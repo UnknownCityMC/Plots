@@ -61,6 +61,8 @@ bukkit {
 
     load = BukkitPluginDescription.PluginLoadOrder.POSTWORLD
 
+    depend = listOf("AstraLib")
+
     softDepend = listOf("PlaceholderAPI")
 
     defaultPermission = BukkitPluginDescription.Permission.Default.OP
