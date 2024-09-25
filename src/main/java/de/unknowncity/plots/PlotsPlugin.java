@@ -7,10 +7,10 @@ import de.unknowncity.astralib.common.database.DataBaseUpdater;
 import de.unknowncity.astralib.common.message.lang.Localization;
 import de.unknowncity.astralib.common.service.ServiceRegistry;
 import de.unknowncity.astralib.paper.api.hook.defaulthooks.PlaceholderApiHook;
-import de.unknowncity.astralib.paper.api.lib.AstraLibPaper;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
 import de.unknowncity.astralib.paper.api.plugin.PaperAstraPlugin;
 import de.unknowncity.astralib.paper.plugin.AstraLibPaperPlugin;
+import de.unknowncity.plots.command.PlotAdminCommand;
 import de.unknowncity.plots.configurration.PlotsConfiguration;
 import de.unknowncity.plots.configurration.serializer.PlotsConfigSerializer;
 import de.unknowncity.plots.database.dao.MySQLPlotsDao;
@@ -18,15 +18,14 @@ import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.logging.Level;
 
 public class PlotsPlugin extends PaperAstraPlugin {
     private ServiceRegistry<PlotsPlugin> serviceRegistry;
     private PlotsConfiguration configuration;
-    private AstraLibPaper astraLibPaper;
     private PaperMessenger messenger;
+    private AstraLibPaperPlugin astraLibPaperPlugin;
 
     @Override
     public void onPluginEnable() {
@@ -34,18 +33,13 @@ public class PlotsPlugin extends PaperAstraPlugin {
         initializeDataServices();
 
         registerServices();
+        registerCommands();
+        initializeMessenger();
     }
 
     @Override
     public void onPluginDisable() {
 
-    }
-
-    @Override
-    public void onPostLibHook(AstraLibPaper astraLibPaper) {
-        this.astraLibPaper = astraLibPaper;
-        registerCommands();
-        initializeMessenger();
     }
 
     private void registerServices() {
@@ -56,7 +50,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
     }
 
     public void registerCommands() {
-
+        new PlotAdminCommand(this).apply(commandManager);
     }
 
     public void initConfiguration() {
@@ -78,13 +72,13 @@ public class PlotsPlugin extends PaperAstraPlugin {
     }
 
     private void initializeMessenger() {
-        var defaultLang = astraLibPaper.languageService().getDefaultLanguage();
+        var defaultLang = languageService.getDefaultLanguage();
 
         var localization = Localization.builder(getDataPath().resolve("lang")).buildAndLoad();
 
         this.messenger = PaperMessenger.builder(localization)
                 .withDefaultLanguage(defaultLang)
-                .withLanguageService(astraLibPaper.languageService())
+                .withLanguageService(languageService)
                 .withPlaceHolderAPI(hookRegistry.getRegistered(PlaceholderApiHook.class))
                 .build();
     }
