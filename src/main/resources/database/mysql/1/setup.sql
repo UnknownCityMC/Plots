@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS plots
+CREATE TABLE IF NOT EXISTS plot
 (
     id              VARCHAR(256) NOT NULL PRIMARY KEY,
     world           VARCHAR(256) NOT NULL,
@@ -10,29 +10,29 @@ CREATE TABLE IF NOT EXISTS plots
     last_rent_payed DATETIME
 );
 
-CREATE TABLE IF NOT EXISTS plot_members
+CREATE TABLE IF NOT EXISTS plot_member
 (
-    plot_id VARCHAR(256) NOT NULL,
-    world   VARCHAR(256) NOT NULL,
     id      VARCHAR(36),
+    plot_id VARCHAR(256) NOT NULL,
     role    ENUM ('CO_OWNER', 'MEMBER', 'TEMP_MEMBER'),
 
-    CONSTRAINT plot_members_id
-        PRIMARY KEY (plot_id, world, id),
-    FOREIGN KEY (plot_id) REFERENCES plots (id, world)
-        ON DELETE CASCADE
+    CONSTRAINT plot_member_pk
+        PRIMARY KEY (id, plot_id),
+    CONSTRAINT plot_member_plot_plot_id_id_fk
+        FOREIGN KEY (plot_id) REFERENCES plot (id)
+            ON DELETE CASCADE
 );
 
 
-CREATE TABLE IF NOT EXISTS plot_flags
+CREATE TABLE IF NOT EXISTS plot_flag
 (
     id              VARCHAR(256) NOT NULL,
-    world           VARCHAR(256) NOT NULL,
     plot_id         VARCHAR(256) NOT NULL,
     access_modifier ENUM ('CO_OWNER', 'MEMBER', 'TEMP_MEMBER', 'ALL', 'OFF'),
 
-    CONSTRAINT plot_flags_id
-        PRIMARY KEY (plot_id, world, id),
-    FOREIGN KEY (plot_id) REFERENCES plots (id, world)
-        ON DELETE CASCADE
+    CONSTRAINT plot_flag_pk
+        PRIMARY KEY (plot_id, id),
+    CONSTRAINT plot_flag_plot_plot_id_id_fk
+        FOREIGN KEY (plot_id) REFERENCES plot (id)
+            ON DELETE CASCADE
 );
