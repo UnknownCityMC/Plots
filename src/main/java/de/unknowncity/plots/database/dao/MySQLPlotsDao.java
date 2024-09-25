@@ -1,6 +1,5 @@
 package de.unknowncity.plots.database.dao;
 
-import de.chojo.sadu.queries.api.query.Query;
 import de.unknowncity.plots.plot.Plot;
 
 import java.util.Optional;

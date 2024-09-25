@@ -9,7 +9,6 @@ import de.unknowncity.astralib.common.service.ServiceRegistry;
 import de.unknowncity.astralib.paper.api.hook.defaulthooks.PlaceholderApiHook;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
 import de.unknowncity.astralib.paper.api.plugin.PaperAstraPlugin;
-import de.unknowncity.astralib.paper.plugin.AstraLibPaperPlugin;
 import de.unknowncity.plots.command.PlotAdminCommand;
 import de.unknowncity.plots.configurration.PlotsConfiguration;
 import de.unknowncity.plots.configurration.serializer.PlotsConfigSerializer;
@@ -25,7 +24,6 @@ public class PlotsPlugin extends PaperAstraPlugin {
     private ServiceRegistry<PlotsPlugin> serviceRegistry;
     private PlotsConfiguration configuration;
     private PaperMessenger messenger;
-    private AstraLibPaperPlugin astraLibPaperPlugin;
 
     @Override
     public void onPluginEnable() {
@@ -66,9 +64,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
         configLoader.loadConfiguration(getDataFolder().toPath().resolve("config.yml"), PlotsConfiguration.class, builder -> {
             builder.register(PlotsConfiguration.class, new PlotsConfigSerializer());
             builder.register(DataBaseSetting.class, new DatabaseSettingSerializer());
-        }).ifPresent(plotsConfiguration -> {
-            this.configuration = plotsConfiguration;
-        });
+        }).ifPresent(plotsConfiguration -> this.configuration = plotsConfiguration);
     }
 
     private void initializeMessenger() {
