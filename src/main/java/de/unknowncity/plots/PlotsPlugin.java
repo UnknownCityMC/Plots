@@ -1,5 +1,7 @@
 package de.unknowncity.plots;
 
+import de.unknowncity.astralib.common.configuration.setting.defaults.DataBaseSetting;
+import de.unknowncity.astralib.common.configuration.setting.serializer.DatabaseSettingSerializer;
 import de.unknowncity.astralib.common.database.DataBaseProvider;
 import de.unknowncity.astralib.common.database.DataBaseUpdater;
 import de.unknowncity.astralib.common.message.lang.Localization;
@@ -10,34 +12,40 @@ import de.unknowncity.astralib.paper.api.message.PaperMessenger;
 import de.unknowncity.astralib.paper.api.plugin.PaperAstraPlugin;
 import de.unknowncity.astralib.paper.plugin.AstraLibPaperPlugin;
 import de.unknowncity.plots.configurration.PlotsConfiguration;
+import de.unknowncity.plots.configurration.serializer.PlotsConfigSerializer;
 import de.unknowncity.plots.database.dao.MySQLPlotsDao;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.logging.Level;
 
 public class PlotsPlugin extends PaperAstraPlugin {
     private ServiceRegistry<PlotsPlugin> serviceRegistry;
     private PlotsConfiguration configuration;
-    private AstraLibPaperPlugin astraLibPaper;
+    private AstraLibPaper astraLibPaper;
     private PaperMessenger messenger;
 
     @Override
     public void onPluginEnable() {
-        this.astraLibPaper = AstraLibPaper.getAstraLibPlugin();
+        initConfiguration();
         initializeDataServices();
-        initializeMessenger();
-        initializeCommandManager(astraLibPaper.messenger(), astraLibPaper.languageService());
 
         registerServices();
-        registerCommands();
     }
 
     @Override
     public void onPluginDisable() {
 
+    }
+
+    @Override
+    public void onPostLibHook(AstraLibPaper astraLibPaper) {
+        this.astraLibPaper = astraLibPaper;
+        registerCommands();
+        initializeMessenger();
     }
 
     private void registerServices() {
@@ -51,18 +59,34 @@ public class PlotsPlugin extends PaperAstraPlugin {
 
     }
 
+    public void initConfiguration() {
+        this.configuration = new PlotsConfiguration(
+                new DataBaseSetting()
+        );
+
+        configLoader.saveDefaultConfig(configuration, getDataFolder().toPath().resolve("config.yml"), builder -> {
+            builder.register(PlotsConfiguration.class, new PlotsConfigSerializer());
+            builder.register(DataBaseSetting.class, new DatabaseSettingSerializer());
+        });
+
+        configLoader.loadConfiguration(getDataFolder().toPath().resolve("config.yml"), PlotsConfiguration.class, builder -> {
+            builder.register(PlotsConfiguration.class, new PlotsConfigSerializer());
+            builder.register(DataBaseSetting.class, new DatabaseSettingSerializer());
+        }).ifPresent(plotsConfiguration -> {
+            this.configuration = plotsConfiguration;
+        });
+    }
+
     private void initializeMessenger() {
         var defaultLang = astraLibPaper.languageService().getDefaultLanguage();
 
-        var localization = new Localization(getDataPath().resolve("lang"));
-        localization.loadLanguageFiles(getLogger());
+        var localization = Localization.builder(getDataPath().resolve("lang")).buildAndLoad();
 
-        this.messenger = new PaperMessenger(
-                localization,
-                defaultLang,
-                astraLibPaper.languageService(),
-                hookRegistry.getRegistered(PlaceholderApiHook.class).isAvailable(getServer())
-        );
+        this.messenger = PaperMessenger.builder(localization)
+                .withDefaultLanguage(defaultLang)
+                .withLanguageService(astraLibPaper.languageService())
+                .withPlaceHolderAPI(hookRegistry.getRegistered(PlaceholderApiHook.class))
+                .build();
     }
 
     private void initializeDataServices() {

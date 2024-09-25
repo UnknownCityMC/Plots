@@ -38,7 +38,7 @@ dependencies {
 
     compileOnly("io.papermc.paper", "paper-api", "1.21-R0.1-SNAPSHOT")
     compileOnly("me.clip", "placeholderapi", "2.11.6")
-    compileOnly("de.unknowncity.astralib", "astralib-paper", "0.3.0")
+    compileOnly("de.unknowncity.astralib", "astralib-paper", "0.3.0-SNAPSHOT")
     compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.10")
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
@@ -76,9 +76,6 @@ tasks {
     shadowJar {
         fun relocateDependency(from : String) = relocate(from, "$shadeBasePath$from")
 
-        relocateDependency("org.incendo")
-        relocateDependency("de.chojo.sadu")
-        relocateDependency("org.spongepowered")
         relocateDependency("xyz.xenondevs.invui")
     }
 
@@ -94,6 +91,9 @@ tasks {
     runServer {
         minecraftVersion("1.21")
 
+        downloadPlugins {
+            url("https://ci.unknowncity.de/job/AstraLib/lastSuccessfulBuild/artifact/astralib-paper/build/libs/AstraLib-Paper-0.3.0-SNAPSHOT-%2326.jar")
+        }
     }
 
     register<Copy>("copyToServer") {
