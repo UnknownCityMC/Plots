@@ -27,13 +27,13 @@ dependencies {
     bukkitLibrary("org.incendo", "cloud-paper", "2.0.0-beta.9")
     bukkitLibrary("org.incendo", "cloud-minecraft-extras", "2.0.0-beta.9")
     bukkitLibrary("de.chojo.sadu", "sadu-queries", "2.2.1")
-    bukkitLibrary("de.chojo.sadu", "sadu-mysql", "2.2.1")
+    bukkitLibrary("de.chojo.sadu", "sadu-mariadb", "2.2.1")
     bukkitLibrary("de.chojo.sadu", "sadu-datasource", "2.2.1")
     bukkitLibrary("de.chojo.sadu", "sadu-updater", "2.2.1")
     bukkitLibrary("org.spongepowered", "configurate-yaml", "4.1.2")
     bukkitLibrary("org.spongepowered", "configurate-hocon", "4.1.2")
 
-    implementation("xyz.xenondevs.invui", "invui", "1.33")
+    implementation("xyz.xenondevs.invui", "invui", "1.37")
 
 
     compileOnly("io.papermc.paper", "paper-api", "1.21-R0.1-SNAPSHOT")
@@ -49,7 +49,7 @@ bukkit {
 
     name = "UC-Plots"
     version = "${project.version}"
-    description = "A simple but effective single plot plugin for paper"
+    description = "A simple but effective single mariadb plugin for paper"
 
     author = "UnknownCity"
 

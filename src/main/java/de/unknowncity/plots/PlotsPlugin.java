@@ -12,7 +12,8 @@ import de.unknowncity.astralib.paper.api.plugin.PaperAstraPlugin;
 import de.unknowncity.plots.command.PlotAdminCommand;
 import de.unknowncity.plots.configurration.PlotsConfiguration;
 import de.unknowncity.plots.configurration.serializer.PlotsConfigSerializer;
-import de.unknowncity.plots.database.dao.MySQLPlotsDao;
+import de.unknowncity.plots.data.dao.mariadb.*;
+import de.unknowncity.plots.data.repository.PlotGroupRepository;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 
@@ -44,7 +45,14 @@ public class PlotsPlugin extends PaperAstraPlugin {
         this.serviceRegistry = new ServiceRegistry<>(this);
 
         this.serviceRegistry.register(new RegionService());
-        this.serviceRegistry.register(new PlotService(new MySQLPlotsDao()));
+        this.serviceRegistry.register(new PlotService(new PlotGroupRepository(
+                new MariaDBGroupDao(),
+                new MariaDBPlotDao(),
+                new MariaDBPlotFlagDao(),
+                new MariaDBPlotLocationDao(),
+                new MariaDBPlotMemberDao(),
+                new MariaDBPlotMetaDao()
+        )));
     }
 
     public void registerCommands() {
@@ -90,7 +98,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
         try {
             dataBaseUpdater.update(getClassLoader());
         } catch (IOException | SQLException e) {
-            this.getLogger().log(Level.SEVERE, "Failed to update database", e);
+            this.getLogger().log(Level.SEVERE, "Failed to update data", e);
             this.getServer().getPluginManager().disablePlugin(this);
         }
     }

@@ -1,0 +1,88 @@
+package de.unknowncity.plots.data.dao.mariadb;
+
+import de.chojo.sadu.mapper.reader.StandardReader;
+import de.unknowncity.plots.data.dao.PlotMemberDao;
+import de.unknowncity.plots.data.model.plot.PlotMember;
+import de.unknowncity.plots.data.model.plot.PlotMemberRole;
+import org.intellij.lang.annotations.Language;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+
+import static de.chojo.sadu.queries.api.call.Call.call;
+import static de.chojo.sadu.queries.api.query.Query.query;
+
+public class MariaDBPlotMemberDao implements PlotMemberDao {
+
+    @Override
+    public CompletableFuture<Optional<PlotMember>> read(UUID memberId, String plotId) {
+        @Language("mariadb")
+        var queryString = """
+                SELECT user_id, last_known_name, role  FROM plot_member WHERE plot_id = :plotId AND user_id = :userId;
+                """;
+        return CompletableFuture.supplyAsync(query(queryString)
+                .single(call()
+                        .bind("plotId", plotId)
+                        .bind("userId", String.valueOf(memberId))
+                )
+                .map(row -> new PlotMember(
+                        row.get("user_id", StandardReader.UUID_FROM_STRING),
+                        row.getString("last_known_name"),
+                        row.getEnum("role", PlotMemberRole.class)
+
+                ))::first
+        );
+    }
+
+    @Override
+    public CompletableFuture<Boolean> write(PlotMember plotMember, String plotId) {
+        @Language("mariadb")
+        var queryString = """
+                REPLACE INTO plot_member (user_id, last_known_name, role)
+                VALUES (:userId, :lastKnownName, :role);
+                """;
+        return CompletableFuture.supplyAsync(query(queryString)
+                .single(call()
+                        .bind("userId", String.valueOf(plotMember.memberID()))
+                        .bind("plotId", plotId)
+                        .bind("lastKnownName", plotMember.lastKnownName())
+                        .bind("role", plotMember.plotMemberRole())
+                )
+                .insert()::changed
+        );
+    }
+
+    @Override
+    public CompletableFuture<List<PlotMember>> readAll(String plotId) {
+        @Language("mariadb")
+        var queryString = """
+                SELECT user_id, last_known_name, role  FROM plot_member WHERE plot_id = :plotId;;
+                """;
+        return CompletableFuture.supplyAsync(query(queryString)
+                .single(call()
+                        .bind("plotId", plotId)
+                )
+                .map(row -> new PlotMember(
+                        row.get("user_id", StandardReader.UUID_FROM_STRING),
+                        row.getString("last_known_name"),
+                        row.getEnum("role", PlotMemberRole.class)
+
+                ))::all
+        );
+    }
+
+    @Override
+    public CompletableFuture<Boolean> delete(UUID memberId, String plotId) {
+        @Language("mariadb")
+        var querySting = "DELETE FROM plot_member WHERE user_id = :userId AND plot_id = :plotId;";
+        return CompletableFuture.supplyAsync(query(querySting)
+                .single(call()
+                        .bind("userId", String.valueOf(memberId))
+                        .bind("plotId", plotId)
+                )
+                .delete()::changed
+        );
+    }
+}

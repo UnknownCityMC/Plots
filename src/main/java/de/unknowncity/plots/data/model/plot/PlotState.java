@@ -1,4 +1,4 @@
-package de.unknowncity.plots.plot;
+package de.unknowncity.plots.data.model.plot;
 
 public enum PlotState {
     AVAILABLE,

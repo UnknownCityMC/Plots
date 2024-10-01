@@ -4,7 +4,7 @@ import de.unknowncity.astralib.paper.api.command.PaperCommand;
 import de.unknowncity.astralib.paper.api.command.sender.PaperCommandSource;
 import de.unknowncity.astralib.paper.api.command.sender.PaperPlayerCommandSource;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.plot.PlotPaymentType;
+import de.unknowncity.plots.data.model.plot.PlotPaymentType;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import org.bukkit.entity.Player;
@@ -51,7 +51,7 @@ public class PlotAdminCommand extends PaperCommand<PlotsPlugin> {
             var world = player.getWorld();
 
             if (plotService.existsPlot(protectedRegion, world)) {
-
+                plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "aleady-exists"));
                 return;
             }
 

@@ -3,23 +3,26 @@ package de.unknowncity.plots.service;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.unknowncity.astralib.common.service.Service;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.database.dao.PlotsDao;
-import de.unknowncity.plots.plot.Plot;
-import de.unknowncity.plots.plot.PlotPaymentType;
-import de.unknowncity.plots.plot.PlotState;
-import de.unknowncity.plots.plot.flag.PlotFlag;
+import de.unknowncity.plots.data.model.plot.Plot;
+import de.unknowncity.plots.data.model.plot.PlotMember;
+import de.unknowncity.plots.data.model.plot.PlotPaymentType;
+import de.unknowncity.plots.data.model.plot.PlotState;
+import de.unknowncity.plots.data.model.plot.flag.PlotFlag;
+import de.unknowncity.plots.data.model.plot.group.PlotGroup;
+import de.unknowncity.plots.data.repository.PlotGroupRepository;
 import org.bukkit.World;
 
 import java.time.Duration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class PlotService implements Service<PlotsPlugin> {
-    private final Set<Plot> plotCache = new HashSet<>();
-    private final PlotsDao plotsDao;
+    private final Set<PlotGroup> plotGroupCache = new HashSet<>();
+    private final PlotGroupRepository plotGroupRepositoryt;
 
-    public PlotService(PlotsDao plotsDao) {
-        this.plotsDao = plotsDao;
+    public PlotService(PlotGroupRepository plotGroupRepository) {
+        this.plotGroupRepositoryt = plotGroupRepository;
     }
 
     @Override
@@ -33,43 +36,19 @@ public class PlotService implements Service<PlotsPlugin> {
     }
 
     public boolean existsPlot(ProtectedRegion region, World world) {
-        return plotCache.stream().anyMatch(plot -> plot.plotID().equals(region.getId()) && plot.worldName().equals(world.getName()));
+        return true;
+    }
+
+    public List<PlotGroup> plotGroupsInWorld(World world) {
+        return plotGroupCache.stream().filter(plotGroup -> plotGroup.worldName().equals(world.getName())).toList();
     }
 
     public boolean createSellPlotFromExisting(ProtectedRegion region, World world, double price) {
-        var plot = new Plot(
-                region.getId(),
-                world.getName(),
-                null,
-                PlotState.AVAILABLE,
-                PlotPaymentType.SELL,
-                price,
-                null,
-                0,
-                Set.of(),
-                PlotFlag.defaults()
-        );
-
-        plotsDao.write(plot);
-        plotCache.add(plot);
         return true;
     }
 
     public boolean createRentPlotFromExisting(ProtectedRegion region, World world, double price, Duration rentInterval) {
-        var plot = new Plot(
-                region.getId(),
-                world.getName(),
-                null,
-                PlotState.AVAILABLE,
-                PlotPaymentType.RENT,
-                price,
-                null,
-                rentInterval.toMinutes(),
-                Set.of(),
-                PlotFlag.defaults()
-        );
-        plotsDao.write(plot);
-        plotCache.add(plot);
+
         return true;
     }
 }

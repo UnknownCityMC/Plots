@@ -26,9 +26,9 @@ public class RegionService implements Service<PlotsPlugin> {
 
 
     /**
-     * Returns a region suitable for plot creation at the location
+     * Returns a region suitable for mariadb creation at the location
      * @param location the player
-     * @return a ProtectedRegion suitable for plot creation
+     * @return a ProtectedRegion suitable for mariadb creation
      */
     public Optional<ProtectedRegion> getSuitableRegion(Location location) {
         var container = worldGuard.getPlatform().getRegionContainer();
