@@ -14,20 +14,16 @@ import static de.chojo.sadu.queries.api.query.Query.*;
 public class MariaDBPlotDao implements PlotDao {
 
     @Override
-    public CompletableFuture<Optional<Plot>> read(String plotId) {
+    public CompletableFuture<Optional<? extends Plot>> read(String plotId) {
         @Language("mariadb")
         var queryString = """
-                SELECT region_id, group_name
+                SELECT id, region_id, group_name, world, state, payment_type, price, rent_interval, last_rent_paid
                 FROM plot
                 WHERE id = :plotId
                 """;
         return CompletableFuture.supplyAsync(query(queryString)
                 .single(call().bind("plotId", plotId))
-                .map(row -> new Plot(
-                        plotId,
-                        row.getString("group_name"),
-                        row.getString("region_id")
-                ))::first
+                .map(Plot.map())::first
         );
     }
 
@@ -49,7 +45,7 @@ public class MariaDBPlotDao implements PlotDao {
     }
 
     @Override
-    public CompletableFuture<List<Plot>> readAll() {
+    public CompletableFuture<List<? extends Plot>> readAll() {
         @Language("mariadb")
         var queryString = """
                 SELECT id, region_id, group_name
@@ -57,16 +53,12 @@ public class MariaDBPlotDao implements PlotDao {
                 """;
         return CompletableFuture.supplyAsync(query(queryString)
                 .single()
-                .map(row -> new Plot(
-                        row.getString("plot_id"),
-                        row.getString("group_name"),
-                        row.getString("region_id")
-                ))::all
+                .map(Plot.map())::all
         );
     }
 
     @Override
-    public CompletableFuture<List<Plot>> readAllFromGroup(String groupName) {
+    public CompletableFuture<List<? extends Plot>> readAllFromGroup(String groupName) {
         @Language("mariadb")
         var queryString = """
                 SELECT region_id, group_name
@@ -75,11 +67,7 @@ public class MariaDBPlotDao implements PlotDao {
                 """;
         return CompletableFuture.supplyAsync(query(queryString)
                 .single(call().bind("groupName", groupName))
-                .map(row -> new Plot(
-                        row.getString("plot_id"),
-                        row.getString("group_name"),
-                        row.getString("region_id")
-                ))::all
+                .map(Plot.map())::all
         );
     }
 

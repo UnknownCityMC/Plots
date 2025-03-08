@@ -12,6 +12,7 @@ import static de.chojo.sadu.queries.api.call.Call.call;
 import static de.chojo.sadu.queries.api.query.Query.query;
 
 public class MariaDBGroupDao implements GroupDao {
+
     @Override
     public CompletableFuture<Optional<PlotGroup>> read(String groupName) {
         @Language("mariadb")
@@ -19,8 +20,7 @@ public class MariaDBGroupDao implements GroupDao {
         return CompletableFuture.supplyAsync(query(querySting)
                 .single(call().bind("name", groupName))
                 .map(row -> new PlotGroup(
-                        groupName,
-                        row.getString("world")
+                        groupName
                 ))::first
         );
     }
@@ -32,8 +32,7 @@ public class MariaDBGroupDao implements GroupDao {
         return CompletableFuture.supplyAsync(query(querySting)
                 .single()
                 .map(row -> new PlotGroup(
-                        row.getString("name"),
-                        row.getString("world")
+                        row.getString("name")
                 ))::all
         );
     }
@@ -43,7 +42,7 @@ public class MariaDBGroupDao implements GroupDao {
         @Language("mariadb")
         var querySting = "REPLACE INTO plot_group(name, world) VALUE (:name, :world)";
         return CompletableFuture.supplyAsync(query(querySting)
-                .single(call().bind("name", plotGroup.name()).bind("world", plotGroup.worldName()))
+                .single(call().bind("name", plotGroup.name()))
                 .insert()::changed
         );
     }

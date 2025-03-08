@@ -24,24 +24,23 @@ repositories {
 }
 
 dependencies {
-    bukkitLibrary("org.incendo", "cloud-paper", "2.0.0-beta.9")
-    bukkitLibrary("org.incendo", "cloud-minecraft-extras", "2.0.0-beta.9")
-    bukkitLibrary("de.chojo.sadu", "sadu-queries", "2.2.1")
-    bukkitLibrary("de.chojo.sadu", "sadu-mariadb", "2.2.1")
-    bukkitLibrary("de.chojo.sadu", "sadu-datasource", "2.2.1")
-    bukkitLibrary("de.chojo.sadu", "sadu-updater", "2.2.1")
-    bukkitLibrary("org.spongepowered", "configurate-yaml", "4.1.2")
-    bukkitLibrary("org.spongepowered", "configurate-hocon", "4.1.2")
+    bukkitLibrary(libs.sadu.queries)
+    bukkitLibrary(libs.sadu.mariadb)
+    bukkitLibrary(libs.sadu.datasource)
+    bukkitLibrary(libs.sadu.mapper)
+    bukkitLibrary(libs.jackson.yaml)
+    bukkitLibrary(libs.configurate.yaml)
+
 
     implementation("xyz.xenondevs.invui", "invui", "1.37")
 
 
-    compileOnly("io.papermc.paper", "paper-api", "1.21-R0.1-SNAPSHOT")
-    compileOnly("me.clip", "placeholderapi", "2.11.6")
-    compileOnly("de.unknowncity.astralib", "astralib-paper", "0.3.0-SNAPSHOT")
+    compileOnly(libs.paper.api)
+    compileOnly(libs.papi)
+    compileOnly("de.unknowncity.astralib", "astralib-paper-api", "0.5.0-SNAPSHOT")
     compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.10")
-
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
+
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
@@ -77,6 +76,7 @@ tasks {
         fun relocateDependency(from : String) = relocate(from, "$shadeBasePath$from")
 
         relocateDependency("xyz.xenondevs.invui")
+        relocateDependency("org.incendo")
     }
 
     compileJava {

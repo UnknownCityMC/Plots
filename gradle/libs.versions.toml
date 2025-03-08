@@ -1,0 +1,35 @@
+[versions]
+# Gradle Plugins
+shadow = "8.1.7"
+pluginyml = "0.6.0"
+
+sadu = "2.3.1"
+paper-api = "1.21.1-R0.1-SNAPSHOT"
+
+# Config
+configurate = "4.1.2"
+jackson = "2.18.0"
+adventure = "4.15.0"
+papi = "2.11.5"
+
+[libraries]
+paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper-api" }
+jackson-yaml = { group = "com.fasterxml.jackson.dataformat", name =  "jackson-dataformat-yaml", version.ref = "jackson"}
+jackson-toml = { group = "com.fasterxml.jackson.dataformat", name =  "jackson-dataformat-toml", version.ref = "jackson"}
+configurate-yaml = { group = "org.spongepowered", name = "configurate-hocon", version.ref = "configurate"}
+adventure-api = { group = "net.kyori", name = "adventure-api", version.ref = "adventure" }
+adventure-text-minimessage = { group = "net.kyori", name = "adventure-text-minimessage", version.ref = "adventure" }
+papi = { group = "me.clip", name = "placeholderapi", version.ref = "papi" }
+
+# Storage
+sadu-queries = { group = "de.chojo.sadu", name = "sadu-queries", version.ref = "sadu" }
+sadu-datasource = { group = "de.chojo.sadu", name = "sadu-datasource", version.ref = "sadu" }
+sadu-mysql = { group = "de.chojo.sadu", name = "sadu-mysql", version.ref = "sadu" }
+sadu-mariadb = { group = "de.chojo.sadu", name = "sadu-mariadb", version.ref = "sadu" }
+sadu-postgresql = { group = "de.chojo.sadu", name = "sadu-postgresql", version.ref = "sadu" }
+sadu-sqlite = { group = "de.chojo.sadu", name = "sadu-sqlite", version.ref = "sadu" }
+sadu-mapper = { group = "de.chojo.sadu", name = "sadu-mapper", version.ref = "sadu" }
+
+[plugins]
+shadow = { id = "io.github.goooler.shadow", version.ref = "shadow" }
+pluginyml = { id = "net.minecrell.plugin-yml.bukkit", version.ref = "pluginyml"}

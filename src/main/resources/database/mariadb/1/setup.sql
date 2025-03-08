@@ -1,7 +1,6 @@
 CREATE TABLE IF NOT EXISTS plot_group
 (
-    name  VARCHAR(256) NOT NULL PRIMARY KEY,
-    world VARCHAR(256) NOT NULL
+    name VARCHAR(256) NOT NULL PRIMARY KEY
 );
 
 CREATE TABLE IF NOT EXISTS plot
@@ -9,6 +8,13 @@ CREATE TABLE IF NOT EXISTS plot
     id         VARCHAR(256) NOT NULL PRIMARY KEY,
     region_id  VARCHAR(256) NOT NULL,
     group_name VARCHAR(256) NOT NULL,
+    world      VARCHAR(256) NOT NULL,
+    state          ENUM ('SOLD', 'AVAILABLE', 'UNAVAILABLE') DEFAULT 'UNAVAILABLE',
+    payment_type   ENUM ('BUY', 'RENT')                      DEFAULT 'BUY',
+    price          DOUBLE                                    DEFAULT 0.0,
+
+    rent_interval  LONG                                      DEFAULT 0,
+    last_rent_paid DATETIME,
 
     CONSTRAINT plot_plot_group_group_name_name_fk
         FOREIGN KEY (group_name) REFERENCES plot_group (name)
@@ -17,8 +23,8 @@ CREATE TABLE IF NOT EXISTS plot
 
 CREATE TABLE IF NOT EXISTS plot_location
 (
-    plot_id VARCHAR(256)                   NOT NULL,
-    type    ENUM ('SPAWN', 'HOLO', 'SIGN') NOT NULL,
+    plot_id VARCHAR(256) NOT NULL,
+    type    VARCHAR(256) NOT NULL,
     x       DOUBLE,
     y       DOUBLE,
     z       DOUBLE,
@@ -27,20 +33,6 @@ CREATE TABLE IF NOT EXISTS plot_location
     CONSTRAINT plot_member_pk
         PRIMARY KEY (plot_id, type),
     CONSTRAINT plot_location_plot_plot_id_id_fk
-        FOREIGN KEY (plot_id) REFERENCES plot (id)
-            ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS plot_meta
-(
-    plot_id        VARCHAR(256) NOT NULL PRIMARY KEY,
-    state          ENUM ('SOLD', 'AVAILABLE', 'UNAVAILABLE') DEFAULT 'UNAVAILABLE',
-    price          DOUBLE                                    DEFAULT 0.0,
-    payment_type   ENUM ('SELL', 'RENT')                     DEFAULT 'SELL',
-    rent_interval  LONG                                      DEFAULT 0,
-    last_rent_paid DATETIME,
-
-    CONSTRAINT plot_meta_plot_plot_id_id_fk
         FOREIGN KEY (plot_id) REFERENCES plot (id)
             ON DELETE CASCADE
 );

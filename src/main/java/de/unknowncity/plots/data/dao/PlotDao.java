@@ -7,9 +7,9 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public interface PlotDao {
-    CompletableFuture<Optional<Plot>> read(String plotId);
+    CompletableFuture<Optional<? extends Plot>> read(String plotId);
     CompletableFuture<Boolean> write(Plot plot);
-    CompletableFuture<List<Plot>> readAll();
-    CompletableFuture<List<Plot>> readAllFromGroup(String groupName);
+    CompletableFuture<List<? extends Plot>> readAll();
+    CompletableFuture<List<? extends Plot>> readAllFromGroup(String groupName);
     CompletableFuture<Boolean> delete(String plotId);
 }

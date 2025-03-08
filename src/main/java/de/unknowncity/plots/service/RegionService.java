@@ -14,16 +14,9 @@ public class RegionService implements Service<PlotsPlugin> {
     private WorldGuard worldGuard;
 
     @Override
-    public void startup(PlotsPlugin plugin) {
-        this.worldGuard = WorldGuard.getInstance();
-    }
-
-
-    @Override
     public void shutdown() {
 
     }
-
 
     /**
      * Returns a region suitable for mariadb creation at the location

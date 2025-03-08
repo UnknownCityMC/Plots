@@ -2,34 +2,26 @@ package de.unknowncity.plots.data.model.plot.group;
 
 import de.unknowncity.plots.data.model.plot.Plot;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 public class PlotGroup {
     private final String name;
-    private final String worldName;
-    private List<Plot> plotsInGroup;
+    private HashMap<String, Plot> plotsInGroup;
 
-    public PlotGroup(String name, String worldName) {
+    public PlotGroup(String name) {
         this.name = name;
-        this.worldName = worldName;
-        this.plotsInGroup = new ArrayList<>();
+        this.plotsInGroup = new HashMap<>();
     }
 
-    public void plotsInGroup(List<Plot> plots) {
+    public void plotsInGroup(HashMap<String, Plot> plots) {
         plotsInGroup = plots;
     }
 
-    public List<Plot> plotsInGroup() {
+    public HashMap<String, Plot> plotsInGroup() {
         return plotsInGroup;
     }
 
     public String name() {
         return name;
     }
-
-    public String worldName() {
-        return worldName;
-    }
-
 }

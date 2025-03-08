@@ -1,17 +1,20 @@
 package de.unknowncity.plots.configurration;
 
-import de.unknowncity.astralib.common.configuration.ApplicableAstraConfiguration;
-import de.unknowncity.astralib.common.configuration.setting.defaults.DataBaseSetting;
 
-public class PlotsConfiguration extends ApplicableAstraConfiguration {
+import de.unknowncity.astralib.common.configuration.YamlAstraConfiguration;
+import de.unknowncity.astralib.common.configuration.annotation.Config;
+import de.unknowncity.astralib.common.configuration.setting.defaults.ModernDataBaseSetting;
 
-    private DataBaseSetting dataBaseSetting;
+@Config(targetFile = "plugins/UC-Plots/config.yml")
+public class PlotsConfiguration extends YamlAstraConfiguration {
 
-    public PlotsConfiguration(DataBaseSetting dataBaseSetting) {
-        this.dataBaseSetting = dataBaseSetting;
+    private ModernDataBaseSetting database;
+
+    public PlotsConfiguration() {
+        database = new ModernDataBaseSetting();
     }
 
-    public DataBaseSetting dataBaseSetting() {
-        return dataBaseSetting;
+    public ModernDataBaseSetting database() {
+        return database;
     }
 }
