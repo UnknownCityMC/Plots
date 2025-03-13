@@ -91,6 +91,9 @@ public class PlotsPlugin extends PaperAstraPlugin {
     private void initializeMessenger() {
         var defaultLang = languageService.getDefaultLanguage();
 
+        saveDefaultResource("lang/de_DE.yml", Path.of("lang", "de_DE.yml"));
+        saveDefaultResource("lang/en_US.yml", Path.of("lang", "en_US.yml"));
+
         var localization = Localization.builder(getDataPath().resolve("lang")).buildAndLoad();
 
         this.messenger = PaperMessenger.builder(localization, getPluginMeta())
@@ -101,9 +104,25 @@ public class PlotsPlugin extends PaperAstraPlugin {
     }
 
     private void initializeDataServices() {
+        this.serviceRegistry = new ServiceRegistry<>(this);
+
+        this.serviceRegistry.register(new RegionService());
+        var economyService = new EconomyService(configuration.economy());
+        this.serviceRegistry.register(economyService);
+
         var databaseSetting = configuration.database();
 
-        StandardDataBaseProvider.updateAndConnectToDataBase(databaseSetting, getClassLoader(), getDataPath());
+        var queryConfig = StandardDataBaseProvider.updateAndConnectToDataBase(databaseSetting, getClassLoader(), getDataPath());
+        this.serviceRegistry.register(new PlotService(
+                new PlotGroupRepository(
+                        new MariaDBGroupDao(queryConfig),
+                        new MariaDBPlotDao(queryConfig),
+                        new MariaDBPlotFlagDao(queryConfig),
+                        new MariaDBPlotLocationDao(queryConfig),
+                        new MariaDBPlotMemberDao(queryConfig)
+                ), economyService));
+
+        this.serviceRegistry().getRegistered(PlotService.class).cacheAll();
     }
 
     public ServiceRegistry<PlotsPlugin> serviceRegistry() {

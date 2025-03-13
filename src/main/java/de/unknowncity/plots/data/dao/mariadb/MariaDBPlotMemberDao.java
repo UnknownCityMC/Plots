@@ -1,6 +1,7 @@
 package de.unknowncity.plots.data.dao.mariadb;
 
 import de.chojo.sadu.mapper.reader.StandardReader;
+import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.unknowncity.plots.data.dao.PlotMemberDao;
 import de.unknowncity.plots.data.model.plot.PlotMember;
 import de.unknowncity.plots.data.model.plot.PlotMemberRole;
@@ -15,6 +16,11 @@ import static de.chojo.sadu.queries.api.call.Call.call;
 import static de.chojo.sadu.queries.api.query.Query.query;
 
 public class MariaDBPlotMemberDao implements PlotMemberDao {
+    private final QueryConfiguration queryConfiguration;
+
+    public MariaDBPlotMemberDao(QueryConfiguration queryConfiguration) {
+        this.queryConfiguration = queryConfiguration;
+    }
 
     @Override
     public CompletableFuture<Optional<PlotMember>> read(UUID memberId, String plotId) {
@@ -22,7 +28,7 @@ public class MariaDBPlotMemberDao implements PlotMemberDao {
         var queryString = """
                 SELECT user_id, last_known_name, role  FROM plot_member WHERE plot_id = :plotId AND user_id = :userId;
                 """;
-        return CompletableFuture.supplyAsync(query(queryString)
+        return CompletableFuture.supplyAsync(queryConfiguration.query(queryString)
                 .single(call()
                         .bind("plotId", plotId)
                         .bind("userId", String.valueOf(memberId))
@@ -43,7 +49,7 @@ public class MariaDBPlotMemberDao implements PlotMemberDao {
                 REPLACE INTO plot_member (user_id, last_known_name, role)
                 VALUES (:userId, :lastKnownName, :role);
                 """;
-        return CompletableFuture.supplyAsync(query(queryString)
+        return CompletableFuture.supplyAsync(queryConfiguration.query(queryString)
                 .single(call()
                         .bind("userId", String.valueOf(plotMember.memberID()))
                         .bind("plotId", plotId)
@@ -60,7 +66,7 @@ public class MariaDBPlotMemberDao implements PlotMemberDao {
         var queryString = """
                 SELECT user_id, last_known_name, role  FROM plot_member WHERE plot_id = :plotId;;
                 """;
-        return CompletableFuture.supplyAsync(query(queryString)
+        return CompletableFuture.supplyAsync(queryConfiguration.query(queryString)
                 .single(call()
                         .bind("plotId", plotId)
                 )
@@ -77,7 +83,7 @@ public class MariaDBPlotMemberDao implements PlotMemberDao {
     public CompletableFuture<Boolean> delete(UUID memberId, String plotId) {
         @Language("mariadb")
         var querySting = "DELETE FROM plot_member WHERE user_id = :userId AND plot_id = :plotId;";
-        return CompletableFuture.supplyAsync(query(querySting)
+        return CompletableFuture.supplyAsync(queryConfiguration.query(querySting)
                 .single(call()
                         .bind("userId", String.valueOf(memberId))
                         .bind("plotId", plotId)
