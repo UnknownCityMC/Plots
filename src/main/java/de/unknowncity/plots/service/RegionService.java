@@ -11,7 +11,7 @@ import java.util.Comparator;
 import java.util.Optional;
 
 public class RegionService implements Service<PlotsPlugin> {
-    private WorldGuard worldGuard;
+    private final WorldGuard worldGuard = WorldGuard.getInstance();
 
     @Override
     public void shutdown() {

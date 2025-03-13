@@ -20,27 +20,27 @@ repositories {
     maven("https://repo.xenondevs.xyz/releases")
     maven("https://maven.enginehub.org/repo/")
     maven("https://repo.unknowncity.de/snapshots")
+
+    maven("https://repo.nightexpressdev.com/releases")
     mavenLocal()
 }
 
 dependencies {
-    bukkitLibrary(libs.sadu.queries)
-    bukkitLibrary(libs.sadu.mariadb)
-    bukkitLibrary(libs.sadu.datasource)
-    bukkitLibrary(libs.sadu.mapper)
     bukkitLibrary(libs.jackson.yaml)
     bukkitLibrary(libs.configurate.yaml)
 
 
-    implementation("xyz.xenondevs.invui", "invui", "1.37")
-
+    implementation(libs.invui)
+    compileOnly(libs.coinsengine) {
+        exclude(group = "*", module = "*")
+    }
 
     compileOnly(libs.paper.api)
     compileOnly(libs.papi)
-    compileOnly("de.unknowncity.astralib", "astralib-paper-api", "0.5.0-SNAPSHOT")
-    compileOnly("com.sk89q.worldguard", "worldguard-bukkit", "7.0.10")
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    compileOnly(libs.astralib)
+    compileOnly(libs.worldguard)
 
+    testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
@@ -60,7 +60,7 @@ bukkit {
 
     load = BukkitPluginDescription.PluginLoadOrder.POSTWORLD
 
-    depend = listOf("AstraLib")
+    depend = listOf("AstraLib", "WorldGuard", "CoinsEngine")
 
     softDepend = listOf("PlaceholderAPI")
 
@@ -76,7 +76,6 @@ tasks {
         fun relocateDependency(from : String) = relocate(from, "$shadeBasePath$from")
 
         relocateDependency("xyz.xenondevs.invui")
-        relocateDependency("org.incendo")
     }
 
     compileJava {

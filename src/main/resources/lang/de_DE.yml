@@ -1,0 +1,43 @@
+command:
+  plot:
+    info: """<gray>» Plot Id: <plot-id>
+    Gruppe: <group>
+    Preis: <price>
+    Status: <state>
+    Besitzer: <owner>
+    Mitglieder: <members>
+    Flags: <flags>
+    Welt: <world>
+    Koordinaten: <location>"""
+    no-plot: "Bitte stelle dich auf ein Plot."
+    claim:
+      not-enough-money: "Du hast nicht genug Geld."
+      unavailable: "Plot nicht verfügbar."
+      success: "Plot erfolgreich gekauft."
+    unclaim:
+      no-owner: 'Du bist nicht der Besitzer.'
+      unavailable: "Plot nicht verfügbar."
+      success: "Plot wurde erfolgreich verkauft".
+  plotadmin:
+    no-plot: "Bitte stelle dich auf ein Plot."
+    no-suitable-region: "Keine Region gefunden."
+    set-owner:
+      success: "Besitzer wurde geändert."
+    set-group:
+      success: "Gruppe wurde geändert."
+    group:
+      create:
+        exists: "Gruppennamen gibt es bereits."
+        success: "Gruppe wurde erstellt."
+      delete:
+        no-group: "Gruppennamen gibt es nicht."
+        success: "Gruppe erfolgreich gelöscht."
+      set-group:
+        no-group: "Gruppennamen gibt es nicht."
+    delete:
+      not-exists: "Plot existiert nicht."
+      success: "Plot erfolgreich gelöscht."
+    create:
+      success: "Plot wurde erstellt."
+      already-exists: "Plot existiert bereits"
+      error: "Es gab einen Fehler..."

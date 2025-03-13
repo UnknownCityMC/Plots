@@ -1,13 +1,12 @@
 package de.unknowncity.plots.data.model.plot;
 
+import java.util.UUID;
+
 public class BuyPlot extends Plot {
 
-    public BuyPlot(String plotId, String groupName, String regionId, double price, String worldName) {
-        super(plotId, groupName, regionId, price, worldName);
-    }
-
-    @Override
-    public PlotPaymentType plotPayMentType() {
-        return PlotPaymentType.BUY;
+    public BuyPlot(String plotId, UUID owner, String groupName, String regionId, double price, String worldName,
+                   PlotState state
+    ) {
+        super(plotId, groupName, owner, regionId, price, worldName, state);
     }
 }

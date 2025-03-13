@@ -1,21 +1,18 @@
 package de.unknowncity.plots.data.model.plot;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class RentPlot extends Plot {
     private LocalDateTime lastRentPayed;
     private long rentIntervalInMin;
 
-    public RentPlot(String plotId, String groupName, String regionId, double price, String worldName, LocalDateTime lastRentPayed, long rentIntervalInMin) {
-        super(plotId, groupName, regionId, price, worldName);
+    public RentPlot(String plotId, UUID owner, String groupName, String regionId, double price, String worldName,
+                    PlotState state, LocalDateTime lastRentPayed, long rentIntervalInMin
+    ) {
+        super(plotId, groupName, owner, regionId, price, worldName, state);
         this.lastRentPayed = lastRentPayed;
         this.rentIntervalInMin = rentIntervalInMin;
-    }
-
-
-    @Override
-    public PlotPaymentType plotPayMentType() {
-        return PlotPaymentType.RENT;
     }
 
     public LocalDateTime lastRentPayed() {
@@ -24,5 +21,13 @@ public class RentPlot extends Plot {
 
     public long rentIntervalInMin() {
         return rentIntervalInMin;
+    }
+
+    public void lastRentPayed(LocalDateTime lastRentPayed) {
+        this.lastRentPayed = lastRentPayed;
+    }
+
+    public void rentIntervalInMin(long rentIntervalInMin) {
+        this.rentIntervalInMin = rentIntervalInMin;
     }
 }

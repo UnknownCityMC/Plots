@@ -12,6 +12,12 @@ jackson = "2.18.0"
 adventure = "4.15.0"
 papi = "2.11.5"
 
+coinsengine = "2.4.1"
+invui = "1.37"
+
+worldguard = "7.0.10"
+astralib = "0.5.0-SNAPSHOT"
+
 [libraries]
 paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper-api" }
 jackson-yaml = { group = "com.fasterxml.jackson.dataformat", name =  "jackson-dataformat-yaml", version.ref = "jackson"}
@@ -20,6 +26,12 @@ configurate-yaml = { group = "org.spongepowered", name = "configurate-hocon", ve
 adventure-api = { group = "net.kyori", name = "adventure-api", version.ref = "adventure" }
 adventure-text-minimessage = { group = "net.kyori", name = "adventure-text-minimessage", version.ref = "adventure" }
 papi = { group = "me.clip", name = "placeholderapi", version.ref = "papi" }
+
+coinsengine = { group = "su.nightexpress.coinsengine", name = "CoinsEngine", version.ref = "coinsengine"}
+invui = { group = "xyz.xenondevs.invui", name = "invui", version.ref = "invui"}
+worldguard = { group = "com.sk89q.worldguard", name = "worldguard-bukkit", version.ref = "worldguard"}
+astralib = { group = "de.unknowncity.astralib", name = "astralib-paper-api", version.ref = "astralib" }
+
 
 # Storage
 sadu-queries = { group = "de.chojo.sadu", name = "sadu-queries", version.ref = "sadu" }

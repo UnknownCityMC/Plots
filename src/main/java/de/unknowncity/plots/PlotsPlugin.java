@@ -7,11 +7,12 @@ import de.unknowncity.astralib.common.service.ServiceRegistry;
 import de.unknowncity.astralib.paper.api.hook.defaulthooks.PlaceholderApiHook;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
 import de.unknowncity.astralib.paper.api.plugin.PaperAstraPlugin;
-import de.unknowncity.plots.command.PlotAdminCommand;
-import de.unknowncity.plots.command.PlotAdminGroupCommand;
+import de.unknowncity.plots.command.admin.PlotAdminCommand;
+import de.unknowncity.plots.command.user.PlotCommand;
 import de.unknowncity.plots.configurration.PlotsConfiguration;
 import de.unknowncity.plots.data.dao.mariadb.*;
 import de.unknowncity.plots.data.repository.PlotGroupRepository;
+import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import org.bukkit.command.CommandSender;
@@ -19,6 +20,8 @@ import org.incendo.cloud.processors.cache.SimpleCache;
 import org.incendo.cloud.processors.confirmation.ConfirmationConfiguration;
 import org.incendo.cloud.processors.confirmation.ConfirmationManager;
 import org.spongepowered.configurate.NodePath;
+
+import java.nio.file.Path;
 
 public class PlotsPlugin extends PaperAstraPlugin {
     private ServiceRegistry<PlotsPlugin> serviceRegistry;
@@ -31,7 +34,6 @@ public class PlotsPlugin extends PaperAstraPlugin {
         initConfiguration();
         initializeDataServices();
 
-        registerServices();
         registerCommands();
         initializeMessenger();
     }
@@ -39,19 +41,6 @@ public class PlotsPlugin extends PaperAstraPlugin {
     @Override
     public void onPluginDisable() {
 
-    }
-
-    private void registerServices() {
-        this.serviceRegistry = new ServiceRegistry<>(this);
-
-        this.serviceRegistry.register(new RegionService());
-        this.serviceRegistry.register(new PlotService(new PlotGroupRepository(
-                new MariaDBGroupDao(),
-                new MariaDBPlotDao(),
-                new MariaDBPlotFlagDao(),
-                new MariaDBPlotLocationDao(),
-                new MariaDBPlotMemberDao()
-        )));
     }
 
     public void registerCommands() {
@@ -77,8 +66,9 @@ public class PlotsPlugin extends PaperAstraPlugin {
                 confirmationManager.createPostprocessor()
         );
 
+
+        new PlotCommand(this).apply(commandManager);
         new PlotAdminCommand(this).apply(commandManager);
-        new PlotAdminGroupCommand(this).apply(commandManager);
     }
 
     public void initConfiguration() {

@@ -3,13 +3,19 @@ package de.unknowncity.plots.service;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.unknowncity.astralib.common.service.Service;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.data.model.plot.*;
+import de.unknowncity.plots.data.model.plot.BuyPlot;
+import de.unknowncity.plots.data.model.plot.Plot;
+import de.unknowncity.plots.data.model.plot.PlotState;
+import de.unknowncity.plots.data.model.plot.RentPlot;
 import de.unknowncity.plots.data.model.plot.group.PlotGroup;
 import de.unknowncity.plots.data.repository.PlotGroupRepository;
 import de.unknowncity.plots.util.PlotId;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class PlotService implements Service<PlotsPlugin> {
@@ -17,12 +23,12 @@ public class PlotService implements Service<PlotsPlugin> {
 
     private HashMap<String, Plot> plotCache = new HashMap<>();
     private HashMap<String, PlotGroup> plotGroupCache = new HashMap<>();
+    private final EconomyService economyService;
 
-    public PlotService(PlotGroupRepository plotGroupRepository) {
+    public PlotService(PlotGroupRepository plotGroupRepository, EconomyService economyService) {
         this.plotGroupRepository = plotGroupRepository;
-        this.cacheAll();
+        this.economyService = economyService;
     }
-
 
     @Override
     public void shutdown() {
@@ -31,15 +37,19 @@ public class PlotService implements Service<PlotsPlugin> {
 
     public void cacheAll() {
         plotGroupRepository.loadPlotCache().whenComplete((plotCache, thr1) -> {
-            this.plotCache = plotCache;
+            this.plotCache.putAll(plotCache);
             plotGroupRepository.loadPlotGroupCache(plotCache).whenComplete((plotGroupCache, thr2) -> {
-                this.plotGroupCache = plotGroupCache;
+                this.plotGroupCache.putAll(plotGroupCache);
             });
         });
     }
 
     public boolean existsPlot(String id) {
         return plotCache.containsKey(id);
+    }
+
+    public boolean existsGroup(String id) {
+        return plotGroupCache.containsKey(id);
     }
 
     public boolean existsPlot(ProtectedRegion region, World world) {
@@ -51,12 +61,11 @@ public class PlotService implements Service<PlotsPlugin> {
         if (plotCache.containsKey(plotId)) {
             return false;
         }
-        var plot = new BuyPlot(plotId, plotGroupName, region.getId(), price, world.getName());
+        var plot = new BuyPlot(plotId, null, plotGroupName, region.getId(), price, world.getName(), PlotState.AVAILABLE);
 
         addPlotToPlotGroup(plot, plotGroupName);
 
-        plotGroupRepository.savePlot(plot);
-        plotCache.put(plot.id(), plot);
+        savePlot(plot);
         return true;
     }
 
@@ -65,12 +74,11 @@ public class PlotService implements Service<PlotsPlugin> {
         if (plotCache.containsKey(plotId)) {
             return false;
         }
-        var plot = new RentPlot(plotId, plotGroupName, region.getId(), price, world.getName(), null, rentInterval.toMinutes());
+        var plot = new RentPlot(plotId, null, plotGroupName, region.getId(), price, world.getName(), PlotState.AVAILABLE, null, rentInterval.toMinutes());
 
         addPlotToPlotGroup(plot, plotGroupName);
 
-        plotGroupRepository.savePlot(plot);
-        plotCache.put(plot.id(), plot);
+        savePlot(plot);
         return true;
     }
 
@@ -82,22 +90,53 @@ public class PlotService implements Service<PlotsPlugin> {
         }
     }
 
-    public boolean createPlotGroup(String name) {
+    public void claimPlot(Player player, Plot plot) {
+        economyService.withdraw(player.getUniqueId(), plot.price());
+        if (plot instanceof RentPlot rentPlot) {
+            rentPlot.lastRentPayed(LocalDateTime.now());
+        }
+
+        plot.state(PlotState.SOLD);
+        plot.owner(player.getUniqueId());
+        savePlot(plot);
+    }
+
+    public void unClaimPlot(Plot plot) {
+        economyService.deposit(plot.owner(), plot.price());
+
+        plot.state(PlotState.AVAILABLE);
+        plot.owner(null);
+        plot.flags(new ArrayList<>());
+        plot.members(new ArrayList<>());
+        savePlot(plot);
+    }
+
+    public void setPlotOwner(Player player, Plot plot) {
+        plot.state(PlotState.SOLD);
+        plot.owner(player.getUniqueId());
+        savePlot(plot);
+    }
+
+    public void setPlotGroup(String groupName, Plot plot) {
+        plot.state(PlotState.SOLD);
+        if (plot.groupName() != null && !plot.groupName().isEmpty()) {
+            plotGroupCache.get(plot.groupName()).plotsInGroup().remove(plot.id());
+        }
+        plot.groupName(groupName);
+        plotGroupCache.get(groupName).plotsInGroup().put(plot.id(), plot);
+        savePlot(plot);
+    }
+
+    public void createPlotGroup(String name) {
         var plotGroup = new PlotGroup(name);
         plotGroupRepository.savePlotGroup(plotGroup);
         plotGroupCache.put(name, plotGroup);
-        return true;
     }
 
-    public boolean deletePlotGroup(String name) {
+    public void deletePlotGroup(String name) {
         var plotGroup = plotGroupCache.get(name);
-        if (plotGroup == null) {
-            return false;
-        }
-
         plotGroupRepository.deletePlotGroup(plotGroup);
         this.deletePlotGroup(plotGroup);
-        return true;
     }
 
     public void savePlotGroup(PlotGroup plotGroup) {
@@ -137,6 +176,14 @@ public class PlotService implements Service<PlotsPlugin> {
 
     public Plot getPlot(String id) {
         return plotCache.get(id);
+    }
+
+    public PlotGroup getGroup(String id) {
+        return plotGroupCache.get(id);
+    }
+
+    public Plot getPlot(World world, ProtectedRegion region) {
+        return plotCache.get(PlotId.generate(world, region));
     }
 
     public Plot getPlotFromGroup(String id, String groupName) {
