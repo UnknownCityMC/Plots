@@ -8,7 +8,10 @@ import org.bukkit.entity.Player;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
+import org.incendo.cloud.suggestion.Suggestion;
 import org.spongepowered.configurate.NodePath;
+
+import java.util.concurrent.CompletableFuture;
 
 import static org.incendo.cloud.parser.standard.StringParser.stringParser;
 
@@ -22,22 +25,22 @@ public class PlotAdminGroupCommand extends SubCommand {
 
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
-        commandManager.command(builder.literal("createGroup")
+        commandManager.command(builder.literal("group").literal("create")
                 .permission("ucplots.command.plotadmin")
                 .required("group-name", stringParser())
                 .handler(this::handleCreate)
                 .build()
         );
 
-        commandManager.command(builder.literal("deleteGroup")
+        commandManager.command(builder.literal("group").literal("delete")
                 .permission("ucplots.command.plotadmin")
-                .required("group-name", stringParser())
+                .required("group-name", stringParser(), (sender, input) -> CompletableFuture.completedFuture(plotService.groupCache().keySet().stream().map(Suggestion::suggestion).toList()))
                 .apply(plugin.confirmationManager())
                 .handler(this::handleDelete)
                 .build()
         );
 
-        commandManager.command(builder.literal("deleteGroup")
+        commandManager.command(builder.literal("group").literal("delete")
                 .permission("ucplots.command.plotadmin")
                 .literal("confirm")
                 .handler(plugin.confirmationManager().createExecutionHandler())
@@ -49,7 +52,7 @@ public class PlotAdminGroupCommand extends SubCommand {
         var player = (Player) commandContext.sender();
         var groupName = commandContext.<String>get("group-name");
 
-        if (plotService.existsPlot(groupName)) {
+        if (plotService.existsGroup(groupName)) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "group", "create", "exists"));
             return;
         }
@@ -63,7 +66,7 @@ public class PlotAdminGroupCommand extends SubCommand {
         var player = (Player) commandContext.sender();
         var groupName = commandContext.<String>get("group-name");
 
-        if (!plotService.existsPlot(groupName)) {
+        if (!plotService.existsGroup(groupName)) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "group", "delete", "no-group"));
             return;
         }

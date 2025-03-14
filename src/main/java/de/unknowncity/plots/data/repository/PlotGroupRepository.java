@@ -42,12 +42,12 @@ public class PlotGroupRepository {
     }
 
     public CompletableFuture<HashMap<String, PlotGroup>> loadPlotGroupCache(HashMap<String, Plot> plotCache) {
-        return plotGroupDao.readAll().thenApplyAsync(plotGroups -> {
+        return plotGroupDao.readAll().thenApply(plotGroups -> {
             var plotGroupCache = new HashMap<String, PlotGroup>();
             plotGroups.forEach(plotGroup -> {
                 var plots = new HashMap<String, Plot>();
                 plotCache.values().forEach(plot -> {
-                    if (plot.groupName().equals(plotGroup.name())) {
+                    if (plot.groupName() != null && plot.groupName().equals(plotGroup.name())) {
                         plots.put(plot.id(), plot);
                     }
                 });

@@ -255,4 +255,12 @@ public class PlotService implements Service<PlotsPlugin> {
         }
 
     }
+
+    public HashMap<String, PlotGroup> groupCache() {
+        return plotGroupCache;
+    }
+
+    public HashMap<String, Plot> plotCache() {
+        return plotCache;
+    }
 }
