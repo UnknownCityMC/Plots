@@ -4,7 +4,6 @@ import java.util.UUID;
 
 public record PlotMember(
         UUID memberID,
-        String lastKnownName,
         PlotMemberRole plotMemberRole
 ) {
 }

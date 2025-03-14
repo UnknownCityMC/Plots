@@ -18,13 +18,11 @@ import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.unknowncity.astralib.common.service.Service;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.data.model.plot.BuyPlot;
-import de.unknowncity.plots.data.model.plot.Plot;
-import de.unknowncity.plots.data.model.plot.PlotState;
-import de.unknowncity.plots.data.model.plot.RentPlot;
+import de.unknowncity.plots.data.model.plot.*;
 import de.unknowncity.plots.data.model.plot.group.PlotGroup;
 import de.unknowncity.plots.data.repository.PlotGroupRepository;
 import de.unknowncity.plots.util.PlotId;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
@@ -133,6 +131,16 @@ public class PlotService implements Service<PlotsPlugin> {
         plot.members(new ArrayList<>());
         savePlot(plot);
         loadSchematic(plot);
+    }
+
+    public void addMember(OfflinePlayer player, PlotMemberRole role, Plot plot) {
+        plot.members().add(new PlotMember(player.getUniqueId(), role));
+        savePlot(plot);
+    }
+
+    public void removeMember(OfflinePlayer player, Plot plot) {
+        plot.members().removeIf(plotMember -> plotMember.memberID().equals(player.getUniqueId()));
+        savePlot(plot);
     }
 
     public void setPlotOwner(Player player, Plot plot) {

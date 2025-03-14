@@ -26,7 +26,7 @@ public class MariaDBPlotMemberDao implements PlotMemberDao {
     public CompletableFuture<Optional<PlotMember>> read(UUID memberId, String plotId) {
         @Language("mariadb")
         var queryString = """
-                SELECT user_id, last_known_name, role  FROM plot_member WHERE plot_id = :plotId AND user_id = :userId;
+                SELECT user_id, role  FROM plot_member WHERE plot_id = :plotId AND user_id = :userId;
                 """;
         return CompletableFuture.supplyAsync(queryConfiguration.query(queryString)
                 .single(call()
@@ -35,7 +35,6 @@ public class MariaDBPlotMemberDao implements PlotMemberDao {
                 )
                 .map(row -> new PlotMember(
                         row.get("user_id", StandardReader.UUID_FROM_STRING),
-                        row.getString("last_known_name"),
                         row.getEnum("role", PlotMemberRole.class)
 
                 ))::first
@@ -46,14 +45,13 @@ public class MariaDBPlotMemberDao implements PlotMemberDao {
     public CompletableFuture<Boolean> write(PlotMember plotMember, String plotId) {
         @Language("mariadb")
         var queryString = """
-                REPLACE INTO plot_member (user_id, last_known_name, role)
-                VALUES (:userId, :lastKnownName, :role);
+                REPLACE INTO plot_member (user_id, role, plot_id)
+                VALUES (:userId, :role, :plotId);
                 """;
         return CompletableFuture.supplyAsync(queryConfiguration.query(queryString)
                 .single(call()
                         .bind("userId", String.valueOf(plotMember.memberID()))
                         .bind("plotId", plotId)
-                        .bind("lastKnownName", plotMember.lastKnownName())
                         .bind("role", plotMember.plotMemberRole())
                 )
                 .insert()::changed
@@ -64,7 +62,7 @@ public class MariaDBPlotMemberDao implements PlotMemberDao {
     public CompletableFuture<List<PlotMember>> readAll(String plotId) {
         @Language("mariadb")
         var queryString = """
-                SELECT user_id, last_known_name, role  FROM plot_member WHERE plot_id = :plotId;;
+                SELECT user_id, role  FROM plot_member WHERE plot_id = :plotId;;
                 """;
         return CompletableFuture.supplyAsync(queryConfiguration.query(queryString)
                 .single(call()
@@ -72,7 +70,6 @@ public class MariaDBPlotMemberDao implements PlotMemberDao {
                 )
                 .map(row -> new PlotMember(
                         row.get("user_id", StandardReader.UUID_FROM_STRING),
-                        row.getString("last_known_name"),
                         row.getEnum("role", PlotMemberRole.class)
 
                 ))::all

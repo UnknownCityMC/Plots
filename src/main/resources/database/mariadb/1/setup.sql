@@ -42,7 +42,6 @@ CREATE TABLE IF NOT EXISTS plot_member
 (
     plot_id         VARCHAR(256) NOT NULL,
     user_id         VARCHAR(36)  NOT NULL,
-    last_known_name VARCHAR(16)  NOT NULL,
     role            ENUM ('CO_OWNER', 'MEMBER', 'TEMP_MEMBER') DEFAULT 'MEMBER',
 
     CONSTRAINT plot_member_pk
