@@ -20,6 +20,7 @@ public class RegionService implements Service<PlotsPlugin> {
 
     /**
      * Returns a region suitable for mariadb creation at the location
+     *
      * @param location the player
      * @return a ProtectedRegion suitable for mariadb creation
      */

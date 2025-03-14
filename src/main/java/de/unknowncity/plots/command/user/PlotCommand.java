@@ -15,6 +15,7 @@ public class PlotCommand extends PaperCommand<PlotsPlugin> {
         var builder = commandManager.commandBuilder("plot");
 
         new PlotClaimCommand(plugin, builder).apply(commandManager);
+        new PlotUnClaimCommand(plugin, builder).apply(commandManager);
         new PlotInfoCommand(plugin, builder).apply(commandManager);
     }
 }

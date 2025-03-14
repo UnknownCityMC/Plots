@@ -31,13 +31,6 @@ public class PlotClaimCommand extends SubCommand {
                 .senderType(Player.class)
                 .handler(this::handleClaim)
                 .build());
-
-
-        commandManager.command(builder.literal("unclaim")
-                .permission("plots.command.plot.unclaim")
-                .senderType(Player.class)
-                .handler(this::handleUnClaim)
-                .build());
     }
 
     private void handleClaim(@NonNull CommandContext<Player> context) {
@@ -69,36 +62,5 @@ public class PlotClaimCommand extends SubCommand {
 
         plotService.claimPlot(sender, plot);
         plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "success"));
-    }
-
-    private void handleUnClaim(@NonNull CommandContext<Player> context) {
-        var sender = context.sender();
-        var possibleRegion = regionService.getSuitableRegion(sender.getLocation());
-
-        if (possibleRegion.isEmpty()) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot"));
-            return;
-        }
-
-        var plotId = PlotId.generate(sender.getWorld(), possibleRegion.get());
-
-        if (!plotService.existsPlot(plotId)) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot"));
-            return;
-        }
-
-        var plot = plotService.getPlot(plotId);
-        if (plot.state() != PlotState.SOLD) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "unclaim", "unavailable"));
-            return;
-        }
-
-        if(!plot.owner().equals(sender.getUniqueId())) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "unclaim", "no-owner"));
-            return;
-        }
-        
-        plotService.unClaimPlot(plot);
-        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "unclaim", "success"));
     }
 }

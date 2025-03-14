@@ -21,7 +21,10 @@ import org.incendo.cloud.processors.confirmation.ConfirmationConfiguration;
 import org.incendo.cloud.processors.confirmation.ConfirmationManager;
 import org.spongepowered.configurate.NodePath;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.logging.Level;
 
 public class PlotsPlugin extends PaperAstraPlugin {
     private ServiceRegistry<PlotsPlugin> serviceRegistry;
@@ -36,6 +39,12 @@ public class PlotsPlugin extends PaperAstraPlugin {
 
         registerCommands();
         initializeMessenger();
+
+        try {
+            Files.createDirectories(getDataPath().resolve("schematics"));
+        } catch (IOException e) {
+            getLogger().log(Level.SEVERE, e.getMessage());
+        }
     }
 
     @Override
@@ -110,7 +119,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
                         new MariaDBPlotFlagDao(queryConfig),
                         new MariaDBPlotLocationDao(queryConfig),
                         new MariaDBPlotMemberDao(queryConfig)
-                ), economyService));
+                ), economyService, this));
 
         this.serviceRegistry().getRegistered(PlotService.class).cacheAll();
     }

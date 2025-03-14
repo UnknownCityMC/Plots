@@ -2,10 +2,11 @@ package de.unknowncity.plots.command.user;
 
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
+import de.unknowncity.plots.data.model.plot.PlotState;
+import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import de.unknowncity.plots.util.PlotId;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -14,24 +15,25 @@ import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
 import org.spongepowered.configurate.NodePath;
 
-public class PlotInfoCommand extends SubCommand {
+public class PlotUnClaimCommand extends SubCommand {
     private RegionService regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
     private PlotService plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
+    private EconomyService economyService = plugin.serviceRegistry().getRegistered(EconomyService.class);
 
-    public PlotInfoCommand(PlotsPlugin plugin, Command.Builder<CommandSender> builder) {
+    public PlotUnClaimCommand(PlotsPlugin plugin, Command.Builder<CommandSender> builder) {
         super(plugin, builder);
     }
 
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
-        commandManager.command(builder.literal("info")
-                .permission("plots.command.plot.info")
+        commandManager.command(builder.literal("unclaim")
+                .permission("plots.command.plot.unclaim")
                 .senderType(Player.class)
-                .handler(this::handleInfo)
+                .handler(this::handleUnClaim)
                 .build());
     }
 
-    private void handleInfo(@NonNull CommandContext<Player> context) {
+    private void handleUnClaim(@NonNull CommandContext<Player> context) {
         var sender = context.sender();
         var possibleRegion = regionService.getSuitableRegion(sender.getLocation());
 
@@ -48,17 +50,17 @@ public class PlotInfoCommand extends SubCommand {
         }
 
         var plot = plotService.getPlot(plotId);
+        if (plot.state() != PlotState.SOLD) {
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "unclaim", "unavailable"));
+            return;
+        }
 
-        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "info"),
-                Placeholder.parsed("plot-id", plotId),
-                Placeholder.parsed("group", plot.groupName() != null ? plot.groupName() : ""),
-                Placeholder.parsed("price", String.valueOf(plot.price())),
-                Placeholder.parsed("state", plot.state().name()),
-                Placeholder.parsed("owner", plot.owner() != null ? plot.owner().toString() : ""),
-                Placeholder.parsed("world", plot.worldName()),
-                Placeholder.parsed("members", plot.members() != null ? plot.members().toString() : ""),
-                Placeholder.parsed("flags", plot.flags() != null ? plot.flags().toString() : ""),
-                Placeholder.parsed("location", plot.locations().toString())
-        );
+        if (!plot.owner().equals(sender.getUniqueId())) {
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "unclaim", "no-owner"));
+            return;
+        }
+
+        plotService.unClaimPlot(plot);
+        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "unclaim", "success"));
     }
 }

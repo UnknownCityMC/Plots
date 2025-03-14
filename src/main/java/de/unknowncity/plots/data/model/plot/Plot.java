@@ -1,6 +1,12 @@
 package de.unknowncity.plots.data.model.plot;
 
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.unknowncity.plots.data.model.plot.flag.PlotFlag;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,6 +93,14 @@ public abstract class Plot {
 
     public String worldName() {
         return worldName;
+    }
+
+    public World world() {
+        return Bukkit.getWorld(worldName);
+    }
+
+    public ProtectedRegion protectedRegion() {
+        return WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(world())).getRegions().get(regionId);
     }
 
     public double price() {

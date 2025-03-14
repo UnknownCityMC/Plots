@@ -1,5 +1,20 @@
 package de.unknowncity.plots.service;
 
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
+import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat;
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
+import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
+import com.sk89q.worldedit.function.operation.Operation;
+import com.sk89q.worldedit.function.operation.Operations;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.unknowncity.astralib.common.service.Service;
 import de.unknowncity.plots.PlotsPlugin;
@@ -13,21 +28,28 @@ import de.unknowncity.plots.util.PlotId;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Level;
 
 public class PlotService implements Service<PlotsPlugin> {
     private final PlotGroupRepository plotGroupRepository;
+    private final PlotsPlugin plugin;
 
     private HashMap<String, Plot> plotCache = new HashMap<>();
     private HashMap<String, PlotGroup> plotGroupCache = new HashMap<>();
     private final EconomyService economyService;
 
-    public PlotService(PlotGroupRepository plotGroupRepository, EconomyService economyService) {
+    public PlotService(PlotGroupRepository plotGroupRepository, EconomyService economyService, PlotsPlugin plugin) {
         this.plotGroupRepository = plotGroupRepository;
         this.economyService = economyService;
+        this.plugin = plugin;
     }
 
     @Override
@@ -99,6 +121,7 @@ public class PlotService implements Service<PlotsPlugin> {
         plot.state(PlotState.SOLD);
         plot.owner(player.getUniqueId());
         savePlot(plot);
+        createSchematic(plot);
     }
 
     public void unClaimPlot(Plot plot) {
@@ -109,6 +132,7 @@ public class PlotService implements Service<PlotsPlugin> {
         plot.flags(new ArrayList<>());
         plot.members(new ArrayList<>());
         savePlot(plot);
+        loadSchematic(plot);
     }
 
     public void setPlotOwner(Player player, Plot plot) {
@@ -188,5 +212,47 @@ public class PlotService implements Service<PlotsPlugin> {
 
     public Plot getPlotFromGroup(String id, String groupName) {
         return plotGroupCache.get(groupName).plotsInGroup().get(id);
+    }
+
+    public void createSchematic(Plot plot) {
+        CuboidRegion region = new CuboidRegion(plot.protectedRegion().getMinimumPoint(), plot.protectedRegion().getMaximumPoint());
+        BlockArrayClipboard clipboard = new BlockArrayClipboard(region);
+
+        ForwardExtentCopy forwardExtentCopy = new ForwardExtentCopy(
+                BukkitAdapter.adapt(plot.world()), region, clipboard, region.getMinimumPoint()
+        );
+
+        try {
+            Operations.complete(forwardExtentCopy);
+        } catch (WorldEditException e) {
+            plugin.getLogger().log(Level.SEVERE, e.getMessage());
+        }
+
+        File file = new File(plugin.getDataPath() + "/schematics/" + plot.id() + ".schem");
+        try (ClipboardWriter writer = BuiltInClipboardFormat.SPONGE_V3_SCHEMATIC.getWriter(new FileOutputStream(file))) {
+            writer.write(clipboard);
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.SEVERE, e.getMessage());
+        }
+    }
+
+    public void loadSchematic(Plot plot) {
+        File file = new File(plugin.getDataPath() + "/schematics/" + plot.id() + ".schem");
+        ClipboardFormat format = BuiltInClipboardFormat.SPONGE_V3_SCHEMATIC;
+        Clipboard clipboard;
+        try (ClipboardReader reader = format.getReader(new FileInputStream(file))) {
+            clipboard = reader.read();
+            EditSession editSession = WorldEdit.getInstance().newEditSession((BukkitAdapter.adapt(plot.world())));
+            Operation operation = new ClipboardHolder(clipboard)
+                    .createPaste(editSession)
+                    .to(clipboard.getOrigin())
+                    .ignoreAirBlocks(false)
+                    .build();
+            Operations.complete(operation);
+            editSession.close();
+        } catch (WorldEditException | IOException e) {
+            plugin.getLogger().log(Level.SEVERE, e.getMessage());
+        }
+
     }
 }
