@@ -34,17 +34,26 @@ public class PlotsPlugin extends PaperAstraPlugin {
 
     @Override
     public void onPluginEnable() {
-        initConfiguration();
+        onPluginReload();
         initializeDataServices();
 
         registerCommands();
-        initializeMessenger();
 
+
+        var pluginManager = getServer().getPluginManager();
+        pluginManager.registerEvents(new PlotInteractListener(this), this);
+
+
+    }
+
+    public void onPluginReload() {
         try {
             Files.createDirectories(getDataPath().resolve("schematics"));
         } catch (IOException e) {
             getLogger().log(Level.SEVERE, e.getMessage());
         }
+        initConfiguration();
+        initializeMessenger();
     }
 
     @Override
@@ -117,6 +126,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
                         new MariaDBGroupDao(queryConfig),
                         new MariaDBPlotDao(queryConfig),
                         new MariaDBPlotFlagDao(queryConfig),
+                        new MariaDBPlotInteractablesDao(queryConfig),
                         new MariaDBPlotLocationDao(queryConfig),
                         new MariaDBPlotMemberDao(queryConfig)
                 ), economyService, this));

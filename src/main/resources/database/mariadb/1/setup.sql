@@ -63,3 +63,16 @@ CREATE TABLE IF NOT EXISTS plot_flag
         FOREIGN KEY (plot_id) REFERENCES plot (id)
             ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS plot_interactables
+(
+    block_type       VARCHAR(256) NOT NULL,
+    plot_id         VARCHAR(256) NOT NULL,
+    access_modifier ENUM ('OWNER', 'CO_OWNER', 'MEMBER', 'TEMP_MEMBER', 'EVERYBODY', 'NOBODY') DEFAULT 'MEMBER',
+
+    CONSTRAINT plot_flag_pk
+        PRIMARY KEY (plot_id, block_type),
+    CONSTRAINT plot_interactables_plot_plot_id_id_fk
+        FOREIGN KEY (plot_id) REFERENCES plot (id)
+            ON DELETE CASCADE
+);

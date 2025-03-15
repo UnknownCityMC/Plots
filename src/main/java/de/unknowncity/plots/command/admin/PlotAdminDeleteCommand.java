@@ -15,7 +15,7 @@ import static org.incendo.cloud.parser.standard.StringParser.stringParser;
 
 public class PlotAdminDeleteCommand extends SubCommand {
 
-    private PlotService plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
+    private final PlotService plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
 
     public PlotAdminDeleteCommand(PlotsPlugin plugin, Command.Builder<CommandSender> builder) {
         super(plugin, builder);

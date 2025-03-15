@@ -18,8 +18,8 @@ import static org.incendo.cloud.bukkit.parser.PlayerParser.playerParser;
 import static org.incendo.cloud.parser.standard.EnumParser.enumParser;
 
 public class PlotChangeRoleCommand extends SubCommand {
-    private RegionService regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
-    private PlotService plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
+    private final RegionService regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
+    private final PlotService plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
 
     public PlotChangeRoleCommand(PlotsPlugin plugin, Command.Builder<CommandSender> builder) {
         super(plugin, builder);

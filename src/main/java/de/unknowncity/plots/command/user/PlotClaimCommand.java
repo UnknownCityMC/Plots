@@ -16,9 +16,9 @@ import org.incendo.cloud.context.CommandContext;
 import org.spongepowered.configurate.NodePath;
 
 public class PlotClaimCommand extends SubCommand {
-    private RegionService regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
-    private PlotService plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
-    private EconomyService economyService = plugin.serviceRegistry().getRegistered(EconomyService.class);
+    private final RegionService regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
+    private final PlotService plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
+    private final EconomyService economyService = plugin.serviceRegistry().getRegistered(EconomyService.class);
 
     public PlotClaimCommand(PlotsPlugin plugin, Command.Builder<CommandSender> builder) {
         super(plugin, builder);

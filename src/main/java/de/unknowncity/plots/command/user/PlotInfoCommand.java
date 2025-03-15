@@ -15,8 +15,8 @@ import org.incendo.cloud.context.CommandContext;
 import org.spongepowered.configurate.NodePath;
 
 public class PlotInfoCommand extends SubCommand {
-    private RegionService regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
-    private PlotService plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
+    private final RegionService regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
+    private final PlotService plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
 
     public PlotInfoCommand(PlotsPlugin plugin, Command.Builder<CommandSender> builder) {
         super(plugin, builder);
@@ -50,15 +50,7 @@ public class PlotInfoCommand extends SubCommand {
         var plot = plotService.getPlot(plotId);
 
         plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "info"),
-                Placeholder.parsed("plot-id", plotId),
-                Placeholder.parsed("group", plot.groupName() != null ? plot.groupName() : ""),
-                Placeholder.parsed("price", String.valueOf(plot.price())),
-                Placeholder.parsed("state", plot.state().name()),
-                Placeholder.parsed("owner", plot.owner() != null ? plot.owner().toString() : ""),
-                Placeholder.parsed("world", plot.worldName()),
-                Placeholder.parsed("members", plot.members() != null ? plot.members().toString() : ""),
-                Placeholder.parsed("flags", plot.flags() != null ? plot.flags().toString() : ""),
-                Placeholder.parsed("location", plot.locations().toString())
+                plot.tagResolvers(sender, plugin.messenger())
         );
     }
 }

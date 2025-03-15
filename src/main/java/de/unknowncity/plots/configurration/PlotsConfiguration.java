@@ -10,10 +10,10 @@ import de.unknowncity.astralib.libs.com.fasterxml.jackson.annotation.JsonPropert
 public class PlotsConfiguration extends YamlAstraConfiguration {
 
     @JsonProperty
-    private ModernDataBaseSetting database = new ModernDataBaseSetting();
+    private final ModernDataBaseSetting database = new ModernDataBaseSetting();
 
     @JsonProperty
-    private EconomySettings economy = new EconomySettings();
+    private final EconomySettings economy = new EconomySettings();
 
     public PlotsConfiguration() {
 

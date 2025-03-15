@@ -16,8 +16,8 @@ import static org.incendo.cloud.parser.standard.StringParser.stringParser;
 
 public class PlotAdminSetOwnerCommand extends SubCommand {
 
-    private PlotService plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
-    private RegionService regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
+    private final PlotService plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
+    private final RegionService regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
 
     public PlotAdminSetOwnerCommand(PlotsPlugin plugin, Command.Builder<CommandSender> builder) {
         super(plugin, builder);

@@ -9,7 +9,7 @@ import su.nightexpress.coinsengine.api.currency.Currency;
 import java.util.UUID;
 
 public class EconomyService implements Service<PlotsPlugin> {
-    private Currency currency;
+    private final Currency currency;
 
     public EconomyService(EconomySettings economySettings) {
         currency = CoinsEngineAPI.getCurrency(economySettings.currency());

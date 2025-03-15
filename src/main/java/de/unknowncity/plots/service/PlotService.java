@@ -10,21 +10,35 @@ import com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
+import com.sk89q.worldedit.extent.world.BiomeQuirkExtent;
+import com.sk89q.worldedit.function.biome.BiomeReplace;
+import com.sk89q.worldedit.function.biome.ExtentBiomeCopy;
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
+import com.sk89q.worldedit.function.visitor.RegionVisitor;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.session.ClipboardHolder;
+import com.sk89q.worldedit.world.biome.BiomeType;
+import com.sk89q.worldguard.protection.flags.Flag;
+import com.sk89q.worldguard.protection.flags.Flags;
+import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.unknowncity.astralib.common.service.Service;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.data.model.plot.*;
+import de.unknowncity.plots.data.model.plot.flag.PlotInteractable;
 import de.unknowncity.plots.data.model.plot.group.PlotGroup;
 import de.unknowncity.plots.data.repository.PlotGroupRepository;
 import de.unknowncity.plots.util.PlotId;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
+import org.bukkit.block.Biome;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.spongepowered.configurate.NodePath;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -40,8 +54,8 @@ public class PlotService implements Service<PlotsPlugin> {
     private final PlotGroupRepository plotGroupRepository;
     private final PlotsPlugin plugin;
 
-    private HashMap<String, Plot> plotCache = new HashMap<>();
-    private HashMap<String, PlotGroup> plotGroupCache = new HashMap<>();
+    private final HashMap<String, Plot> plotCache = new HashMap<>();
+    private final HashMap<String, PlotGroup> plotGroupCache = new HashMap<>();
     private final EconomyService economyService;
 
     public PlotService(PlotGroupRepository plotGroupRepository, EconomyService economyService, PlotsPlugin plugin) {
@@ -83,9 +97,7 @@ public class PlotService implements Service<PlotsPlugin> {
         }
         var plot = new BuyPlot(plotId, null, plotGroupName, region.getId(), price, world.getName(), PlotState.AVAILABLE);
 
-        addPlotToPlotGroup(plot, plotGroupName);
-
-        savePlot(plot);
+        createPlot(region, plot, plotGroupName);
         return true;
     }
 
@@ -96,10 +108,33 @@ public class PlotService implements Service<PlotsPlugin> {
         }
         var plot = new RentPlot(plotId, null, plotGroupName, region.getId(), price, world.getName(), PlotState.AVAILABLE, null, rentInterval.toMinutes());
 
+        createPlot(region, plot, plotGroupName);
+        return true;
+    }
+
+    private void createPlot(ProtectedRegion region, Plot plot, String plotGroupName) {
         addPlotToPlotGroup(plot, plotGroupName);
 
+        region.setFlag(Flags.INTERACT, StateFlag.State.ALLOW);
+        region.setFlag(Flags.USE, StateFlag.State.ALLOW);
+
+        plot.interactables(PlotInteractable.defaults());
+
         savePlot(plot);
-        return true;
+    }
+
+    public void setBiome(Plot plot, BiomeType biome) {
+        var world = plot.world();
+
+        try (EditSession editSession = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(world))) {
+            var region = new CuboidRegion(plot.protectedRegion().getMinimumPoint(), plot.protectedRegion().getMaximumPoint());
+
+            var replace = new BiomeReplace(editSession, biome);
+            var visitor = new RegionVisitor(region, replace);
+            Operations.complete(visitor);
+        } catch (WorldEditException e) {
+            plugin.getLogger().warning("Failed to change biome for plot " + plot.id());
+        }
     }
 
     public void addPlotToPlotGroup(Plot plot, String plotGroupName) {
@@ -189,7 +224,9 @@ public class PlotService implements Service<PlotsPlugin> {
     public void deletePlot(Plot plot) {
         plotGroupRepository.deletePlot(plot);
         plotCache.remove(plot.id());
-        plotGroupCache.get(plot.groupName()).plotsInGroup().remove(plot.id());
+        if (plot.groupName() != null) {
+            plotGroupCache.get(plot.groupName()).plotsInGroup().remove(plot.id());
+        }
     }
 
     public void deletePlotGroup(PlotGroup plotGroup) {

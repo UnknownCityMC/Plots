@@ -19,5 +19,7 @@ public class PlotAdminCommand extends PaperCommand<PlotsPlugin> {
         new PlotAdminDeleteCommand(plugin, builder).apply(commandManager);
         new PlotAdminSetOwnerCommand(plugin, builder).apply(commandManager);
         new PlotAdminSetGroupCommand(plugin, builder).apply(commandManager);
+
+        new PlotAdminReloadCommand(plugin, builder).apply(commandManager);
     }
 }
