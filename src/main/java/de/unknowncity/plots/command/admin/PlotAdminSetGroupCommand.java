@@ -53,8 +53,10 @@ public class PlotAdminSetGroupCommand extends SubCommand {
                 return;
             }
 
-            plotService.setPlotGroup(groupName, plotService.getPlot(world, protectedRegion));
-            plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "set-group", "success"));
+            var plot = plotService.getPlot(world, protectedRegion);
+
+            plotService.setPlotGroup(groupName, plot);
+            plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "set-group", "success"), plot.tagResolvers(player, plugin.messenger()));
 
         }, () -> {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "no-suitable-region"));

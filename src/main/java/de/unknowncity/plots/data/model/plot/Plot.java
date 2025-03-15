@@ -35,6 +35,7 @@ public abstract class Plot {
     private PlotState state;
 
     private List<PlotMember> members = new ArrayList<>();
+    private List<BannedPlayer> bannedPlayers = new ArrayList<>();
     private List<PlotFlag> flags = new ArrayList<>();
     private List<PlotInteractable> interactables = new ArrayList<>();
     private List<RelativePlotLocation> locations = new ArrayList<>();
@@ -55,6 +56,14 @@ public abstract class Plot {
 
     public List<PlotMember> members() {
         return members;
+    }
+
+    public List<BannedPlayer> bannedPlayers() {
+        return bannedPlayers;
+    }
+
+    public void bannedPlayers(List<BannedPlayer> bannedPlayers) {
+        this.bannedPlayers = bannedPlayers;
     }
 
     public String id() {
@@ -148,6 +157,12 @@ public abstract class Plot {
     public TagResolver[] tagResolvers(Player player, PaperMessenger messenger) {
         return new TagResolver[]{
                 Placeholder.parsed("id", plotId),
+                Placeholder.parsed("height", String.valueOf(height())),
+                Placeholder.parsed("width", String.valueOf(width())),
+                Placeholder.parsed("depth", String.valueOf(depth())),
+
+                Placeholder.parsed("price", String.valueOf(price())),
+
                 Placeholder.component("group", groupName() != null ? Component.text(groupName()) :
                         messenger.component(player, NodePath.path("plot", "no-group"))),
                 Placeholder.parsed("price", String.valueOf(price())),
@@ -155,9 +170,26 @@ public abstract class Plot {
                 Placeholder.component("owner", owner() != null ? Component.text(owner().toString())
                         : messenger.component(player, NodePath.path("plot", "no-owner"))),
                 Placeholder.parsed("world", worldName()),
-                Placeholder.component("members", members().isEmpty() ? Component.text(Strings.join(members().stream().map(PlotMember::memberID).toList(), ',')) :
+
+                Placeholder.component("members", !members().isEmpty() ? Component.text(String.join(", ", members().stream().map(PlotMember::name).toList())):
                         messenger.component(player, NodePath.path("plot", "no-members"))),
+
+                Placeholder.component("banned", !bannedPlayers().isEmpty() ? Component.text(String.join(", ", bannedPlayers().stream().map(BannedPlayer::name).toList())) :
+                        messenger.component(player, NodePath.path("plot", "no-banned"))),
+
                 Placeholder.parsed("flags", flags() != null ? flags().toString() : ""),
         };
+    }
+
+    public int height() {
+        return protectedRegion().getMaximumPoint().y() - protectedRegion().getMinimumPoint().y() + 1;
+    }
+
+    public int width() {
+        return protectedRegion().getMaximumPoint().z() - protectedRegion().getMinimumPoint().z() + 1;
+    }
+
+    public int depth() {
+        return protectedRegion().getMaximumPoint().x() - protectedRegion().getMinimumPoint().x() + 1;
     }
 }

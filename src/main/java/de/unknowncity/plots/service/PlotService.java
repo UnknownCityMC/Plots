@@ -169,7 +169,7 @@ public class PlotService implements Service<PlotsPlugin> {
     }
 
     public void addMember(OfflinePlayer player, PlotMemberRole role, Plot plot) {
-        plot.members().add(new PlotMember(player.getUniqueId(), role));
+        plot.members().add(new PlotMember(player.getUniqueId(), role, player.getName()));
         savePlot(plot);
     }
 

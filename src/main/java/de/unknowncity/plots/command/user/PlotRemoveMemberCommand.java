@@ -55,16 +55,16 @@ public class PlotRemoveMemberCommand extends SubCommand {
 
         var plot = plotService.getPlot(plotId);
         if (!plot.owner().equals(sender.getUniqueId())) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-owner"));
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-owner"), plot.tagResolvers(sender, plugin.messenger()));
             return;
         }
 
         if(plot.members().stream().noneMatch(plotMember -> plotMember.memberID().equals(target.getUniqueId()))){
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-member"));
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-member"), plot.tagResolvers(sender, plugin.messenger()));
             return;
         }
 
         plotService.removeMember(target, plot);
-        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "remove", "success"));
+        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "remove", "success"), plot.tagResolvers(sender, plugin.messenger()));
     }
 }

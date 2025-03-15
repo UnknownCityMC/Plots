@@ -56,11 +56,11 @@ public class PlotUnClaimCommand extends SubCommand {
         }
 
         if (!plot.owner().equals(sender.getUniqueId())) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "unclaim", "no-owner"));
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "unclaim", "no-owner"), plot.tagResolvers(sender, plugin.messenger()));
             return;
         }
 
         plotService.unClaimPlot(plot);
-        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "unclaim", "success"));
+        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "unclaim", "success"), plot.tagResolvers(sender, plugin.messenger()));
     }
 }
