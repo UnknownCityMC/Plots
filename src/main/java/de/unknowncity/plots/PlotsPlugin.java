@@ -8,6 +8,7 @@ import de.unknowncity.astralib.paper.api.hook.defaulthooks.PlaceholderApiHook;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
 import de.unknowncity.astralib.paper.api.plugin.PaperAstraPlugin;
 import de.unknowncity.plots.command.admin.PlotAdminCommand;
+import de.unknowncity.plots.command.mod.PlotModCommand;
 import de.unknowncity.plots.command.user.PlotCommand;
 import de.unknowncity.plots.configurration.PlotsConfiguration;
 import de.unknowncity.plots.data.dao.mariadb.*;
@@ -86,6 +87,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
 
 
         new PlotCommand(this).apply(commandManager);
+        new PlotModCommand(this).apply(commandManager);
         new PlotAdminCommand(this).apply(commandManager);
     }
 

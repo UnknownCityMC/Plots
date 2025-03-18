@@ -38,7 +38,7 @@ public class PlotAdminSetGroupCommand extends SubCommand {
         var player = commandContext.sender();
         var groupName = commandContext.<String>get("group-name");
 
-        if(!plotService.existsGroup(groupName)){
+        if (!plotService.existsGroup(groupName)) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "set-group", "no-group"));
             return;
         }
@@ -56,8 +56,6 @@ public class PlotAdminSetGroupCommand extends SubCommand {
             plotService.setPlotGroup(groupName, plotService.getPlot(world, protectedRegion));
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "set-group", "success"));
 
-        }, () -> {
-            plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "no-suitable-region"));
-        });
+        }, () -> plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "no-suitable-region")));
     }
 }
