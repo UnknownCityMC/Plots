@@ -31,14 +31,14 @@ command:
     set-owner:
       success: <prefix><gray>Der Besitzer wurde zu <gold><new-owner> <gray>geändert
     set-group:
-      no-group: <prefix><red>Diese Gruppe exitstiert nicht!
+      no-group: <prefix><red>Diese Gruppe existiert nicht!
       success: <prefix><gray>Die Plot-Gruppe wurde zu <gold><new-group> <gray>geändert
     group:
       create:
-        exists: <perfix><red>Diese Gruppe exitstiert bereits!
+        exists: <prefix><red>Diese Gruppe existiert bereits!
         success: <prefix><gray>Gruppe erfolgreich erstellt!
       delete:
-        no-group: <perfix><red>Diese Gruppe exitstiert nicht!
+        no-group: <prefix><red>Diese Gruppe existiert nicht!
         success: <prefix><gray>Gruppe erfolgreich gelöscht!
     delete:
       not-exists: <prefix><red>Dieses Plot existiert nicht!
@@ -54,8 +54,8 @@ command:
       success: <prefix><gray>Mitglied erfolgreich entfernt!
   plotmod:
     create:
-      already-exists: <perfix><red>Hier existiert bereits ein Plot!
-      id-exists: <perfix><red>ID existiert bereits!
+      already-exists: <prefix><red>Hier existiert bereits ein Plot!
+      id-exists: <prefix><red>ID existiert bereits!
       success: <prefix><gray>Plot erstellt!
       error: <prefix><red>Es gab einen Fehler...
     expand:
