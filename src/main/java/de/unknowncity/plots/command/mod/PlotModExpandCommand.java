@@ -64,7 +64,7 @@ public class PlotModExpandCommand extends SubCommand {
             }
 
             if (regionService.expandRegionInDirection(protectedRegion, direction, blocks, world)) {
-                var newSquareMeters = regionService.calculateAreaSquareMeters(protectedRegion);
+                var newSquareMeters = regionService.calculateAreaSquareMeters(regionService.getRegion(protectedRegion.getId(), player.getWorld()));
                 var newPrice = newSquareMeters * plugin.configuration().fb().price();
                 plotService.setPlotPrice(newPrice, plot);
                 if (plot.owner() != null) {

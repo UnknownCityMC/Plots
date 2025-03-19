@@ -206,8 +206,8 @@ public class RegionService implements Service<PlotsPlugin> {
     }
 
     private int calculateAreaSquareMeters(BlockVector3 min, BlockVector3 max) {
-        int lengthX = max.x() - min.x();
-        int lengthZ = max.z() - min.z();
+        int lengthX = Math.abs(max.x()) - Math.abs(min.x()) + 1;
+        int lengthZ = Math.abs(max.z()) - Math.abs(min.z()) + 1;
 
         return lengthX * lengthZ;
     }

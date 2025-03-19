@@ -14,7 +14,6 @@ import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
 import org.spongepowered.configurate.NodePath;
 
-import static org.incendo.cloud.parser.standard.DoubleParser.doubleParser;
 import static org.incendo.cloud.parser.standard.IntegerParser.integerParser;
 import static org.incendo.cloud.parser.standard.StringParser.stringParser;
 
@@ -49,7 +48,6 @@ public class PlotModCreateCommand extends SubCommand {
 
         var world = player.getWorld();
 
-        id = PlotId.generate(world, id);
 
         if (regionService.getRegion(id, world) != null) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotmod", "create", "id-exists"));
