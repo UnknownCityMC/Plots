@@ -78,7 +78,6 @@ public class PlotModCreateCommand extends SubCommand {
             return;
         }
 
-
         ProtectedRegion protectedRegion = regionService.createRegionFromLocations(loc1, loc2, id);
 
         if (plotService.createBuyPlotFromRegion(protectedRegion, world, price, groupName)) {

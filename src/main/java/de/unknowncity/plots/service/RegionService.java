@@ -84,15 +84,11 @@ public class RegionService implements Service<PlotsPlugin> {
             return false;
         }
 
-        int minX = (int) Math.min(loc1.getX(), loc2.getX());
-        int minY = (int) Math.min(loc1.getY(), loc2.getY());
-        int minZ = (int) Math.min(loc1.getZ(), loc2.getZ());
-        int maxX = (int) Math.max(loc1.getX(), loc2.getX());
-        int maxY = (int) Math.max(loc1.getY(), loc2.getY());
-        int maxZ = (int) Math.max(loc1.getZ(), loc2.getZ());
+        BlockVector3 bv1 = new BlockVector3(loc1.getBlockX(), loc1.getBlockY(), loc1.getBlockZ());
+        BlockVector3 bv2 = new BlockVector3(loc2.getBlockX(), loc2.getBlockY(), loc2.getBlockZ());
 
         for (ProtectedRegion region : regionManager.getRegions().values()) {
-            if (region.contains(minX, minY, minZ) && region.contains(maxX, maxY, maxZ)) {
+            if (isRegionBetweenLocations(region, bv1, bv2)) {
                 return true;
             }
         }
@@ -108,18 +104,8 @@ public class RegionService implements Service<PlotsPlugin> {
             return false;
         }
 
-        int minX = Math.min(loc1.x(), loc2.x());
-        int minY = Math.min(loc1.y(), loc2.y());
-        int minZ = Math.min(loc1.z(), loc2.z());
-        int maxX = Math.max(loc1.x(), loc2.x());
-        int maxY = Math.max(loc1.y(), loc2.y());
-        int maxZ = Math.max(loc1.z(), loc2.z());
-
         for (ProtectedRegion region : regionManager.getRegions().values()) {
-            if (region.contains(minX, minY, minZ) && region.contains(maxX, maxY, maxZ)) {
-                if (region.getId().equals(ignoreId)) {
-                    continue;
-                }
+            if (!region.getId().equals(ignoreId) && isRegionBetweenLocations(region, loc1, loc2)) {
                 return true;
             }
         }
@@ -127,21 +113,28 @@ public class RegionService implements Service<PlotsPlugin> {
         return false;
     }
 
+    private boolean isRegionBetweenLocations(ProtectedRegion region, BlockVector3 loc1, BlockVector3 loc2) {
+        double minX = region.getMinimumPoint().x();
+        double minY = region.getMinimumPoint().y();
+        double minZ = region.getMinimumPoint().z();
+
+        double maxX = region.getMaximumPoint().x();
+        double maxY = region.getMaximumPoint().y();
+        double maxZ = region.getMaximumPoint().z();
+
+        return (minX >= Math.min(loc1.x(), loc2.x()) && maxX <= Math.max(loc1.x(), loc2.x())) &&
+                (minY >= Math.min(loc1.y(), loc2.y()) && maxY <= Math.max(loc1.y(), loc2.y())) &&
+                (minZ >= Math.min(loc1.z(), loc2.z()) && maxZ <= Math.max(loc1.z(), loc2.z()));
+    }
+
     public ProtectedRegion createRegionFromLocations(Location loc1, Location loc2, String regionName) {
         RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
         RegionManager regionManager = container.get(BukkitAdapter.adapt(loc1.getWorld()));
 
-        int minX = (int) Math.min(loc1.getX(), loc2.getX());
-        int minY = (int) Math.min(loc1.getY(), loc2.getY());
-        int minZ = (int) Math.min(loc1.getZ(), loc2.getZ());
-        int maxX = (int) Math.max(loc1.getX(), loc2.getX());
-        int maxY = (int) Math.max(loc1.getY(), loc2.getY());
-        int maxZ = (int) Math.max(loc1.getZ(), loc2.getZ());
+        BlockVector3 bv1 = new BlockVector3(loc1.getBlockX(), loc1.getBlockY(), loc1.getBlockZ());
+        BlockVector3 bv2 = new BlockVector3(loc2.getBlockX(), loc2.getBlockY(), loc2.getBlockZ());
 
-        BlockVector3 min = new BlockVector3(minX, minY, minZ);
-        BlockVector3 max = new BlockVector3(maxX, maxY, maxZ);
-
-        ProtectedRegion region = new ProtectedCuboidRegion(regionName, min, max);
+        ProtectedRegion region = new ProtectedCuboidRegion(regionName, bv1, bv2);
 
         regionManager.addRegion(region);
         try {
@@ -180,6 +173,7 @@ public class RegionService implements Service<PlotsPlugin> {
         RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
         RegionManager regionManager = container.get(BukkitAdapter.adapt(world));
         regionManager.addRegion(newRegion);
+
         return true;
     }
 }
