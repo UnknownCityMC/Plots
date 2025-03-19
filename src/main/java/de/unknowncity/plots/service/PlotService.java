@@ -10,9 +10,7 @@ import com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
-import com.sk89q.worldedit.extent.world.BiomeQuirkExtent;
 import com.sk89q.worldedit.function.biome.BiomeReplace;
-import com.sk89q.worldedit.function.biome.ExtentBiomeCopy;
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
@@ -20,7 +18,6 @@ import com.sk89q.worldedit.function.visitor.RegionVisitor;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.world.biome.BiomeType;
-import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
@@ -31,14 +28,9 @@ import de.unknowncity.plots.data.model.plot.flag.PlotInteractable;
 import de.unknowncity.plots.data.model.plot.group.PlotGroup;
 import de.unknowncity.plots.data.repository.PlotGroupRepository;
 import de.unknowncity.plots.util.PlotId;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
-import org.bukkit.block.Biome;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.spongepowered.configurate.NodePath;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -181,6 +173,12 @@ public class PlotService implements Service<PlotsPlugin> {
     public void setPlotOwner(Player player, Plot plot) {
         plot.state(PlotState.SOLD);
         plot.owner(player.getUniqueId());
+        savePlot(plot);
+    }
+
+    public void setPlotPrice(double price, Plot plot) {
+        plot.state(PlotState.SOLD);
+        plot.price(price);
         savePlot(plot);
     }
 

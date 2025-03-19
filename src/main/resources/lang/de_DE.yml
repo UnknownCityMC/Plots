@@ -62,6 +62,7 @@ command:
       no-region: <prefix><red>An dieser Stelle befindet sich kein Plot, bitte gehe zu einem Plot.
       success: <prefix><gray>Plot erweitert!
       error: <prefix><red>Region konnte nicht erweitert werden, überschneidet sich mit einer anderen Region!
+      not-enough-money: <prefix><red>Plot Besitzer hat nicht genügend Geld, es wird <price> benötigt!
 event:
   plot:
     interact:

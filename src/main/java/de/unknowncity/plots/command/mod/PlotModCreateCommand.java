@@ -32,7 +32,6 @@ public class PlotModCreateCommand extends SubCommand {
         commandManager.command(builder.literal("create")
                 .permission("ucplots.command.plotmod")
                 .required("id", stringParser())
-                .required("price", doubleParser())
                 .required("x1", integerParser())
                 .required("z1", integerParser())
                 .required("x2", integerParser())
@@ -46,7 +45,6 @@ public class PlotModCreateCommand extends SubCommand {
     private void handleCreateBuy(CommandContext<Player> commandContext) {
         var player = commandContext.sender();
         var id = (String) commandContext.get("id");
-        var price = (double) commandContext.get("price");
         var groupName = (String) commandContext.flags().get("plot-group");
 
         var world = player.getWorld();
@@ -79,6 +77,8 @@ public class PlotModCreateCommand extends SubCommand {
         }
 
         ProtectedRegion protectedRegion = regionService.createRegionFromLocations(loc1, loc2, id);
+
+        var price = regionService.calculateAreaSquareMeters(protectedRegion) * plugin.configuration().fb().price();
 
         if (plotService.createBuyPlotFromRegion(protectedRegion, world, price, groupName)) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotmod", "create", "success"));

@@ -147,4 +147,8 @@ public class PlotsPlugin extends PaperAstraPlugin {
     public ConfirmationManager<CommandSender> confirmationManager() {
         return confirmationManager;
     }
+
+    public PlotsConfiguration configuration() {
+        return configuration;
+    }
 }

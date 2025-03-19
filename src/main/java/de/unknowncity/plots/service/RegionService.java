@@ -176,4 +176,39 @@ public class RegionService implements Service<PlotsPlugin> {
 
         return true;
     }
+
+    public int expandRegionInDirectionBlockCount(ProtectedRegion region, PlotExpandDirection direction, int blocks, World world) {
+        BlockVector3 newMin = region.getMinimumPoint();
+        BlockVector3 newMax = region.getMaximumPoint();
+
+        switch (direction) {
+            case NORTH:
+                newMin = newMin.withZ(newMin.z() - blocks);
+                break;
+            case SOUTH:
+                newMax = newMax.withZ(newMax.z() + blocks);
+                break;
+            case WEST:
+                newMin = newMin.withX(newMin.x() - blocks);
+                break;
+            case EAST:
+                newMax = newMax.withX(newMax.x() + blocks);
+                break;
+        }
+
+        ProtectedRegion newRegion = new ProtectedCuboidRegion(region.getId(), newMin, newMax);
+
+        return calculateAreaSquareMeters(newRegion);
+    }
+
+    public int calculateAreaSquareMeters(ProtectedRegion region) {
+        return calculateAreaSquareMeters(region.getMinimumPoint(), region.getMaximumPoint());
+    }
+
+    private int calculateAreaSquareMeters(BlockVector3 min, BlockVector3 max) {
+        int lengthX = max.x() - min.x();
+        int lengthZ = max.z() - min.z();
+
+        return lengthX * lengthZ;
+    }
 }
