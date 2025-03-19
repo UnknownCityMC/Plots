@@ -115,16 +115,13 @@ public class RegionService implements Service<PlotsPlugin> {
 
     private boolean isRegionBetweenLocations(ProtectedRegion region, BlockVector3 loc1, BlockVector3 loc2) {
         double minX = region.getMinimumPoint().x();
-        double minY = region.getMinimumPoint().y();
         double minZ = region.getMinimumPoint().z();
 
         double maxX = region.getMaximumPoint().x();
-        double maxY = region.getMaximumPoint().y();
         double maxZ = region.getMaximumPoint().z();
 
-        return (minX >= Math.min(loc1.x(), loc2.x()) && maxX <= Math.max(loc1.x(), loc2.x())) &&
-                (minY >= Math.min(loc1.y(), loc2.y()) && maxY <= Math.max(loc1.y(), loc2.y())) &&
-                (minZ >= Math.min(loc1.z(), loc2.z()) && maxZ <= Math.max(loc1.z(), loc2.z()));
+        return (minX >= Math.min(loc1.x(), loc2.x()) || maxX <= Math.max(loc1.x(), loc2.x())) &&
+                (minZ >= Math.min(loc1.z(), loc2.z()) || maxZ <= Math.max(loc1.z(), loc2.z()));
     }
 
     public ProtectedRegion createRegionFromLocations(Location loc1, Location loc2, String regionName) {
