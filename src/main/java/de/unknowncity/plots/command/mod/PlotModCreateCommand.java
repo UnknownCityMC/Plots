@@ -1,12 +1,12 @@
 package de.unknowncity.plots.command.mod;
 
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import de.unknowncity.plots.util.PlotId;
-import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.incendo.cloud.Command;
@@ -64,17 +64,17 @@ public class PlotModCreateCommand extends SubCommand {
         var x2 = (int) commandContext.get("x2");
         var z2 = (int) commandContext.get("z2");
 
-        var loc1 = new Location(world, x1, -64, z1);
-        var loc2 = new Location(world, x2, 319, z2);
+        var loc1 = new BlockVector3(x1, -64, z1);
+        var loc2 = new BlockVector3(x2, 319, z2);
 
-        var regionExist = regionService.doesRegionExistBetweenLocations(loc1, loc2);
+        var regionExist = regionService.doesRegionExistBetweenLocations(world, loc1, loc2);
 
         if (regionExist) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotmod", "create", "already-exists"));
             return;
         }
 
-        ProtectedRegion protectedRegion = regionService.createRegionFromLocations(loc1, loc2, id);
+        ProtectedRegion protectedRegion = regionService.createRegionFromLocations(world, loc1, loc2, id);
 
         var price = regionService.calculateAreaSquareMeters(protectedRegion) * plugin.configuration().fb().price();
 

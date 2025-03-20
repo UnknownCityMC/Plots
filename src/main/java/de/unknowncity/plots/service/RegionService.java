@@ -14,10 +14,7 @@ import de.unknowncity.plots.data.model.plot.PlotExpandDirection;
 import org.bukkit.Location;
 import org.bukkit.World;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class RegionService implements Service<PlotsPlugin> {
     private final WorldGuard worldGuard = WorldGuard.getInstance();
@@ -76,27 +73,9 @@ public class RegionService implements Service<PlotsPlugin> {
         return regions.getRegions().get(id);
     }
 
-    public boolean doesRegionExistBetweenLocations(Location loc1, Location loc2) {
-        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-        RegionManager regionManager = container.get(BukkitAdapter.adapt(loc1.getWorld()));
+    public boolean doesRegionExistBetweenLocations(World world, BlockVector3 loc1, BlockVector3 loc2) {
 
-        if (regionManager == null) {
-            return false;
-        }
-
-        BlockVector3 bv1 = new BlockVector3(loc1.getBlockX(), loc1.getBlockY(), loc1.getBlockZ());
-        BlockVector3 bv2 = new BlockVector3(loc2.getBlockX(), loc2.getBlockY(), loc2.getBlockZ());
-
-        for (ProtectedRegion region : regionManager.getRegions().values()) {
-            if (isRegionBetweenLocations(region, bv1, bv2)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public boolean doesRegionExistBetweenLocations(World world, BlockVector3 loc1, BlockVector3 loc2, String ignoreId) {
+        ProtectedRegion newRegion = new ProtectedCuboidRegion(UUID.randomUUID().toString(), loc1, loc2);
         RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
         RegionManager regionManager = container.get(BukkitAdapter.adapt(world));
 
@@ -104,32 +83,31 @@ public class RegionService implements Service<PlotsPlugin> {
             return false;
         }
 
-        for (ProtectedRegion region : regionManager.getRegions().values()) {
-            if (!region.getId().equals(ignoreId) && isRegionBetweenLocations(region, loc1, loc2)) {
-                return true;
-            }
+        return !newRegion.getIntersectingRegions(regionManager.getRegions().values()).isEmpty();
+    }
+
+    public boolean doesRegionExistBetweenLocations(World world, BlockVector3 loc1, BlockVector3 loc2, ProtectedRegion ignoreRegion) {
+
+        ProtectedRegion newRegion = new ProtectedCuboidRegion(UUID.randomUUID().toString(), loc1, loc2);
+        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+        RegionManager regionManager = container.get(BukkitAdapter.adapt(world));
+
+        if (regionManager == null) {
+            return false;
         }
 
-        return false;
+        var regionList = newRegion.getIntersectingRegions(regionManager.getRegions().values());
+        regionList.remove(ignoreRegion);
+
+        return !regionList.isEmpty();
     }
 
-    private boolean isRegionBetweenLocations(ProtectedRegion region, BlockVector3 loc1, BlockVector3 loc2) {
-        double minX = region.getMinimumPoint().x();
-        double minZ = region.getMinimumPoint().z();
-
-        double maxX = region.getMaximumPoint().x();
-        double maxZ = region.getMaximumPoint().z();
-
-        return (minX >= Math.min(loc1.x(), loc2.x()) || maxX <= Math.max(loc1.x(), loc2.x())) &&
-                (minZ >= Math.min(loc1.z(), loc2.z()) || maxZ <= Math.max(loc1.z(), loc2.z()));
-    }
-
-    public ProtectedRegion createRegionFromLocations(Location loc1, Location loc2, String regionName) {
+    public ProtectedRegion createRegionFromLocations(World world, BlockVector3 loc1, BlockVector3 loc2, String regionName) {
         RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-        RegionManager regionManager = container.get(BukkitAdapter.adapt(loc1.getWorld()));
+        RegionManager regionManager = container.get(BukkitAdapter.adapt(world));
 
-        BlockVector3 bv1 = new BlockVector3(loc1.getBlockX(), loc1.getBlockY(), loc1.getBlockZ());
-        BlockVector3 bv2 = new BlockVector3(loc2.getBlockX(), loc2.getBlockY(), loc2.getBlockZ());
+        BlockVector3 bv1 = new BlockVector3(loc1.x(), loc1.y(), loc1.z());
+        BlockVector3 bv2 = new BlockVector3(loc2.x(), loc2.y(), loc2.z());
 
         ProtectedRegion region = new ProtectedCuboidRegion(regionName, bv1, bv2);
 
@@ -162,7 +140,7 @@ public class RegionService implements Service<PlotsPlugin> {
                 break;
         }
 
-        if (doesRegionExistBetweenLocations(world, newMin, newMax, region.getId())) {
+        if (doesRegionExistBetweenLocations(world, newMin, newMax, region)) {
             return false;
         }
 
@@ -203,8 +181,8 @@ public class RegionService implements Service<PlotsPlugin> {
     }
 
     private int calculateAreaSquareMeters(BlockVector3 min, BlockVector3 max) {
-        int lengthX = Math.abs(max.x()) - Math.abs(min.x()) + 1;
-        int lengthZ = Math.abs(max.z()) - Math.abs(min.z()) + 1;
+        int lengthX = Math.abs(max.x() - min.x());
+        int lengthZ = Math.abs(max.z() - min.z());
 
         return lengthX * lengthZ;
     }

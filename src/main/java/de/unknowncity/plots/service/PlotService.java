@@ -177,7 +177,6 @@ public class PlotService implements Service<PlotsPlugin> {
     }
 
     public void setPlotPrice(double price, Plot plot) {
-        plot.state(PlotState.SOLD);
         plot.price(price);
         savePlot(plot);
     }
