@@ -48,11 +48,6 @@ public class PlotCommand extends PaperCommand<PlotsPlugin> {
                         return;
                     }
 
-                    if (!plot.owner().equals(sender.getUniqueId())) {
-                        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-owner"));
-                        return;
-                    }
-
                     PlotMainGUI.open(sender, plot, plugin);
                 }));
 
