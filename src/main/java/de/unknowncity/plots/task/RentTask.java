@@ -29,7 +29,7 @@ public class RentTask {
     public void start() {
         this.task = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, () -> {
             plotService.plotCache().values().stream()
-                    .filter(plot -> plot.state() == PlotState.SOLD && plot instanceof RentPlot && ((RentPlot) plot).lastRentPayed().isAfter(LocalDateTime.now()))
+                    .filter(plot -> plot.state() == PlotState.SOLD && plot instanceof RentPlot && ((RentPlot) plot).lastRentPayed().plusMinutes(((RentPlot) plot).rentIntervalInMin()).isAfter(LocalDateTime.now()))
                     .forEach(plot -> {
                         var price = plot.price();
                         var owner = plot.owner();
