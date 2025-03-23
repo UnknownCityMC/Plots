@@ -146,7 +146,9 @@ public class PlotService implements Service<PlotsPlugin> {
         plot.state(PlotState.SOLD);
         plot.owner(player.getUniqueId());
         savePlot(plot);
-        createSchematic(plot);
+        if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
+            createSchematic(plot);
+        }
     }
 
     public void unClaimPlot(Plot plot) {
@@ -157,7 +159,9 @@ public class PlotService implements Service<PlotsPlugin> {
         plot.flags(new ArrayList<>());
         plot.members(new ArrayList<>());
         savePlot(plot);
-        loadSchematic(plot);
+        if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
+            loadSchematic(plot);
+        }
     }
 
     public void addMember(OfflinePlayer player, PlotMemberRole role, Plot plot) {
