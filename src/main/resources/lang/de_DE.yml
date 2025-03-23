@@ -4,6 +4,10 @@ plot:
   no-owner: "<green>Nicht verkauft"
   no-members: "<gray>*<i>Niemand*"
   no-banned: "<gray>*<i>Niemand*"
+task:
+  rent:
+    success: <prefix><gray>Du hast die Miete <gold><price>$<gray> für <gold><id> <gray> <green>gezahlt!
+    not-enough-money: <prefix><red>Du hast nicht genug Geld für deine Miete gehabt... (<id>)
 command:
   plot:
     info:
@@ -52,6 +56,10 @@ command:
       success: <prefix><gray>Mitglied erfolgreich hinzugefügt!
     remove-member:
       success: <prefix><gray>Mitglied erfolgreich entfernt!
+    load-backup:
+      not-found: <prefix><red>Es existiert kein Backup für das Plot und den Spieler!
+      success: <prefix><gray>Backup erfolgreich geladen.
+      not-enough-money: <prefix><red>Spieler hat nicht genügend Geld...
   plotmod:
     create:
       already-exists: <prefix><red>Hier existiert bereits ein Plot!

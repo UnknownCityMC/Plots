@@ -40,6 +40,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public class PlotService implements Service<PlotsPlugin> {
@@ -164,6 +165,31 @@ public class PlotService implements Service<PlotsPlugin> {
         }
     }
 
+    public boolean backup(Plot plot, UUID owner) {
+        return createSchematicBackup(plot, owner);
+    }
+
+    public boolean hasBackup(Plot plot, UUID owner) {
+        var path = "/schematics/backups/" + owner.toString() + "_" + plot.id() + ".schem";
+        File file = new File(plugin.getDataPath() + path);
+        return file.exists();
+    }
+
+    public void loadBackup(Plot plot, Player player) {
+        economyService.withdraw(player.getUniqueId(), plot.price());
+        if (plot instanceof RentPlot rentPlot) {
+            rentPlot.lastRentPayed(LocalDateTime.now());
+        }
+
+        plot.state(PlotState.SOLD);
+        plot.owner(player.getUniqueId());
+        savePlot(plot);
+        if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
+            createSchematic(plot);
+        }
+        loadSchematicBackup(plot, player.getUniqueId());
+    }
+
     public void addMember(OfflinePlayer player, PlotMemberRole role, Plot plot) {
         plot.members().add(new PlotMember(player.getUniqueId(), role));
         savePlot(plot);
@@ -261,6 +287,15 @@ public class PlotService implements Service<PlotsPlugin> {
     }
 
     public void createSchematic(Plot plot) {
+        createWorldEditSchematic(plot, "/schematics/");
+    }
+
+
+    public boolean createSchematicBackup(Plot plot, UUID owner) {
+        return createWorldEditSchematic(plot, "/schematics/backups/" + owner.toString() + "_");
+    }
+
+    private boolean createWorldEditSchematic(Plot plot, String path) {
         CuboidRegion region = new CuboidRegion(plot.protectedRegion().getMinimumPoint(), plot.protectedRegion().getMaximumPoint());
         BlockArrayClipboard clipboard = new BlockArrayClipboard(region);
 
@@ -272,18 +307,29 @@ public class PlotService implements Service<PlotsPlugin> {
             Operations.complete(forwardExtentCopy);
         } catch (WorldEditException e) {
             plugin.getLogger().log(Level.SEVERE, e.getMessage());
+            return false;
         }
 
-        File file = new File(plugin.getDataPath() + "/schematics/" + plot.id() + ".schem");
+        File file = new File(plugin.getDataPath() + path + plot.id() + ".schem");
         try (ClipboardWriter writer = BuiltInClipboardFormat.SPONGE_V3_SCHEMATIC.getWriter(new FileOutputStream(file))) {
             writer.write(clipboard);
+            return true;
         } catch (IOException e) {
             plugin.getLogger().log(Level.SEVERE, e.getMessage());
+            return false;
         }
     }
 
     public void loadSchematic(Plot plot) {
-        File file = new File(plugin.getDataPath() + "/schematics/" + plot.id() + ".schem");
+        loadWorldEditSchematic(plot, "/schematics/");
+    }
+
+    public void loadSchematicBackup(Plot plot, UUID owner) {
+        loadWorldEditSchematic(plot, "/schematics/backups/" + owner.toString() + "_");
+    }
+
+    public void loadWorldEditSchematic(Plot plot, String path) {
+        File file = new File(plugin.getDataPath() + path + plot.id() + ".schem");
         ClipboardFormat format = BuiltInClipboardFormat.SPONGE_V3_SCHEMATIC;
         Clipboard clipboard;
         try (ClipboardReader reader = format.getReader(new FileInputStream(file))) {

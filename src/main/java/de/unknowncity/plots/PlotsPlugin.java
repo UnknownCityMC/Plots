@@ -16,6 +16,7 @@ import de.unknowncity.plots.data.repository.PlotGroupRepository;
 import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
+import de.unknowncity.plots.task.RentTask;
 import org.bukkit.command.CommandSender;
 import org.incendo.cloud.processors.cache.SimpleCache;
 import org.incendo.cloud.processors.confirmation.ConfirmationConfiguration;
@@ -32,6 +33,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
     private PlotsConfiguration configuration;
     private PaperMessenger messenger;
     private ConfirmationManager<CommandSender> confirmationManager;
+    private RentTask rentTask;
 
     @Override
     public void onPluginEnable() {
@@ -45,11 +47,14 @@ public class PlotsPlugin extends PaperAstraPlugin {
         pluginManager.registerEvents(new PlotInteractListener(this), this);
 
 
+        rentTask = new RentTask(this, serviceRegistry.getRegistered(PlotService.class), serviceRegistry.getRegistered(EconomyService.class));
+        rentTask.start();
     }
 
     public void onPluginReload() {
         try {
             Files.createDirectories(getDataPath().resolve("schematics"));
+            Files.createDirectories(getDataPath().resolve("schematics/backups"));
         } catch (IOException e) {
             getLogger().log(Level.SEVERE, e.getMessage());
         }
@@ -59,7 +64,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
 
     @Override
     public void onPluginDisable() {
-
+        rentTask.cancel();
     }
 
     public void registerCommands() {
