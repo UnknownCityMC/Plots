@@ -4,9 +4,6 @@ import de.unknowncity.plots.data.model.plot.flag.PlotFlagAccessModifier;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import de.unknowncity.plots.util.PlotId;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -20,7 +17,7 @@ public class PlotInteractListener implements Listener {
     private final PlotService plotService;
 
     public PlotInteractListener(PlotsPlugin plotsPlugin) {
-        this.plugin =  plotsPlugin;
+        this.plugin = plotsPlugin;
         regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
         plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
     }
@@ -28,6 +25,11 @@ public class PlotInteractListener implements Listener {
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
         var player = event.getPlayer();
+
+        if (player.hasPermission("ucplots.interact.bypass")) {
+            return;
+        }
+
         var possibleRegion = regionService.getSuitableRegion(player.getLocation());
 
         if (possibleRegion.isEmpty()) {
