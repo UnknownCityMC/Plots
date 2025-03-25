@@ -43,7 +43,7 @@ public class PlotCommand extends PaperCommand<PlotsPlugin> {
 
                     var plot = plotService.getPlot(plotId);
 
-                    if (!plot.owner().equals(sender.getUniqueId())) {
+                    if (!plot.owner().equals(sender.getUniqueId()) && !sender.hasPermission("ucplots.command.plotadmin")) {
                         plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-owner"));
                         return;
                     }
