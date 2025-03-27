@@ -8,6 +8,7 @@ import de.unknowncity.astralib.paper.api.hook.defaulthooks.PlaceholderApiHook;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
 import de.unknowncity.astralib.paper.api.plugin.PaperAstraPlugin;
 import de.unknowncity.plots.command.admin.PlotAdminCommand;
+import de.unknowncity.plots.command.listener.PlotInteractListener;
 import de.unknowncity.plots.command.mod.PlotModCommand;
 import de.unknowncity.plots.command.user.PlotCommand;
 import de.unknowncity.plots.configurration.PlotsConfiguration;
