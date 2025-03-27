@@ -9,10 +9,12 @@ import de.unknowncity.astralib.paper.api.message.PaperMessenger;
 import de.unknowncity.astralib.paper.api.plugin.PaperAstraPlugin;
 import de.unknowncity.plots.command.admin.PlotAdminCommand;
 import de.unknowncity.plots.command.listener.PlotInteractListener;
+import de.unknowncity.plots.command.listener.PlotSignLinkListener;
 import de.unknowncity.plots.command.mod.PlotModCommand;
 import de.unknowncity.plots.command.user.PlotCommand;
 import de.unknowncity.plots.configurration.PlotsConfiguration;
 import de.unknowncity.plots.data.dao.mariadb.*;
+import de.unknowncity.plots.data.model.plot.Plot;
 import de.unknowncity.plots.data.repository.PlotGroupRepository;
 import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
@@ -27,6 +29,8 @@ import org.spongepowered.configurate.NodePath;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public class PlotsPlugin extends PaperAstraPlugin {
@@ -35,6 +39,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
     private PaperMessenger messenger;
     private ConfirmationManager<CommandSender> confirmationManager;
     private RentTask rentTask;
+    public HashMap<UUID, Plot> signLinkPlayers = new HashMap<>();
 
     @Override
     public void onPluginEnable() {
@@ -43,10 +48,9 @@ public class PlotsPlugin extends PaperAstraPlugin {
 
         registerCommands();
 
-
         var pluginManager = getServer().getPluginManager();
         pluginManager.registerEvents(new PlotInteractListener(this), this);
-
+        pluginManager.registerEvents(new PlotSignLinkListener(this), this);
 
         rentTask = new RentTask(this, serviceRegistry.getRegistered(PlotService.class), serviceRegistry.getRegistered(EconomyService.class));
         rentTask.start();
