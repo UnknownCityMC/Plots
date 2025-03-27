@@ -27,11 +27,19 @@ public class PlotInteractListener implements Listener {
     public void onInteract(PlayerInteractEvent event) {
         var player = event.getPlayer();
 
+        if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
+            return;
+        }
+
+        if (event.getClickedBlock() == null) {
+            return;
+        }
+
         if (player.hasPermission("ucplots.interact.bypass")) {
             return;
         }
 
-        var possibleRegion = regionService.getSuitableRegion(player.getLocation());
+        var possibleRegion = regionService.getSuitableRegion(event.getClickedBlock().getLocation());
 
         if (possibleRegion.isEmpty()) {
             return;
@@ -45,18 +53,10 @@ public class PlotInteractListener implements Listener {
 
         var plot = plotService.getPlot(plotId);
 
-        if (event.getClickedBlock() == null) {
-            return;
-        }
-
-        if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
-            return;
-        }
-
         plot.interactables().stream().filter(plotInteractable -> plotInteractable.blockType() == event.getClickedBlock().getType()).forEach(plotInteractable -> {
             if (plot.owner().equals(event.getPlayer().getUniqueId())) {
                 if (plotInteractable.accessModifier() == PlotFlagAccessModifier.NOBODY) {
-                    event.setCancelled(true);
+                    cancelEvent(event);
                     plugin.messenger().sendMessage(event.getPlayer(), NodePath.path("event", "plot", "interact", "deny"));
                 }
                 return;
@@ -64,7 +64,7 @@ public class PlotInteractListener implements Listener {
 
             var memberOpt = plot.members().stream().filter(plotMember -> plotMember.memberID().equals(event.getPlayer().getUniqueId())).findFirst();
             if (memberOpt.isEmpty()) {
-                event.setCancelled(true);
+                cancelEvent(event);
                 plugin.messenger().sendMessage(event.getPlayer(), NodePath.path("event", "plot", "interact", "deny"));
                 return;
             }
@@ -73,7 +73,7 @@ public class PlotInteractListener implements Listener {
                 return;
             }
 
-            event.setCancelled(true);
+            cancelEvent(event);
             plugin.messenger().sendMessage(event.getPlayer(), NodePath.path("event", "plot", "interact", "deny"));
         });
     }
