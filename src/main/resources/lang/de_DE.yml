@@ -60,6 +60,14 @@ command:
       not-found: <prefix><red>Es existiert kein Backup für das Plot und den Spieler!
       success: <prefix><gray>Backup erfolgreich geladen.
       not-enough-money: <prefix><red>Spieler hat nicht genügend Geld...
+    sign:
+      disable: <prefix><gray>SignLink <red>deaktiviert<gray>!
+      enable: <prefix><gray>SignLink <green>aktiviert<gray>! (Klicke zuerst auf ein Plot, danach auf ein Schild)
+      no-block: <prefix><red>Dies ist kein Block!
+      no-region: <prefix><red>Klicke bitte in ein Plot!
+      set-region: <prefix><green>Plot <yellow><id> <green>ausgewählt!
+      no-region-set: <prefix><red>Klicke bitte zuerst in ein Plot!
+      success: <prefix><gray>Schild erfolgreich hinzugefügt.
   plotmod:
     create:
       already-exists: <prefix><red>Hier existiert bereits ein Plot!
