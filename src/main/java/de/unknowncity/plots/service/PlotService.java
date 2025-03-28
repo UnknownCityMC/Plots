@@ -28,6 +28,7 @@ import de.unknowncity.plots.data.model.plot.flag.PlotInteractable;
 import de.unknowncity.plots.data.model.plot.group.PlotGroup;
 import de.unknowncity.plots.data.repository.PlotGroupRepository;
 import de.unknowncity.plots.util.PlotId;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -265,6 +266,17 @@ public class PlotService implements Service<PlotsPlugin> {
         plotGroupCache.remove(plotGroup.name());
     }
 
+    public void addSign(Plot plot, Location location) {
+        RelativePlotLocation sign = new RelativePlotLocation(PlotLocationType.SIGN, location.x(), location.y(), location.z(), location.getYaw(), location.getPitch());
+        System.out.println(plot.locations());
+        System.out.println(sign);
+        plot.locations().add(sign);
+        savePlot(plot);
+    }
+
+    public void updateSing(Plot plot, RelativePlotLocation plotLocation) {
+
+    }
 
     public PlotGroup getPlotGroupWithPlots(String name) {
         return plotGroupCache.get(name);

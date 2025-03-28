@@ -5,6 +5,7 @@ import de.unknowncity.plots.data.model.plot.PlotLocationType;
 import de.unknowncity.plots.data.model.plot.RelativePlotLocation;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -46,7 +47,7 @@ public class PlotSignLinkListener implements Listener {
         var location = block.getLocation();
         var world = block.getWorld();
 
-        if (!block.getType().getKey().getKey().contains("SIGN")) {
+        if (!block.getType().toString().contains("SIGN")) {
             var region = regionService.getSuitableRegion(location);
             region.ifPresentOrElse(protectedRegion -> {
                 if (!plotService.existsPlot(protectedRegion, world)) {
@@ -54,20 +55,20 @@ public class PlotSignLinkListener implements Listener {
                     return;
                 }
 
-                plugin.signLinkPlayers.put(player.getUniqueId(), plotService.getPlot(world, protectedRegion));
-                plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "sign", "set-region"));
+                var plot = plotService.getPlot(world, protectedRegion);
+                plugin.signLinkPlayers.put(player.getUniqueId(), plot);
+                plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "sign", "set-region"), plot.tagResolvers(player, plugin.messenger()));
             }, () -> plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "no-suitable-region")));
             return;
         }
 
         var plot = plugin.signLinkPlayers.get(player.getUniqueId());
         if (plot == null) {
-            plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "sign", "no-region"));
+            plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "sign", "no-region-set"));
             return;
         }
 
-        plot.locations().add(new RelativePlotLocation(PlotLocationType.SIGN, location.x(), location.y(), location.z(), location.getYaw(), location.getPitch()));
-        plotService.savePlot(plot);
+        plotService.addSign(plot, location);
         plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "sign", "success"));
     }
 }
