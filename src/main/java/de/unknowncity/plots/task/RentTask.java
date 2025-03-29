@@ -47,6 +47,7 @@ public class RentTask {
                                 }
 
                                 plotService.savePlot(plot);
+                                plotService.updateSings(plot);
 
                                 plugin.messenger().sendMessage(player, NodePath.path("task", "rent", "not-enough-money"), Placeholder.parsed("id", plot.id()));
                                 return;

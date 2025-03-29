@@ -1,11 +1,8 @@
-package de.unknowncity.plots.command.listener;
+package de.unknowncity.plots.listener;
 
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.data.model.plot.PlotLocationType;
-import de.unknowncity.plots.data.model.plot.RelativePlotLocation;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -68,7 +65,11 @@ public class PlotSignLinkListener implements Listener {
             return;
         }
 
-        plotService.addSign(plot, location);
+        if(!plotService.addSign(plot, location)) {
+            plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "sign", "already-exists"));
+            return;
+        }
+
         plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "sign", "success"));
     }
 }

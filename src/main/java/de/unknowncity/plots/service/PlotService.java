@@ -21,6 +21,7 @@ import com.sk89q.worldedit.world.biome.BiomeType;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import de.unknowncity.astralib.common.message.lang.Language;
 import de.unknowncity.astralib.common.service.Service;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.data.model.plot.*;
@@ -31,7 +32,10 @@ import de.unknowncity.plots.util.PlotId;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
+import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
+import org.spongepowered.configurate.NodePath;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -136,6 +140,8 @@ public class PlotService implements Service<PlotsPlugin> {
             var plotGroup = plotGroupCache.get(plotGroupName);
             plotGroup.plotsInGroup().put(plot.id(), plot);
             savePlotGroup(plotGroup);
+            plot.groupName(plotGroupName);
+            savePlot(plot);
         }
     }
 
@@ -148,9 +154,12 @@ public class PlotService implements Service<PlotsPlugin> {
         plot.state(PlotState.SOLD);
         plot.owner(player.getUniqueId());
         savePlot(plot);
+
         if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
             createSchematic(plot);
         }
+
+        updateSings(plot);
     }
 
     public void unClaimPlot(Plot plot) {
@@ -164,6 +173,8 @@ public class PlotService implements Service<PlotsPlugin> {
         if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
             loadSchematic(plot);
         }
+
+        updateSings(plot);
     }
 
     public boolean backup(Plot plot, UUID owner) {
@@ -205,11 +216,13 @@ public class PlotService implements Service<PlotsPlugin> {
         plot.state(PlotState.SOLD);
         plot.owner(player.getUniqueId());
         savePlot(plot);
+        updateSings(plot);
     }
 
     public void setPlotPrice(double price, Plot plot) {
         plot.price(price);
         savePlot(plot);
+        updateSings(plot);
     }
 
     public void setPlotGroup(String groupName, Plot plot) {
@@ -220,6 +233,7 @@ public class PlotService implements Service<PlotsPlugin> {
         plot.groupName(groupName);
         plotGroupCache.get(groupName).plotsInGroup().put(plot.id(), plot);
         savePlot(plot);
+        updateSings(plot);
     }
 
     public void createPlotGroup(String name) {
@@ -266,16 +280,36 @@ public class PlotService implements Service<PlotsPlugin> {
         plotGroupCache.remove(plotGroup.name());
     }
 
-    public void addSign(Plot plot, Location location) {
+    public boolean addSign(Plot plot, Location location) {
         RelativePlotLocation sign = new RelativePlotLocation(PlotLocationType.SIGN, location.x(), location.y(), location.z(), location.getYaw(), location.getPitch());
-        System.out.println(plot.locations());
-        System.out.println(sign);
+        if (plot.locations().stream().anyMatch(loc -> loc.type() == PlotLocationType.SIGN && loc.x() == location.x() && loc.y() == location.y() && loc.z() == location.z())) {
+            return false;
+        }
         plot.locations().add(sign);
         savePlot(plot);
+
+        updateSings(plot);
+        return true;
     }
 
-    public void updateSing(Plot plot, RelativePlotLocation plotLocation) {
+    public void updateSings(Plot plot) {
+        plot.locations().stream().filter(relativePlotLocation -> relativePlotLocation.type() == PlotLocationType.SIGN).forEach(relativePlotLocation -> {
+            var loc = new Location(plot.world(), relativePlotLocation.x(), relativePlotLocation.y(), relativePlotLocation.z());
+            var block = plot.world().getBlockAt(loc);
 
+            if (!block.getType().toString().contains("SIGN")) {
+                plot.locations().remove(relativePlotLocation);
+                return;
+            }
+
+            var state = plot.state().name().toLowerCase();
+            Sign sign = (Sign) block.getState();
+            sign.getSide(Side.FRONT).line(0, plugin.messenger().component(Language.GERMAN, NodePath.path("sign", state, "line-1"), plot.tagResolvers(plugin.messenger())));
+            sign.getSide(Side.FRONT).line(1, plugin.messenger().component(Language.GERMAN, NodePath.path("sign", state, "line-2"), plot.tagResolvers(plugin.messenger())));
+            sign.getSide(Side.FRONT).line(2, plugin.messenger().component(Language.GERMAN, NodePath.path("sign", state, "line-3"), plot.tagResolvers(plugin.messenger())));
+            sign.getSide(Side.FRONT).line(3, plugin.messenger().component(Language.GERMAN, NodePath.path("sign", state, "line-4"), plot.tagResolvers(plugin.messenger())));
+            sign.update();
+        });
     }
 
     public PlotGroup getPlotGroupWithPlots(String name) {

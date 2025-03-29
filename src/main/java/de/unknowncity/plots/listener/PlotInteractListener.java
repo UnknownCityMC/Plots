@@ -1,4 +1,4 @@
-package de.unknowncity.plots.command.listener;
+package de.unknowncity.plots.listener;
 
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.data.model.plot.flag.PlotFlagAccessModifier;

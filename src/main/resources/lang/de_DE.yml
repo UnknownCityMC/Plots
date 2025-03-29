@@ -8,6 +8,22 @@ task:
   rent:
     success: <prefix><gray>Du hast die Miete <gold><price>$<gray> für <gold><id> <gray> <green>gezahlt!
     not-enough-money: <prefix><red>Du hast nicht genug Geld für deine Miete gehabt... (<id>)
+sign:
+  available:
+    line-1: <green>Verfügbar
+    line-2: "<gray>Preis: <white><price>$"
+    line-3: ""
+    line-4: ""
+  sold:
+    line-1: <red>Nicht verfügbar
+    line-2: <white><owner>
+    line-3: ""
+    line-4: ""
+  unavailable:
+    line-1: <red> Nicht verfügbar
+    line-2: ""
+    line-3: ""
+    line-4: ""
 command:
   plot:
     info:
@@ -27,7 +43,7 @@ command:
       success: <prefix><gray>Du hast <gold><id> <gray>für <gold><price>$ <green>gekauft!
     unclaim:
       no-owner: <prefix><red>Das darf nur der Besitzer tun!
-      success: <prefix><gray>Du hast <gold><id> <grayfür <gold><price>$ <red>verkauft!
+      success: <prefix><gray>Du hast <gold><id> <gray>für <gold><price>$ <red>verkauft!
   plotadmin:
     reload: <prefix><gray>Einstellungen und Nachrichten neu geladen! <green>✔
     no-plot: <prefix><red>An dieser Stelle befindet sich kein Plot
@@ -67,6 +83,7 @@ command:
       no-region: <prefix><red>Klicke bitte in ein Plot!
       set-region: <prefix><green>Plot <yellow><id> <green>ausgewählt!
       no-region-set: <prefix><red>Klicke bitte zuerst in ein Plot!
+      already-exists: <prefix><red>Schild wurde bereits hinzugefügt!
       success: <prefix><gray>Schild erfolgreich hinzugefügt.
   plotmod:
     create:
