@@ -87,9 +87,18 @@ command:
       success: <prefix><gray>Schild erfolgreich hinzugefügt.
   plotmod:
     create:
+      disable: <prefix><gray>Plot erstellen Modus <red>deaktiviert<gray>!
+      enable: <prefix><gray>Plot erstellen Modus <green>aktiviert<gray>! (Setze die Koordinaten mit Rechts & Linksklick)
       already-exists: <prefix><red>Hier existiert bereits ein Plot!
       id-exists: <prefix><red>ID existiert bereits!
+      set-locations: <prefix><gray>Benutze <click:run_command:'/plotmod setLocations'><b><red>/plotmod setLocations</b></click> <gray>um eine Region zu markieren!
+      expand: <prefix><gray>Region min auf -64 und max auf 320 gesetzt.
       success: <prefix><gray>Plot erstellt!
+      loc1-success: <prefix><gray>Location 1 hinzugefügt (x:<x> y:<y> z:<z>)!
+      loc2-success: <prefix><gray>Location 2 hinzugefügt (x:<x> y:<y> z:<z>)!
+      no-block: <prefix><red>Klicke bitte auf einen Block!
+      loc1-empty: <prefix><red>Du musst noch eine Location mit Linksklick hinzufügen!
+      loc2-empty: <prefix><red>Du musst noch eine Location mit Rechtsklick hinzufügen!
       error: <prefix><red>Es gab einen Fehler...
     expand:
       no-region: <prefix><red>An dieser Stelle befindet sich kein Plot, bitte gehe zu einem Plot.
