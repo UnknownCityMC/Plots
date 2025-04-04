@@ -12,12 +12,13 @@ import de.unknowncity.plots.command.mod.PlotModCommand;
 import de.unknowncity.plots.command.user.PlotCommand;
 import de.unknowncity.plots.configurration.PlotsConfiguration;
 import de.unknowncity.plots.data.dao.mariadb.*;
-import de.unknowncity.plots.data.model.plot.Plot;
+
 import de.unknowncity.plots.data.model.plot.PlotLocations;
 import de.unknowncity.plots.data.repository.PlotGroupRepository;
 import de.unknowncity.plots.listener.PlotCreateListener;
 import de.unknowncity.plots.listener.PlotInteractListener;
 import de.unknowncity.plots.listener.PlotSignLinkListener;
+import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.plot.flag.FlagRegistry;
 import de.unknowncity.plots.plot.flag.type.IceMeltFlag;
 import de.unknowncity.plots.service.EconomyService;

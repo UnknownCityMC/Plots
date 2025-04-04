@@ -34,6 +34,8 @@ import de.unknowncity.plots.plot.flag.FlagRegistry;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
 import de.unknowncity.plots.plot.group.PlotGroup;
 import de.unknowncity.plots.data.repository.PlotGroupRepository;
+import de.unknowncity.plots.plot.location.PlotLocationType;
+import de.unknowncity.plots.plot.location.RelativePlotLocation;
 import de.unknowncity.plots.util.PlotId;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -41,6 +43,7 @@ import org.bukkit.World;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
+import org.spongepowered.configurate.NodePath;
 
 import java.io.File;
 import java.io.FileInputStream;

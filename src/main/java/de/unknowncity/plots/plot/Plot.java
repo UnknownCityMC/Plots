@@ -16,6 +16,7 @@ import de.unknowncity.plots.plot.location.RelativePlotLocation;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import org.apache.logging.log4j.util.Strings;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -191,7 +192,7 @@ public abstract class Plot {
                         Component.text(Strings.join(members().stream().map(PlotMember::memberID).toList(), ','))),
 
                 Placeholder.component("banned", !bannedPlayers().isEmpty() ? Component.text(String.join(", ", bannedPlayers().stream().map(BannedPlayer::name).toList())) :
-                        messenger.component(player, NodePath.path("plot", "no-banned"))),
+                        messenger.component(Language.GERMAN, NodePath.path("plot", "no-banned"))),
                 Placeholder.parsed("flags", flags() != null ? flags().toString() : ""),
         };
     }
