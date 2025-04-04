@@ -10,7 +10,7 @@ paper-api = "1.21.1-R0.1-SNAPSHOT"
 configurate = "4.1.2"
 jackson = "2.18.0"
 adventure = "4.15.0"
-papi = "2.11.5"
+papi = "2.11.6"
 
 coinsengine = "2.4.1"
 invui = "1.44"
