@@ -15,7 +15,7 @@ papi = "2.11.6"
 coinsengine = "2.4.1"
 invui = "1.45"
 
-worldguard = "7.0.10"
+worldguard = "7.0.13"
 astralib = "0.6.0-SNAPSHOT"
 
 [libraries]
