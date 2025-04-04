@@ -1,6 +1,6 @@
 [versions]
 # Gradle Plugins
-shadow = "8.1.7"
+shadow = "8.1.8"
 pluginyml = "0.6.0"
 
 sadu = "2.3.1"
