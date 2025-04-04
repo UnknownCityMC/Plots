@@ -13,7 +13,7 @@ adventure = "4.15.0"
 papi = "2.11.5"
 
 coinsengine = "2.4.1"
-invui = "1.44"
+invui = "1.45"
 
 worldguard = "7.0.10"
 astralib = "0.5.0-SNAPSHOT"
