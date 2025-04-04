@@ -7,7 +7,7 @@ sadu = "2.3.1"
 paper-api = "1.21.1-R0.1-SNAPSHOT"
 
 # Config
-configurate = "4.1.2"
+configurate = "4.2.0"
 jackson = "2.18.0"
 adventure = "4.15.0"
 papi = "2.11.5"
