@@ -1,6 +1,6 @@
 package de.unknowncity.plots.data.dao;
 
-import de.unknowncity.plots.data.model.plot.PlotMember;
+import de.unknowncity.plots.plot.access.PlotMember;
 
 import java.util.List;
 import java.util.Optional;

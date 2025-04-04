@@ -43,7 +43,7 @@ command:
       success: <prefix><gray>Du hast <gold><id> <gray>für <gold><price>$ <green>gekauft!
     unclaim:
       no-owner: <prefix><red>Das darf nur der Besitzer tun!
-      success: <prefix><gray>Du hast <gold><id> <gray>für <gold><price>$ <red>verkauft!
+      success: <prefix><gray>Du hast <gold><id> <grayfür <gold><price>$ <red>verkauft!
   plotadmin:
     reload: <prefix><gray>Einstellungen und Nachrichten neu geladen! <green>✔
     no-plot: <prefix><red>An dieser Stelle befindet sich kein Plot
@@ -51,16 +51,18 @@ command:
     set-owner:
       success: <prefix><gray>Der Besitzer wurde zu <gold><new-owner> <gray>geändert
     set-group:
-      no-group: <prefix><red>Diese Gruppe existiert nicht!
+      no-group: <prefix><red>Diese Gruppe exitstiert nicht!
       success: <prefix><gray>Die Plot-Gruppe wurde zu <gold><new-group> <gray>geändert
     group:
       create:
-        exists: <prefix><red>Diese Gruppe existiert bereits!
+        exists: <perfix><red>Diese Gruppe exitstiert bereits!
         success: <prefix><gray>Gruppe erfolgreich erstellt!
       delete:
-        no-group: <prefix><red>Diese Gruppe existiert nicht!
+        no-group: <perfix><red>Diese Gruppe exitstiert nicht!
         success: <prefix><gray>Gruppe erfolgreich gelöscht!
     delete:
+      not-exists: <prefix><red>Dieses Plot existiert nicht!
+      success: <prefix><gray>Plot erfolgreich gelöscht!
       not-exists: <prefix><red>Dieses Plot existiert nicht!
       success: <prefix><gray>Plot erfolgreich gelöscht!
     create:
@@ -87,6 +89,67 @@ command:
       success: <prefix><gray>Schild erfolgreich hinzugefügt.
   plotmod:
     create:
+      success: <prefix><gray>Plot erfolgreich erstellt!
+      already-exists: <prefix><red>Plot existiert bereits!
+      error: <prefix><red>Es gab einen Fehler...
+event:
+  plot:
+    interact:
+      deny: <prefix><red>Das darfst du aufgrund der Ploteinstellungen nicht tun!
+gui:
+  item:
+    next-page:
+      display-name:
+        has-next: <!i><gradient:#fc9403:#fce803>Nächste Seite</gradient>
+        no-next: <!i><gradient:#fc9403:#fce803>Nächste Seite</gradient>
+      lore:
+        has-next:
+          - <gray><!i>Du bist derzeit auf Seite <yellow><curr-page>
+          - <gray><!i>Klicke um auf Seite
+            <dark_gray><!i>(<yellow><next-page><dark_gray>/
+            <yellow><max-page><dark_gray>)<!i> <gray>zu kommen
+        no-next:
+          - <gray><!i>Du bist derzeit auf Seite <yellow><curr-page>
+          - <red>Es gibt keine weiteren Seiten
+    prev-page:
+      display-name:
+        has-prev: <!i><gradient:#fc9403:#fce803>Vorherige Seite</gradient>
+        no-prev: <!i><gradient:#fc9403:#fce803>Vorherige Seite</gradient>
+      lore:
+        has-prev:
+          - <gray><!i>Du bist derzeit auf Seite <yellow><curr-page>
+          - <gray><!i>Klicke um auf Seite
+            <dark_gray><!i>(<yellow><prev-page><dark_gray>/
+            <yellow><max-page><dark_gray>)<!i> <gray>zu kommen
+        no-prev:
+          - <gray><!i>Du bist derzeit auf Seite <yellow><curr-page>
+          - <red>Es gibt keine vorherigen Seiten
+  access-modifier-format:
+    active: <!i><gray>▶ <green><access-modifier>
+    inactive: <!i><gray>▸ <dark_gray><access-modifier>
+  main:
+    title: <!i><#1d71ad>Plot <black>| <dark_gray>Einstellungen
+  interactables:
+    title: <!i><#1d71ad>Plot <black>| <dark_gray>Blockinteraktionen
+    item:
+      back:
+        name: <!i><red>Zurück
+      slot:
+        access-modifier:
+          OWNER: "Besitzer"
+          CO_OWNER: "Co-Besitzer"
+          MEMBER: "Mitglied"
+          TEMP_MEMBER: "Zeitliches Mitglied"
+          NOBODY: "Niemand"
+          EVERYBODY: "Alle"
+        name: <!i><aqua><item-name>
+        lore:
+          - <!i><gray>Ändere wer dieses Item / diesen Block benutzen
+          - <!i>
+          - <!i><gray>Bedienung
+          - <!i><gray>▸ <yellow>↑ <white>🖰 <gray>[<gold>Right Button<gray>]
+          - <!i><gray>▸ <yellow>↓ <white>🖰 <gray>[<gold>Left Button<gray>]
+          - <!i>
       disable: <prefix><gray>Plot erstellen Modus <red>deaktiviert<gray>!
       enable: <prefix><gray>Plot erstellen Modus <green>aktiviert<gray>! (Setze die Koordinaten mit Rechts & Linksklick)
       already-exists: <prefix><red>Hier existiert bereits ein Plot!

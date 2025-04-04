@@ -2,7 +2,7 @@ package de.unknowncity.plots.command.user;
 
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
-import de.unknowncity.plots.data.model.plot.PlotState;
+import de.unknowncity.plots.plot.access.PlotState;
 import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
@@ -51,16 +51,16 @@ public class PlotClaimCommand extends SubCommand {
 
         var plot = plotService.getPlot(plotId);
         if (plot.state() != PlotState.AVAILABLE) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "unavailable"));
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "unavailable"), plot.tagResolvers(sender, plugin.messenger()));
             return;
         }
 
         if (!economyService.hasEnoughFunds(sender.getUniqueId(), plot.price())) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "not-enough-money"));
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "not-enough-money"), plot.tagResolvers(sender, plugin.messenger()));
             return;
         }
 
         plotService.claimPlot(sender, plot);
-        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "success"));
+        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "success"), plot.tagResolvers(sender, plugin.messenger()));
     }
 }

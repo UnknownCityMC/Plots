@@ -2,7 +2,7 @@ package de.unknowncity.plots.gui;
 
 import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.data.model.plot.Plot;
+import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.gui.items.PreparedItems;
 import de.unknowncity.plots.service.PlotService;
 import net.kyori.adventure.text.Component;
@@ -26,17 +26,19 @@ public class PlotMainGUI {
 
         var gui = Gui.normal().setStructure(
                         "# # # # # # # # #",
-                        "# B . . . . . I #",
-                        "# M T D . . . F #",
+                        "# . . . P . . . #",
+                        "# B . . . . . W #",
+                        "# . M D . I F . #",
                         "# # # # # # # # #"
                 ).addIngredient('#', BORDER_ITEM)
                 .addIngredient('.', FILLER_ITEM)
+                .addIngredient('P', PreparedItems.plotInfo(player, plot, plugin))
+                .addIngredient('W', PreparedItems.warp(player, plot, plugin))
                 .addIngredient('B', PreparedItems.biome(player, plot, plugin))
-                .addIngredient('M', PreparedItems.settingsFriends(player, plot, plugin))
+                .addIngredient('M', PreparedItems.friends(player, plot, plugin))
                 .addIngredient('I', PreparedItems.interactables(player, plot, plugin))
                 .addIngredient('F', PreparedItems.flags(player, plot, plugin))
-                .addIngredient('T', PreparedItems.settingsTempMembers(player, plot, plugin))
-                .addIngredient('D', PreparedItems.settingsBannedPlayers(player, plot, plugin))
+                .addIngredient('D', PreparedItems.bannedPlayers(player, plot, plugin))
                 .build();
 
         Window.single().setGui(gui).setTitle(new AdventureComponentWrapper(title)).addCloseHandler(

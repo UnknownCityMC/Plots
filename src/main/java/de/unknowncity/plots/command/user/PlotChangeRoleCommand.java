@@ -2,7 +2,7 @@ package de.unknowncity.plots.command.user;
 
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
-import de.unknowncity.plots.data.model.plot.PlotMemberRole;
+import de.unknowncity.plots.plot.access.PlotMemberRole;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import de.unknowncity.plots.util.PlotId;
@@ -57,17 +57,17 @@ public class PlotChangeRoleCommand extends SubCommand {
 
         var plot = plotService.getPlot(plotId);
         if (!plot.owner().equals(sender.getUniqueId())) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-owner"));
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-owner"), plot.tagResolvers(sender, plugin.messenger()));
             return;
         }
 
-        if(plot.members().stream().noneMatch(plotMember -> plotMember.memberID().equals(target.getUniqueId()))){
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-member"));
+        if (plot.members().stream().noneMatch(plotMember -> plotMember.memberID().equals(target.getUniqueId()))) {
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-member"), plot.tagResolvers(sender, plugin.messenger()));
             return;
         }
 
         plotService.removeMember(target, plot);
         plotService.addMember(target, role, plot);
-        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "success"));
+        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "success"), plot.tagResolvers(sender, plugin.messenger()));
     }
 }

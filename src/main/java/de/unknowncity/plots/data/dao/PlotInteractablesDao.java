@@ -1,6 +1,6 @@
 package de.unknowncity.plots.data.dao;
 
-import de.unknowncity.plots.data.model.plot.flag.PlotInteractable;
+import de.unknowncity.plots.plot.flag.PlotInteractable;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

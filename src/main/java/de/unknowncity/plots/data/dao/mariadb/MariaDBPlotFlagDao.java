@@ -1,51 +1,64 @@
 package de.unknowncity.plots.data.dao.mariadb;
 
+import com.google.gson.Gson;
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.unknowncity.plots.data.dao.PlotFlagDao;
-import de.unknowncity.plots.data.model.plot.flag.PlotFlag;
-import de.unknowncity.plots.data.model.plot.flag.PlotFlagAccessModifier;
+import de.unknowncity.plots.data.model.PlotFlagWrapper;
+import de.unknowncity.plots.plot.flag.FlagRegistry;
+import de.unknowncity.plots.plot.flag.PlotFlag;
 import org.intellij.lang.annotations.Language;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static de.chojo.sadu.queries.api.call.Call.call;
-import static de.chojo.sadu.queries.api.query.Query.query;
 
 public class MariaDBPlotFlagDao implements PlotFlagDao {
     private final QueryConfiguration queryConfiguration;
+    private final FlagRegistry flagRegistry;
+    private final Gson gson = new Gson();
 
-    public MariaDBPlotFlagDao(QueryConfiguration queryConfiguration) {
+    public MariaDBPlotFlagDao(QueryConfiguration queryConfiguration, FlagRegistry flagRegistry) {
         this.queryConfiguration = queryConfiguration;
+        this.flagRegistry = flagRegistry;
     }
 
     @Override
-    public CompletableFuture<List<PlotFlag>> readAll(String plotId) {
+    public CompletableFuture<List<PlotFlagWrapper<Object>>> readAll(String plotId) {
         @Language("mariadb")
-        var querySting = "SELECT action_id, access_modifier FROM plot_flag WHERE plot_id = :plotId";
+        var querySting = "SELECT flag_id, value FROM plot_flag WHERE plot_id = :plotId";
         return CompletableFuture.supplyAsync(queryConfiguration.query(querySting)
                 .single(call()
                         .bind("plotId", plotId)
                 )
-                .map(row -> PlotFlag.create(
-                        row.getString("action_id"),
-                        row.getEnum("access_modifier", PlotFlagAccessModifier.class)
-                ))::all
+                .map(row -> {
+                    var id = row.getString("flag_id");
+                    var valueAsString = row.getString("value");
+
+                    var flag = flagRegistry.getRegistered(id);
+
+                    if (flag == null) {
+                        return null;
+                    }
+
+                    return new PlotFlagWrapper<Object>((PlotFlag<Object>) flag, flag.unmarshall(valueAsString));
+                })::all
         );
     }
 
+
     @Override
-    public CompletableFuture<Boolean> write(PlotFlag plotFlag, String plotId) {
+    public CompletableFuture<Boolean> write(String plotId, String flagId, String value) {
         @Language("mariadb")
         var querySting = """
-                REPLACE INTO plot_flag (action_id, plot_id, access_modifier)
-                VALUES (:action_id, :plot_id, :access_modifier)
+                REPLACE INTO plot_flag (plot_id, flag_id, value)
+                VALUES (:plot_id, :flag_id, :value)
                 """;
         return CompletableFuture.supplyAsync(queryConfiguration.query(querySting)
                 .single(call()
-                        .bind("action_id", plotFlag.actionId())
                         .bind("plot_id", plotId)
-                        .bind("access_modifier", plotFlag.accessModifier())
+                        .bind("flag_id", flagId)
+                        .bind("value", value)
                 )
                 .insert()::changed
         );

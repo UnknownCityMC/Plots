@@ -12,6 +12,7 @@ import org.incendo.cloud.context.CommandContext;
 import org.spongepowered.configurate.NodePath;
 
 import static org.incendo.cloud.bukkit.parser.PlayerParser.playerParser;
+import static org.incendo.cloud.parser.standard.StringParser.stringParser;
 
 public class PlotAdminSetOwnerCommand extends SubCommand {
 
@@ -27,6 +28,7 @@ public class PlotAdminSetOwnerCommand extends SubCommand {
         commandManager.command(builder.literal("setOwner")
                 .permission("ucplots.command.plotadmin")
                 .required("target", playerParser())
+                .flag(commandManager.flagBuilder("plotGroup").withComponent(stringParser()).build())
                 .senderType(Player.class)
                 .handler(this::setOwner)
                 .build()

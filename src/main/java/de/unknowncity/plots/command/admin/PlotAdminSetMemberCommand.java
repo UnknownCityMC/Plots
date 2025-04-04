@@ -2,7 +2,7 @@ package de.unknowncity.plots.command.admin;
 
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
-import de.unknowncity.plots.data.model.plot.PlotMemberRole;
+import de.unknowncity.plots.plot.access.PlotMemberRole;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import org.bukkit.command.CommandSender;

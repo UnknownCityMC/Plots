@@ -24,10 +24,18 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.unknowncity.astralib.common.message.lang.Language;
 import de.unknowncity.astralib.common.service.Service;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.data.model.plot.*;
-import de.unknowncity.plots.data.model.plot.flag.PlotInteractable;
-import de.unknowncity.plots.data.model.plot.group.PlotGroup;
+import de.unknowncity.plots.plot.BuyPlot;
+import de.unknowncity.plots.plot.Plot;
+import de.unknowncity.plots.plot.RentPlot;
+import de.unknowncity.plots.plot.access.PlotMember;
+import de.unknowncity.plots.plot.access.PlotMemberRole;
+import de.unknowncity.plots.plot.access.PlotState;
+import de.unknowncity.plots.plot.flag.FlagRegistry;
+import de.unknowncity.plots.plot.flag.PlotInteractable;
+import de.unknowncity.plots.plot.group.PlotGroup;
 import de.unknowncity.plots.data.repository.PlotGroupRepository;
+import de.unknowncity.plots.plot.location.PlotLocationType;
+import de.unknowncity.plots.plot.location.RelativePlotLocation;
 import de.unknowncity.plots.util.PlotId;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -56,7 +64,10 @@ public class PlotService implements Service<PlotsPlugin> {
     private final HashMap<String, PlotGroup> plotGroupCache = new HashMap<>();
     private final EconomyService economyService;
 
-    public PlotService(PlotGroupRepository plotGroupRepository, EconomyService economyService, PlotsPlugin plugin) {
+    private final FlagRegistry flagRegistry;
+
+    public PlotService(FlagRegistry flagRegistry, PlotGroupRepository plotGroupRepository, EconomyService economyService, PlotsPlugin plugin) {
+        this.flagRegistry = flagRegistry;
         this.plotGroupRepository = plotGroupRepository;
         this.economyService = economyService;
         this.plugin = plugin;
@@ -116,6 +127,8 @@ public class PlotService implements Service<PlotsPlugin> {
         region.setFlag(Flags.INTERACT, StateFlag.State.ALLOW);
         region.setFlag(Flags.USE, StateFlag.State.ALLOW);
 
+        flagRegistry.getAllRegistered().forEach(plotFlag -> plot.setFlag(plotFlag, plotFlag.defaultValue()));
+
         plot.interactables(PlotInteractable.defaults());
 
         savePlot(plot);
@@ -167,7 +180,9 @@ public class PlotService implements Service<PlotsPlugin> {
 
         plot.state(PlotState.AVAILABLE);
         plot.owner(null);
-        plot.flags(new ArrayList<>());
+        flagRegistry.getAllRegistered().forEach(plotFlag -> {
+            plot.setFlag(plotFlag, plotFlag.defaultValue());
+        });
         plot.members(new ArrayList<>());
         savePlot(plot);
         if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
@@ -203,7 +218,7 @@ public class PlotService implements Service<PlotsPlugin> {
     }
 
     public void addMember(OfflinePlayer player, PlotMemberRole role, Plot plot) {
-        plot.members().add(new PlotMember(player.getUniqueId(), role));
+        plot.members().add(new PlotMember(player.getUniqueId(), role, player.getName()));
         savePlot(plot);
     }
 
@@ -400,5 +415,9 @@ public class PlotService implements Service<PlotsPlugin> {
 
     public HashMap<String, Plot> plotCache() {
         return plotCache;
+    }
+
+    public FlagRegistry flagRegistry() {
+        return flagRegistry;
     }
 }

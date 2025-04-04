@@ -1,11 +1,11 @@
 package de.unknowncity.plots.data.dao;
 
-import de.unknowncity.plots.data.model.plot.flag.PlotFlag;
+import de.unknowncity.plots.data.model.PlotFlagWrapper;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public interface PlotFlagDao {
-    CompletableFuture<Boolean> write(PlotFlag plotFlag, String plotId);
-    CompletableFuture<List<PlotFlag>> readAll(String plotId);
+    CompletableFuture<Boolean> write(String plotId, String flagId, String value);
+    CompletableFuture<List<PlotFlagWrapper<Object>>> readAll(String plotId);
 }

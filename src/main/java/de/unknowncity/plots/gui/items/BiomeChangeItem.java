@@ -2,7 +2,7 @@ package de.unknowncity.plots.gui.items;
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.data.model.plot.Plot;
+import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.service.PlotService;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;

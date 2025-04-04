@@ -2,9 +2,10 @@ package de.unknowncity.plots.gui;
 
 import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.data.model.plot.Plot;
-import de.unknowncity.plots.data.model.plot.flag.PlotInteractable;
+import de.unknowncity.plots.plot.Plot;
+import de.unknowncity.plots.plot.flag.PlotInteractable;
 import de.unknowncity.plots.gui.items.InteractablesItem;
+import de.unknowncity.plots.gui.util.PagedGUI;
 import de.unknowncity.plots.service.PlotService;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -33,6 +34,7 @@ public class InteractablesGUI {
                     return new InteractablesItem(player, plotInteractable, plugin);
                 }).collect(Collectors.toList());
 
-        PagedGUI.createAndOpenPagedGUI(messenger, title, backItem, items, player);
+        var gui = PagedGUI.createAndOpenPagedGUI(messenger, title, backItem, items, player);
+        gui.addCloseHandler(() -> plotService.savePlot(plot));
     }
 }

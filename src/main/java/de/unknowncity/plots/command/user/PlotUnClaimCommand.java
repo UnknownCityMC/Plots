@@ -2,7 +2,7 @@ package de.unknowncity.plots.command.user;
 
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
-import de.unknowncity.plots.data.model.plot.PlotState;
+import de.unknowncity.plots.plot.access.PlotState;
 import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
@@ -56,11 +56,11 @@ public class PlotUnClaimCommand extends SubCommand {
         }
 
         if (!plot.owner().equals(sender.getUniqueId())) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "unclaim", "no-owner"));
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "unclaim", "no-owner"), plot.tagResolvers(sender, plugin.messenger()));
             return;
         }
 
         plotService.unClaimPlot(plot);
-        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "unclaim", "success"));
+        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "unclaim", "success"), plot.tagResolvers(sender, plugin.messenger()));
     }
 }

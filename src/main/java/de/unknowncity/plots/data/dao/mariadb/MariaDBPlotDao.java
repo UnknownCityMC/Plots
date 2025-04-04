@@ -3,7 +3,11 @@ package de.unknowncity.plots.data.dao.mariadb;
 import de.chojo.sadu.mapper.reader.StandardReader;
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.unknowncity.plots.data.dao.PlotDao;
-import de.unknowncity.plots.data.model.plot.*;
+import de.unknowncity.plots.plot.BuyPlot;
+import de.unknowncity.plots.plot.Plot;
+import de.unknowncity.plots.plot.RentPlot;
+import de.unknowncity.plots.plot.access.PlotState;
+import de.unknowncity.plots.plot.economy.PlotPaymentType;
 import org.intellij.lang.annotations.Language;
 
 import java.util.List;
@@ -11,7 +15,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static de.chojo.sadu.queries.api.call.Call.*;
-import static de.chojo.sadu.queries.api.query.Query.*;
 
 public class MariaDBPlotDao implements PlotDao {
     private final QueryConfiguration queryConfiguration;
