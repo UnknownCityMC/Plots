@@ -16,6 +16,7 @@ import xyz.xenondevs.invui.item.impl.SimpleItem;
 import xyz.xenondevs.invui.window.Window;
 
 import java.util.List;
+import java.util.Optional;
 
 public class PagedGUI {
 
@@ -38,6 +39,6 @@ public class PagedGUI {
                 .build();
 
 
-        return Window.single().setGui(gui).setTitle(new AdventureComponentWrapper(title)).build();
+        return Window.single().setGui(gui).setTitle(new AdventureComponentWrapper(title)).build(player);
     }
 }

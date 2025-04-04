@@ -37,6 +37,7 @@ import de.unknowncity.plots.data.repository.PlotGroupRepository;
 import de.unknowncity.plots.plot.location.PlotLocationType;
 import de.unknowncity.plots.plot.location.RelativePlotLocation;
 import de.unknowncity.plots.util.PlotId;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
@@ -269,8 +270,10 @@ public class PlotService implements Service<PlotsPlugin> {
     }
 
     public void savePlot(Plot plot) {
-        plotGroupRepository.savePlot(plot);
-        plotCache.put(plot.id(), plot);
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->  {
+            plotGroupRepository.savePlot(plot);
+            plotCache.put(plot.id(), plot);
+        });
     }
 
     public void deletePlot(String id) {

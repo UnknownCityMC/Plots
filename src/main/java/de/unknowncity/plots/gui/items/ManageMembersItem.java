@@ -11,13 +11,13 @@ import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
 
-public class ManageFriendItem extends AbstractItem {
+public class ManageMembersItem extends AbstractItem {
     private final PlotService plotService;
     private final Plot plot;
     private final ItemProvider itemProvider;
     private final PlotMember member;
 
-    public ManageFriendItem(@NotNull ItemProvider itemProvider, PlotService plotService, Plot plot, PlotMember member) {
+    public ManageMembersItem(@NotNull ItemProvider itemProvider, PlotService plotService, Plot plot, PlotMember member) {
         this.itemProvider = itemProvider;
         this.plotService = plotService;
         this.plot = plot;

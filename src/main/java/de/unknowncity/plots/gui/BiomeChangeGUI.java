@@ -35,5 +35,6 @@ public class BiomeChangeGUI {
 
         var gui = PagedGUI.createAndOpenPagedGUI(messenger, title, backItem, items, player);
         gui.addCloseHandler(() -> plugin.serviceRegistry().getRegistered(PlotService.class).savePlot(plot));
+        gui.open();
     }
 }

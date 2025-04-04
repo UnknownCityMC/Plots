@@ -3,7 +3,7 @@ package de.unknowncity.plots.gui;
 import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.Plot;
-import de.unknowncity.plots.gui.items.ManageFriendItem;
+import de.unknowncity.plots.gui.items.ManageMembersItem;
 import de.unknowncity.plots.gui.util.PagedGUI;
 import de.unknowncity.plots.service.PlotService;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -47,10 +47,11 @@ public class MembersGUI {
                                 messenger.component(player, NodePath.path("gui", "members", "item", "member", "name"), Placeholder.parsed("name", friend.memberID().toString())))
                 );
             }
-            return new ManageFriendItem(skull, plotService, plot, friend);
+            return new ManageMembersItem(skull, plotService, plot, friend);
         }).collect(Collectors.toList());
 
         var gui = PagedGUI.createAndOpenPagedGUI(messenger, title, backItem, items, player);
         gui.addCloseHandler(() -> plotService.savePlot(plot));
+        gui.open();
     }
 }

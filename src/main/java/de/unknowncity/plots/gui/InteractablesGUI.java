@@ -36,5 +36,6 @@ public class InteractablesGUI {
 
         var gui = PagedGUI.createAndOpenPagedGUI(messenger, title, backItem, items, player);
         gui.addCloseHandler(() -> plotService.savePlot(plot));
+        gui.open();
     }
 }
