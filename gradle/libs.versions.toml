@@ -4,7 +4,7 @@ shadow = "8.1.8"
 pluginyml = "0.6.0"
 
 sadu = "2.3.1"
-paper-api = "1.21.1-R0.1-SNAPSHOT"
+paper-api = "1.21.3-R0.1-SNAPSHOT"
 
 # Config
 configurate = "4.2.0"
