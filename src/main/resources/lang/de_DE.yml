@@ -4,6 +4,26 @@ plot:
   no-owner: "<green>Nicht verkauft"
   no-members: "<gray>*<i>Niemand*"
   no-banned: "<gray>*<i>Niemand*"
+task:
+  rent:
+    success: <prefix><gray>Du hast die Miete <gold><price>$<gray> für <gold><id> <gray> <green>gezahlt!
+    not-enough-money: <prefix><red>Du hast nicht genug Geld für deine Miete gehabt... (<id>)
+sign:
+  available:
+    line-1: <green>Verfügbar
+    line-2: "<gray>Preis: <white><price>$"
+    line-3: ""
+    line-4: ""
+  sold:
+    line-1: <red>Nicht verfügbar
+    line-2: <white><owner>
+    line-3: ""
+    line-4: ""
+  unavailable:
+    line-1: <red> Nicht verfügbar
+    line-2: ""
+    line-3: ""
+    line-4: ""
 command:
   plot:
     info:
@@ -43,6 +63,31 @@ command:
     delete:
       not-exists: <prefix><red>Dieses Plot existiert nicht!
       success: <prefix><gray>Plot erfolgreich gelöscht!
+      not-exists: <prefix><red>Dieses Plot existiert nicht!
+      success: <prefix><gray>Plot erfolgreich gelöscht!
+    create:
+      success: <prefix><gray>Plot erfolgreich erstellt!
+      already-exists: <prefix><red>Plot existiert bereits!
+      error: <prefix><red>Es gab einen Fehler...
+    member:
+      not-sold: <prefix><red>Dieses Plot gehört niemanden!
+      success: <prefix><gray>Mitglied erfolgreich hinzugefügt!
+    remove-member:
+      success: <prefix><gray>Mitglied erfolgreich entfernt!
+    load-backup:
+      not-found: <prefix><red>Es existiert kein Backup für das Plot und den Spieler!
+      success: <prefix><gray>Backup erfolgreich geladen.
+      not-enough-money: <prefix><red>Spieler hat nicht genügend Geld...
+    sign:
+      disable: <prefix><gray>SignLink <red>deaktiviert<gray>!
+      enable: <prefix><gray>SignLink <green>aktiviert<gray>! (Klicke zuerst auf ein Plot, danach auf ein Schild)
+      no-block: <prefix><red>Dies ist kein Block!
+      no-region: <prefix><red>Klicke bitte in ein Plot!
+      set-region: <prefix><green>Plot <yellow><id> <green>ausgewählt!
+      no-region-set: <prefix><red>Klicke bitte zuerst in ein Plot!
+      already-exists: <prefix><red>Schild wurde bereits hinzugefügt!
+      success: <prefix><gray>Schild erfolgreich hinzugefügt.
+  plotmod:
     create:
       success: <prefix><gray>Plot erfolgreich erstellt!
       already-exists: <prefix><red>Plot existiert bereits!
@@ -95,6 +140,114 @@ gui:
           CO_OWNER: "Co-Besitzer"
           MEMBER: "Mitglied"
           TEMP_MEMBER: "Zeitliches Mitglied"
+          NOBODY: "Niemand"
+          EVERYBODY: "Alle"
+        name: <!i><aqua><item-name>
+        lore:
+          - <!i><gray>Ändere wer dieses Item / diesen Block benutzen
+          - <!i>
+          - <!i><gray>Bedienung
+          - <!i><gray>▸ <yellow>↑ <white>🖰 <gray>[<gold>Right Button<gray>]
+          - <!i><gray>▸ <yellow>↓ <white>🖰 <gray>[<gold>Left Button<gray>]
+          - <!i>
+      disable: <prefix><gray>Plot erstellen Modus <red>deaktiviert<gray>!
+      enable: <prefix><gray>Plot erstellen Modus <green>aktiviert<gray>! (Setze die Koordinaten mit Rechts & Linksklick)
+      already-exists: <prefix><red>Hier existiert bereits ein Plot!
+      id-exists: <prefix><red>ID existiert bereits!
+      set-locations: <prefix><gray>Benutze <click:run_command:'/plotmod setLocations'><b><red>/plotmod setLocations</b></click> <gray>um eine Region zu markieren!
+      expand: <prefix><gray>Region min auf -64 und max auf 320 gesetzt.
+      success: <prefix><gray>Plot erstellt!
+      loc1-success: <prefix><gray>Location 1 hinzugefügt (x:<x> y:<y> z:<z>)!
+      loc2-success: <prefix><gray>Location 2 hinzugefügt (x:<x> y:<y> z:<z>)!
+      no-block: <prefix><red>Klicke bitte auf einen Block!
+      loc1-empty: <prefix><red>Du musst noch eine Location mit Linksklick hinzufügen!
+      loc2-empty: <prefix><red>Du musst noch eine Location mit Rechtsklick hinzufügen!
+      error: <prefix><red>Es gab einen Fehler...
+    expand:
+      no-region: <prefix><red>An dieser Stelle befindet sich kein Plot, bitte gehe zu einem Plot.
+      success: <prefix><gray>Plot erweitert!
+      error: <prefix><red>Region konnte nicht erweitert werden, überschneidet sich mit einer anderen Region!
+      not-enough-money: <prefix><red>Plot Besitzer hat nicht genügend Geld, es wird <price> benötigt!
+event:
+  plot:
+    interact:
+      deny: <prefix><red>Das darfst du aufgrund der Ploteinstellungen nicht tun!
+gui:
+  item:
+    next-page:
+      display-name:
+        has-next: <!i><gradient:#fc9403:#fce803>Nächste Seite</gradient>
+        no-next: <!i><gradient:#fc9403:#fce803>Nächste Seite</gradient>
+      lore:
+        has-next:
+          - <gray><!i>Du bist derzeit auf Seite <yellow><curr-page>
+          - <gray><!i>Klicke um auf Seite
+            <dark_gray><!i>(<yellow><next-page><dark_gray>/
+            <yellow><max-page><dark_gray>)<!i> <gray>zu kommen
+        no-next:
+          - <gray><!i>Du bist derzeit auf Seite <yellow><curr-page>
+          - <red>Es gibt keine weiteren Seiten
+    prev-page:
+      display-name:
+        has-prev: <!i><gradient:#fc9403:#fce803>Vorherige Seite</gradient>
+        no-prev: <!i><gradient:#fc9403:#fce803>Vorherige Seite</gradient>
+      lore:
+        has-prev:
+          - <gray><!i>Du bist derzeit auf Seite <yellow><curr-page>
+          - <gray><!i>Klicke um auf Seite
+            <dark_gray><!i>(<yellow><prev-page><dark_gray>/
+            <yellow><max-page><dark_gray>)<!i> <gray>zu kommen
+        no-prev:
+          - <gray><!i>Du bist derzeit auf Seite <yellow><curr-page>
+          - <red>Es gibt keine vorherigen Seiten
+  access-modifier-format:
+    active: <!i><gray>▶ <green><access-modifier>
+    inactive: <!i><gray>▸ <dark_gray><access-modifier>
+  friends:
+    title: <!i><#1d71ad>Plot <black>| <dark_gray>Vertraute Spieler
+  main:
+    title: <!i><#1d71ad>Plot <black>| <dark_gray>Einstellungen
+    item:
+      plot-info:
+        name: "<!i><gold>Plot-Info <gray>(<yellow><id><gray>)"
+        lore:
+          - "<!i><gray>Besitzer: <yellow><owner>"
+          - "<!i><gray>Größe: <yellow><width> <gray>x <yellow><height> <gray>x <yellow><depth>"
+          - "<!i><gray>Position: <yellow><world> <gray>- <yellow><location>"
+      biome:
+        name: "<!i><gold>Biom ändern"
+        lore:
+          - "<!i><gray>Derzeit: <green><biome>"
+      warp:
+        name: "<!i><gold>Warp ändern"
+        lore:
+          - ""
+      members:
+        name: "<!i><gold>Verwalte Mitglieder"
+        lore:
+          - ""
+          - "<gray>- Entferne Spieler"
+          - "<gray>- Passe Rechte an"
+      banned:
+        name: "<!i><gold>Verwalte Verbannte Spieler"
+        lore:
+          - ""
+          - "<gray>Lass verbannte Spieler wieder zu"
+      interactable:
+        name: "<!i><gold>Blockinteraktionen anpassen"
+      flags:
+        name: "<!i><gold>Flags anpassen"
+  interactables:
+    title: <!i><#1d71ad>Plot <black>| <dark_gray>Blockinteraktionen
+    item:
+      back:
+        name: <!i><red>Zurück
+      slot:
+        access-modifier:
+          OWNER: "Besitzer"
+          CO_OWNER: "Co-Besitzer"
+          MEMBER: "Mitglied"
+          TEMP_MEMBER: "Helfer"
           NOBODY: "Niemand"
           EVERYBODY: "Alle"
         name: <!i><aqua><item-name>

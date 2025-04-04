@@ -1,21 +1,21 @@
 [versions]
 # Gradle Plugins
-shadow = "8.1.7"
+shadow = "8.1.8"
 pluginyml = "0.6.0"
 
 sadu = "2.3.1"
-paper-api = "1.21.1-R0.1-SNAPSHOT"
+paper-api = "1.21.3-R0.1-SNAPSHOT"
 
 # Config
-configurate = "4.1.2"
-jackson = "2.18.0"
-adventure = "4.15.0"
-papi = "2.11.5"
+configurate = "4.2.0"
+jackson = "2.18.3"
+adventure = "4.19.0"
+papi = "2.11.6"
 
 coinsengine = "2.4.1"
-invui = "1.44"
+invui = "1.45"
 
-worldguard = "7.0.10"
+worldguard = "7.0.13"
 astralib = "0.6.0-SNAPSHOT"
 
 [libraries]

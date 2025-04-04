@@ -4,6 +4,7 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import de.unknowncity.astralib.common.message.lang.Language;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
 import de.unknowncity.plots.plot.access.BannedPlayer;
 import de.unknowncity.plots.plot.access.PlotMember;
@@ -23,6 +24,9 @@ import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
 import org.spongepowered.configurate.NodePath;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.*;
 
 public abstract class Plot {
@@ -167,12 +171,27 @@ public abstract class Plot {
                         : messenger.component(player, NodePath.path("plot", "no-owner"))),
                 Placeholder.parsed("world", worldName()),
 
-                Placeholder.component("members", !members().isEmpty() ? Component.text(String.join(", ", members().stream().map(PlotMember::name).toList())):
-                        messenger.component(player, NodePath.path("plot", "no-members"))),
+                Placeholder.component("members", !members().isEmpty() ? messenger.component(Language.GERMAN, NodePath.path("plot", "no-members")) :
+                        Component.text(String.join(", ", members().stream().map(PlotMember::name).toList()))),
+                Placeholder.parsed("flags", flags() != null ? flags().toString() : ""),
+        };
+    }
+
+    public TagResolver[] tagResolvers(PaperMessenger messenger) {
+        return new TagResolver[]{
+                Placeholder.parsed("id", plotId),
+                Placeholder.component("group", groupName() != null ? Component.text(groupName()) :
+                        messenger.component(Language.GERMAN, NodePath.path("plot", "no-group"))),
+                Placeholder.parsed("price", String.valueOf(price())),
+                Placeholder.parsed("state", state().name()),
+                Placeholder.component("owner", owner() != null ? Component.text(owner().toString())
+                        : messenger.component(Language.GERMAN, NodePath.path("plot", "no-owner"))),
+                Placeholder.parsed("world", worldName()),
+                Placeholder.component("members", members().isEmpty() ? messenger.component(Language.GERMAN, NodePath.path("plot", "no-members")) :
+                        Component.text(Strings.join(members().stream().map(PlotMember::memberID).toList(), ','))),
 
                 Placeholder.component("banned", !bannedPlayers().isEmpty() ? Component.text(String.join(", ", bannedPlayers().stream().map(BannedPlayer::name).toList())) :
                         messenger.component(player, NodePath.path("plot", "no-banned"))),
-
                 Placeholder.parsed("flags", flags() != null ? flags().toString() : ""),
         };
     }

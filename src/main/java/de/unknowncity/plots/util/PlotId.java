@@ -8,4 +8,8 @@ public class PlotId {
     public static String generate(World world, ProtectedRegion region) {
         return world.getName() + "-" + region.getId();
     }
+
+    public static String generate(World world, String region) {
+        return world.getName() + "-" + region;
+    }
 }

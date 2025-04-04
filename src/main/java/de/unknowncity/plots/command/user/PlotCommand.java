@@ -43,12 +43,7 @@ public class PlotCommand extends PaperCommand<PlotsPlugin> {
 
                     var plot = plotService.getPlot(plotId);
 
-                    if (!plot.owner().equals(sender.getUniqueId())) {
-                        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-owner"));
-                        return;
-                    }
-
-                    if (!plot.owner().equals(sender.getUniqueId())) {
+                    if (!plot.owner().equals(sender.getUniqueId()) && !sender.hasPermission("ucplots.command.plotadmin")) {
                         plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-owner"));
                         return;
                     }
@@ -61,5 +56,6 @@ public class PlotCommand extends PaperCommand<PlotsPlugin> {
         new PlotInfoCommand(plugin, builder).apply(commandManager);
         new PlotAddMemberCommand(plugin, builder).apply(commandManager);
         new PlotRemoveMemberCommand(plugin, builder).apply(commandManager);
+        new PlotChangeRoleCommand(plugin, builder).apply(commandManager);
     }
 }

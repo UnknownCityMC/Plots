@@ -5,11 +5,13 @@ import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.service.PlotService;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
+import org.incendo.cloud.suggestion.Suggestion;
 import org.spongepowered.configurate.NodePath;
+
+import java.util.concurrent.CompletableFuture;
 
 import static org.incendo.cloud.parser.standard.StringParser.stringParser;
 
@@ -25,15 +27,22 @@ public class PlotAdminDeleteCommand extends SubCommand {
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("delete")
                 .permission("ucplots.command.plotadmin")
-                .required("id", stringParser())
-                .senderType(Player.class)
+                .required("id", stringParser(), (sender, input) -> CompletableFuture.completedFuture(plotService.plotCache().keySet().stream().map(Suggestion::suggestion).toList()))
+                .apply(plugin.confirmationManager())
                 .handler(this::handleDelete)
+                .build()
+        );
+
+        commandManager.command(builder.literal("delete")
+                .permission("ucplots.command.plotadmin")
+                .literal("confirm")
+                .handler(plugin.confirmationManager().createExecutionHandler())
                 .build()
         );
     }
 
-    private void handleDelete(@NonNull CommandContext<Player> commandContext) {
-        var player = commandContext.sender();
+    private void handleDelete(CommandContext<CommandSender> commandContext) {
+        var player = (Player) commandContext.sender();
         var id = commandContext.<String>get("id");
 
         if (!plotService.existsPlot(id)) {

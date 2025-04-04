@@ -50,8 +50,6 @@ public class PlotAdminSetOwnerCommand extends SubCommand {
             plotService.setPlotOwner(player, plotService.getPlot(world, protectedRegion));
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "set-owner", "success"));
 
-        }, () -> {
-            plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "no-suitable-region"));
-        });
+        }, () -> plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "no-suitable-region")));
     }
 }

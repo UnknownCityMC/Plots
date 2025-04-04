@@ -21,6 +21,7 @@ import com.sk89q.worldedit.world.biome.BiomeType;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import de.unknowncity.astralib.common.message.lang.Language;
 import de.unknowncity.astralib.common.service.Service;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.BuyPlot;
@@ -34,8 +35,11 @@ import de.unknowncity.plots.plot.flag.PlotInteractable;
 import de.unknowncity.plots.plot.group.PlotGroup;
 import de.unknowncity.plots.data.repository.PlotGroupRepository;
 import de.unknowncity.plots.util.PlotId;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
+import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 
 import java.io.File;
@@ -46,6 +50,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public class PlotService implements Service<PlotsPlugin> {
@@ -145,6 +150,8 @@ public class PlotService implements Service<PlotsPlugin> {
             var plotGroup = plotGroupCache.get(plotGroupName);
             plotGroup.plotsInGroup().put(plot.id(), plot);
             savePlotGroup(plotGroup);
+            plot.groupName(plotGroupName);
+            savePlot(plot);
         }
     }
 
@@ -157,7 +164,12 @@ public class PlotService implements Service<PlotsPlugin> {
         plot.state(PlotState.SOLD);
         plot.owner(player.getUniqueId());
         savePlot(plot);
-        createSchematic(plot);
+
+        if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
+            createSchematic(plot);
+        }
+
+        updateSings(plot);
     }
 
     public void unClaimPlot(Plot plot) {
@@ -170,7 +182,36 @@ public class PlotService implements Service<PlotsPlugin> {
         });
         plot.members(new ArrayList<>());
         savePlot(plot);
-        loadSchematic(plot);
+        if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
+            loadSchematic(plot);
+        }
+
+        updateSings(plot);
+    }
+
+    public boolean backup(Plot plot, UUID owner) {
+        return createSchematicBackup(plot, owner);
+    }
+
+    public boolean hasBackup(Plot plot, UUID owner) {
+        var path = "/schematics/backups/" + owner.toString() + "_" + plot.id() + ".schem";
+        File file = new File(plugin.getDataPath() + path);
+        return file.exists();
+    }
+
+    public void loadBackup(Plot plot, Player player) {
+        economyService.withdraw(player.getUniqueId(), plot.price());
+        if (plot instanceof RentPlot rentPlot) {
+            rentPlot.lastRentPayed(LocalDateTime.now());
+        }
+
+        plot.state(PlotState.SOLD);
+        plot.owner(player.getUniqueId());
+        savePlot(plot);
+        if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
+            createSchematic(plot);
+        }
+        loadSchematicBackup(plot, player.getUniqueId());
     }
 
     public void addMember(OfflinePlayer player, PlotMemberRole role, Plot plot) {
@@ -187,6 +228,13 @@ public class PlotService implements Service<PlotsPlugin> {
         plot.state(PlotState.SOLD);
         plot.owner(player.getUniqueId());
         savePlot(plot);
+        updateSings(plot);
+    }
+
+    public void setPlotPrice(double price, Plot plot) {
+        plot.price(price);
+        savePlot(plot);
+        updateSings(plot);
     }
 
     public void setPlotGroup(String groupName, Plot plot) {
@@ -197,6 +245,7 @@ public class PlotService implements Service<PlotsPlugin> {
         plot.groupName(groupName);
         plotGroupCache.get(groupName).plotsInGroup().put(plot.id(), plot);
         savePlot(plot);
+        updateSings(plot);
     }
 
     public void createPlotGroup(String name) {
@@ -243,6 +292,37 @@ public class PlotService implements Service<PlotsPlugin> {
         plotGroupCache.remove(plotGroup.name());
     }
 
+    public boolean addSign(Plot plot, Location location) {
+        RelativePlotLocation sign = new RelativePlotLocation(PlotLocationType.SIGN, location.x(), location.y(), location.z(), location.getYaw(), location.getPitch());
+        if (plot.locations().stream().anyMatch(loc -> loc.type() == PlotLocationType.SIGN && loc.x() == location.x() && loc.y() == location.y() && loc.z() == location.z())) {
+            return false;
+        }
+        plot.locations().add(sign);
+        savePlot(plot);
+
+        updateSings(plot);
+        return true;
+    }
+
+    public void updateSings(Plot plot) {
+        plot.locations().stream().filter(relativePlotLocation -> relativePlotLocation.type() == PlotLocationType.SIGN).forEach(relativePlotLocation -> {
+            var loc = new Location(plot.world(), relativePlotLocation.x(), relativePlotLocation.y(), relativePlotLocation.z());
+            var block = plot.world().getBlockAt(loc);
+
+            if (!block.getType().toString().contains("SIGN")) {
+                plot.locations().remove(relativePlotLocation);
+                return;
+            }
+
+            var state = plot.state().name().toLowerCase();
+            Sign sign = (Sign) block.getState();
+            sign.getSide(Side.FRONT).line(0, plugin.messenger().component(Language.GERMAN, NodePath.path("sign", state, "line-1"), plot.tagResolvers(plugin.messenger())));
+            sign.getSide(Side.FRONT).line(1, plugin.messenger().component(Language.GERMAN, NodePath.path("sign", state, "line-2"), plot.tagResolvers(plugin.messenger())));
+            sign.getSide(Side.FRONT).line(2, plugin.messenger().component(Language.GERMAN, NodePath.path("sign", state, "line-3"), plot.tagResolvers(plugin.messenger())));
+            sign.getSide(Side.FRONT).line(3, plugin.messenger().component(Language.GERMAN, NodePath.path("sign", state, "line-4"), plot.tagResolvers(plugin.messenger())));
+            sign.update();
+        });
+    }
 
     public PlotGroup getPlotGroupWithPlots(String name) {
         return plotGroupCache.get(name);
@@ -265,6 +345,15 @@ public class PlotService implements Service<PlotsPlugin> {
     }
 
     public void createSchematic(Plot plot) {
+        createWorldEditSchematic(plot, "/schematics/");
+    }
+
+
+    public boolean createSchematicBackup(Plot plot, UUID owner) {
+        return createWorldEditSchematic(plot, "/schematics/backups/" + owner.toString() + "_");
+    }
+
+    private boolean createWorldEditSchematic(Plot plot, String path) {
         CuboidRegion region = new CuboidRegion(plot.protectedRegion().getMinimumPoint(), plot.protectedRegion().getMaximumPoint());
         BlockArrayClipboard clipboard = new BlockArrayClipboard(region);
 
@@ -276,18 +365,29 @@ public class PlotService implements Service<PlotsPlugin> {
             Operations.complete(forwardExtentCopy);
         } catch (WorldEditException e) {
             plugin.getLogger().log(Level.SEVERE, e.getMessage());
+            return false;
         }
 
-        File file = new File(plugin.getDataPath() + "/schematics/" + plot.id() + ".schem");
+        File file = new File(plugin.getDataPath() + path + plot.id() + ".schem");
         try (ClipboardWriter writer = BuiltInClipboardFormat.SPONGE_V3_SCHEMATIC.getWriter(new FileOutputStream(file))) {
             writer.write(clipboard);
+            return true;
         } catch (IOException e) {
             plugin.getLogger().log(Level.SEVERE, e.getMessage());
+            return false;
         }
     }
 
     public void loadSchematic(Plot plot) {
-        File file = new File(plugin.getDataPath() + "/schematics/" + plot.id() + ".schem");
+        loadWorldEditSchematic(plot, "/schematics/");
+    }
+
+    public void loadSchematicBackup(Plot plot, UUID owner) {
+        loadWorldEditSchematic(plot, "/schematics/backups/" + owner.toString() + "_");
+    }
+
+    public void loadWorldEditSchematic(Plot plot, String path) {
+        File file = new File(plugin.getDataPath() + path + plot.id() + ".schem");
         ClipboardFormat format = BuiltInClipboardFormat.SPONGE_V3_SCHEMATIC;
         Clipboard clipboard;
         try (ClipboardReader reader = format.getReader(new FileInputStream(file))) {

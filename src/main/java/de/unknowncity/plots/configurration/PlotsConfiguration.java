@@ -15,6 +15,9 @@ public class PlotsConfiguration extends YamlAstraConfiguration {
     @JsonProperty
     private final EconomySettings economy = new EconomySettings();
 
+    @JsonProperty
+    private final FreebuildSettings fb = new FreebuildSettings();
+
     public PlotsConfiguration() {
 
     }
@@ -25,5 +28,9 @@ public class PlotsConfiguration extends YamlAstraConfiguration {
 
     public EconomySettings economy() {
         return economy;
+    }
+
+    public FreebuildSettings fb() {
+        return fb;
     }
 }
