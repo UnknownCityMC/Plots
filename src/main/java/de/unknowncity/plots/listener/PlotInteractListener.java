@@ -1,7 +1,6 @@
 package de.unknowncity.plots.listener;
 
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.data.model.plot.flag.PlotFlagAccessModifier;
 import de.unknowncity.plots.plot.access.PlotAccessModifier;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;

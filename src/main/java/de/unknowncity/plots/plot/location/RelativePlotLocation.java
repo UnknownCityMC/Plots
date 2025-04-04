@@ -1,7 +1,7 @@
 package de.unknowncity.plots.plot.location;
 
 public record RelativePlotLocation(
-        String name,
+        PlotLocationType type,
         double x,
         double y,
         double z,

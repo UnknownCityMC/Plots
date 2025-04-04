@@ -2,6 +2,7 @@ package de.unknowncity.plots.data.dao.mariadb;
 
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.unknowncity.plots.data.dao.PlotLocationDao;
+import de.unknowncity.plots.plot.location.PlotLocationType;
 import de.unknowncity.plots.plot.location.RelativePlotLocation;
 import org.intellij.lang.annotations.Language;
 
@@ -29,7 +30,7 @@ public class MariaDBPlotLocationDao implements PlotLocationDao {
         return CompletableFuture.supplyAsync(queryConfiguration.query(queryString)
                 .single(call()
                         .bind("plotId", plotId)
-                        .bind("name", plotLocation.name())
+                        .bind("name", plotLocation.type().toString())
                         .bind("x", plotLocation.x())
                         .bind("y", plotLocation.y())
                         .bind("z", plotLocation.z())
@@ -49,7 +50,7 @@ public class MariaDBPlotLocationDao implements PlotLocationDao {
         return CompletableFuture.supplyAsync(queryConfiguration.query(queryString)
                 .single(call().bind("plotId", plotId))
                 .map(row -> new RelativePlotLocation(
-                        row.getString("name"),
+                        PlotLocationType.valueOf(row.getString("name")),
                         row.getDouble("x"),
                         row.getDouble("y"),
                         row.getDouble("z"),
