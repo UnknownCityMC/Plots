@@ -1,0 +1,84 @@
+package de.unknowncity.plots.gui.items;
+
+import de.unknowncity.astralib.paper.api.item.ItemBuilder;
+import de.unknowncity.plots.PlotsPlugin;
+import de.unknowncity.plots.plot.Plot;
+import de.unknowncity.plots.plot.access.PlotAccessModifier;
+import de.unknowncity.plots.plot.flag.FlagRegistry;
+import de.unknowncity.plots.plot.flag.PlotFlag;
+import de.unknowncity.plots.plot.flag.WorldGuardFlag;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.spongepowered.configurate.NodePath;
+import xyz.xenondevs.invui.item.ItemProvider;
+import xyz.xenondevs.invui.item.impl.AbstractItem;
+import xyz.xenondevs.invui.item.impl.SimpleItem;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+public class FlagItem<T> extends AbstractItem {
+    private final PlotFlag<T> plotFlag;
+    private final PlotsPlugin plugin;
+    private final Plot plot;
+    private final Player player;
+    private T value;
+
+    public FlagItem(Player player, PlotFlag<T> plotFlag, Plot plot, PlotsPlugin plugin) {
+        this.plotFlag = plotFlag;
+        this.plugin = plugin;
+        this.plot = plot;
+        this.player = player;
+        this.value = plot.getFlag(plotFlag);
+    }
+
+    @Override
+    public ItemProvider getItemProvider() {
+        var itemBuilder = ItemBuilder.of(plotFlag.displayMaterial());
+        itemBuilder.name(plugin.messenger().component(player, NodePath.path("flags", "name", plotFlag.flagId())));
+        var lore = new ArrayList<>(plugin.messenger().componentList(player, NodePath.path("gui", "flags", "item", "slot", "lore")));
+
+
+        lore.addAll(plotFlag.possibleValues().stream().map(possibleValue -> {
+            var valueName = plugin.messenger().component(player, NodePath.path("flags", "value", possibleValue.toString()));
+
+            if (plot.getFlag(plotFlag) == possibleValue) {
+                return plugin.messenger().component(player, NodePath.path("gui", "flag-format", "active"),
+                        Placeholder.component("value", valueName));
+            } else {
+                return plugin.messenger().component(player, NodePath.path("gui", "flag-format", "inactive"),
+                        Placeholder.component("value", valueName));
+            }
+        }).toList());
+        itemBuilder.lore(lore);
+        return new xyz.xenondevs.invui.item.builder.ItemBuilder(itemBuilder.item());
+    }
+
+    @Override
+    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent event) {
+
+        if (clickType == ClickType.LEFT) {
+            value = getNextValue(value, false);
+            plot.setFlag(plotFlag, value);
+        }
+        if (clickType == ClickType.RIGHT) {
+            value = getNextValue(value, true);
+            plot.setFlag(plotFlag, value);
+        }
+
+        notifyWindows();
+    }
+
+    private T getNextValue(T value, boolean reverse) {
+        var values = plotFlag.possibleValues();
+        var currentIndex = values.indexOf(value);
+        int index = reverse ? ((currentIndex == 0) ? values.size() - 1 : currentIndex - 1) :
+                ((currentIndex == values.size() - 1) ? 0 : currentIndex + 1);
+        return values.get(index);
+    }
+}

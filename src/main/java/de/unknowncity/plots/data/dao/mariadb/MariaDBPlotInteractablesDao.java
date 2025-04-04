@@ -1,11 +1,9 @@
 package de.unknowncity.plots.data.dao.mariadb;
 
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
-import de.unknowncity.plots.data.dao.PlotFlagDao;
 import de.unknowncity.plots.data.dao.PlotInteractablesDao;
-import de.unknowncity.plots.data.model.plot.flag.PlotFlag;
-import de.unknowncity.plots.data.model.plot.flag.PlotFlagAccessModifier;
-import de.unknowncity.plots.data.model.plot.flag.PlotInteractable;
+import de.unknowncity.plots.plot.access.PlotAccessModifier;
+import de.unknowncity.plots.plot.flag.PlotInteractable;
 import org.bukkit.Material;
 import org.intellij.lang.annotations.Language;
 
@@ -31,7 +29,7 @@ public class MariaDBPlotInteractablesDao implements PlotInteractablesDao {
                 )
                 .map(row -> PlotInteractable.create(
                         Material.valueOf(row.getString("block_type")),
-                        row.getEnum("access_modifier", PlotFlagAccessModifier.class)
+                        row.getEnum("access_modifier", PlotAccessModifier.class)
                 ))::all
         );
     }

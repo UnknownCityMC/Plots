@@ -10,9 +10,7 @@ import com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
-import com.sk89q.worldedit.extent.world.BiomeQuirkExtent;
 import com.sk89q.worldedit.function.biome.BiomeReplace;
-import com.sk89q.worldedit.function.biome.ExtentBiomeCopy;
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
@@ -20,25 +18,25 @@ import com.sk89q.worldedit.function.visitor.RegionVisitor;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.world.biome.BiomeType;
-import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.unknowncity.astralib.common.service.Service;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.data.model.plot.*;
-import de.unknowncity.plots.data.model.plot.flag.PlotInteractable;
-import de.unknowncity.plots.data.model.plot.group.PlotGroup;
+import de.unknowncity.plots.plot.BuyPlot;
+import de.unknowncity.plots.plot.Plot;
+import de.unknowncity.plots.plot.RentPlot;
+import de.unknowncity.plots.plot.access.PlotMember;
+import de.unknowncity.plots.plot.access.PlotMemberRole;
+import de.unknowncity.plots.plot.access.PlotState;
+import de.unknowncity.plots.plot.flag.FlagRegistry;
+import de.unknowncity.plots.plot.flag.PlotInteractable;
+import de.unknowncity.plots.plot.group.PlotGroup;
 import de.unknowncity.plots.data.repository.PlotGroupRepository;
 import de.unknowncity.plots.util.PlotId;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
-import org.bukkit.block.Biome;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.spongepowered.configurate.NodePath;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -58,7 +56,10 @@ public class PlotService implements Service<PlotsPlugin> {
     private final HashMap<String, PlotGroup> plotGroupCache = new HashMap<>();
     private final EconomyService economyService;
 
-    public PlotService(PlotGroupRepository plotGroupRepository, EconomyService economyService, PlotsPlugin plugin) {
+    private final FlagRegistry flagRegistry;
+
+    public PlotService(FlagRegistry flagRegistry, PlotGroupRepository plotGroupRepository, EconomyService economyService, PlotsPlugin plugin) {
+        this.flagRegistry = flagRegistry;
         this.plotGroupRepository = plotGroupRepository;
         this.economyService = economyService;
         this.plugin = plugin;
@@ -118,6 +119,8 @@ public class PlotService implements Service<PlotsPlugin> {
         region.setFlag(Flags.INTERACT, StateFlag.State.ALLOW);
         region.setFlag(Flags.USE, StateFlag.State.ALLOW);
 
+        flagRegistry.getAllRegistered().forEach(plotFlag -> plot.setFlag(plotFlag, plotFlag.defaultValue()));
+
         plot.interactables(PlotInteractable.defaults());
 
         savePlot(plot);
@@ -162,7 +165,9 @@ public class PlotService implements Service<PlotsPlugin> {
 
         plot.state(PlotState.AVAILABLE);
         plot.owner(null);
-        plot.flags(new ArrayList<>());
+        flagRegistry.getAllRegistered().forEach(plotFlag -> {
+            plot.setFlag(plotFlag, plotFlag.defaultValue());
+        });
         plot.members(new ArrayList<>());
         savePlot(plot);
         loadSchematic(plot);
@@ -307,5 +312,9 @@ public class PlotService implements Service<PlotsPlugin> {
 
     public HashMap<String, Plot> plotCache() {
         return plotCache;
+    }
+
+    public FlagRegistry flagRegistry() {
+        return flagRegistry;
     }
 }

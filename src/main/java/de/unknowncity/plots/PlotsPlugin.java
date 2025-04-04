@@ -12,6 +12,8 @@ import de.unknowncity.plots.command.user.PlotCommand;
 import de.unknowncity.plots.configurration.PlotsConfiguration;
 import de.unknowncity.plots.data.dao.mariadb.*;
 import de.unknowncity.plots.data.repository.PlotGroupRepository;
+import de.unknowncity.plots.plot.flag.FlagRegistry;
+import de.unknowncity.plots.plot.flag.type.IceMeltFlag;
 import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
@@ -121,11 +123,16 @@ public class PlotsPlugin extends PaperAstraPlugin {
         var databaseSetting = configuration.database();
 
         var queryConfig = StandardDataBaseProvider.updateAndConnectToDataBase(databaseSetting, getClassLoader(), getDataPath());
+
+        var flagRegistry = new FlagRegistry(this);
+        flagRegistry.register(new IceMeltFlag());
+
         this.serviceRegistry.register(new PlotService(
+                flagRegistry,
                 new PlotGroupRepository(
                         new MariaDBGroupDao(queryConfig),
                         new MariaDBPlotDao(queryConfig),
-                        new MariaDBPlotFlagDao(queryConfig),
+                        new MariaDBPlotFlagDao(queryConfig, flagRegistry),
                         new MariaDBPlotInteractablesDao(queryConfig),
                         new MariaDBPlotLocationDao(queryConfig),
                         new MariaDBPlotMemberDao(queryConfig)

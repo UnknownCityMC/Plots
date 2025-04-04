@@ -2,7 +2,6 @@ package de.unknowncity.plots.command.user;
 
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
-import de.unknowncity.plots.data.model.plot.PlotMemberRole;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import de.unknowncity.plots.util.PlotId;
@@ -15,7 +14,6 @@ import org.incendo.cloud.context.CommandContext;
 import org.spongepowered.configurate.NodePath;
 
 import static org.incendo.cloud.bukkit.parser.PlayerParser.playerParser;
-import static org.incendo.cloud.parser.standard.EnumParser.enumParser;
 
 public class PlotRemoveMemberCommand extends SubCommand {
     private final RegionService regionService = plugin.serviceRegistry().getRegistered(RegionService.class);

@@ -1,11 +1,9 @@
 package de.unknowncity.plots.data.repository;
 
 import de.unknowncity.plots.data.dao.*;
-import de.unknowncity.plots.data.dao.mariadb.MariaDBPlotInteractablesDao;
-import de.unknowncity.plots.data.model.plot.Plot;
-import de.unknowncity.plots.data.model.plot.flag.PlotFlag;
-import de.unknowncity.plots.data.model.plot.flag.PlotInteractable;
-import de.unknowncity.plots.data.model.plot.group.PlotGroup;
+import de.unknowncity.plots.plot.Plot;
+import de.unknowncity.plots.plot.flag.PlotInteractable;
+import de.unknowncity.plots.plot.group.PlotGroup;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,13 +37,10 @@ public class PlotGroupRepository {
         return plotDao.readAll().thenApplyAsync(plots -> {
             var plotsCache = new HashMap<String, Plot>();
             plots.forEach(plot -> {
-                plotFlagDao.readAll(plot.id()).thenAccept(plotFlags -> {
-                    var updatedFlags = new ArrayList<>(PlotFlag.defaults());
-                    plotFlags.forEach(flag -> {
-                        updatedFlags.removeIf(pf -> pf.actionId().equals(flag.actionId()));
+                plotFlagDao.readAll(plot.id()).thenAccept(plotFlagWrappers -> {
+                    plotFlagWrappers.forEach(plotFlagWrapper -> {
+                        plot.setFlag(plotFlagWrapper.flag(), plotFlagWrapper.flagValue());
                     });
-                    updatedFlags.addAll(plotFlags);
-                    plot.flags(updatedFlags);
                 });
                 plotMemberDao.readAll(plot.id()).thenAccept(plot::members);
                 plotLocationDao.readAll(plot.id()).thenAccept(plot::locations);
@@ -87,7 +82,8 @@ public class PlotGroupRepository {
 
     public void savePlot(Plot plot) {
         plotDao.write(plot);
-        plot.flags().forEach(plotFlag -> plotFlagDao.write(plotFlag, plot.id()));
+
+        plot.flags().forEach((plotFlag, value) -> plotFlagDao.write(plot.id(), plotFlag.flagId(), plotFlag.marshall(value)));
         plot.interactables().forEach(plotInteractable -> plotInteractablesDao.write(plotInteractable, plot.id()));
         plot.members().forEach(plotMember -> plotMemberDao.write(plotMember, plot.id()));
         plot.locations().forEach(plotLocation -> plotLocationDao.write(plotLocation, plot.id()));

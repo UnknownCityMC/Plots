@@ -1,12 +1,9 @@
 package de.unknowncity.plots;
 
-import de.unknowncity.plots.data.model.plot.flag.PlotFlagAccessModifier;
+import de.unknowncity.plots.plot.access.PlotAccessModifier;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import de.unknowncity.plots.util.PlotId;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -52,7 +49,7 @@ public class PlotInteractListener implements Listener {
 
         plot.interactables().stream().filter(plotInteractable -> plotInteractable.blockType() == event.getClickedBlock().getType()).forEach(plotInteractable -> {
             if (plot.owner().equals(event.getPlayer().getUniqueId())) {
-                if (plotInteractable.accessModifier() == PlotFlagAccessModifier.NOBODY) {
+                if (plotInteractable.accessModifier() == PlotAccessModifier.NOBODY) {
                     event.setCancelled(true);
                     plugin.messenger().sendMessage(event.getPlayer(), NodePath.path("event", "plot", "interact", "deny"));
                 }

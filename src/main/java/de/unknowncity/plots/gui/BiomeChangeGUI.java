@@ -2,8 +2,10 @@ package de.unknowncity.plots.gui;
 
 import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.data.model.plot.Plot;
+import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.gui.items.BiomeChangeItem;
+import de.unknowncity.plots.gui.util.PagedGUI;
+import de.unknowncity.plots.service.PlotService;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
@@ -31,6 +33,7 @@ public class BiomeChangeGUI {
                 messenger.component(player, NodePath.path("gui", "biome", "item", "biome", "name"), Placeholder.parsed("biome", biome.name()))
         ).item()), plot, biome, plugin)).collect(Collectors.toList());
 
-        PagedGUI.createAndOpenPagedGUI(messenger, title, backItem, items, player);
+        var gui = PagedGUI.createAndOpenPagedGUI(messenger, title, backItem, items, player);
+        gui.addCloseHandler(() -> plugin.serviceRegistry().getRegistered(PlotService.class).savePlot(plot));
     }
 }

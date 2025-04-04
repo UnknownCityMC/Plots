@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS plot_group
 CREATE TABLE IF NOT EXISTS plot
 (
     id             VARCHAR(256) NOT NULL PRIMARY KEY,
-    owner_id UUID,
+    owner_id       UUID,
     region_id      VARCHAR(256) NOT NULL,
     group_name     VARCHAR(256),
     world          VARCHAR(256) NOT NULL,
@@ -25,14 +25,14 @@ CREATE TABLE IF NOT EXISTS plot
 CREATE TABLE IF NOT EXISTS plot_location
 (
     plot_id VARCHAR(256) NOT NULL,
-    type    VARCHAR(256) NOT NULL,
+    name    VARCHAR(256) NOT NULL,
     x       DOUBLE,
     y       DOUBLE,
     z       DOUBLE,
     yaw     DOUBLE,
     pitch   DOUBLE,
     CONSTRAINT plot_member_pk
-        PRIMARY KEY (plot_id, type),
+        PRIMARY KEY (plot_id, name),
     CONSTRAINT plot_location_plot_plot_id_id_fk
         FOREIGN KEY (plot_id) REFERENCES plot (id)
             ON DELETE CASCADE
@@ -65,12 +65,12 @@ CREATE TABLE IF NOT EXISTS plot_banned_players
 
 CREATE TABLE IF NOT EXISTS plot_flag
 (
-    action_id       VARCHAR(256) NOT NULL,
-    plot_id         VARCHAR(256) NOT NULL,
-    access_modifier ENUM ('OWNER', 'CO_OWNER', 'MEMBER', 'TEMP_MEMBER', 'EVERYBODY', 'NOBODY') DEFAULT 'MEMBER',
+    plot_id VARCHAR(256) NOT NULL,
+    flag_id VARCHAR(256) NOT NULL,
+    value   TEXT         NOT NULL,
 
     CONSTRAINT plot_flag_pk
-        PRIMARY KEY (plot_id, action_id),
+        PRIMARY KEY (plot_id, flag_id),
     CONSTRAINT plot_flag_plot_plot_id_id_fk
         FOREIGN KEY (plot_id) REFERENCES plot (id)
             ON DELETE CASCADE

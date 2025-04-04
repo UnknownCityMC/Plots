@@ -2,8 +2,8 @@ package de.unknowncity.plots.gui.items;
 
 import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.data.model.plot.flag.PlotFlagAccessModifier;
-import de.unknowncity.plots.data.model.plot.flag.PlotInteractable;
+import de.unknowncity.plots.plot.access.PlotAccessModifier;
+import de.unknowncity.plots.plot.flag.PlotInteractable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
@@ -37,7 +37,7 @@ public class InteractablesItem extends AbstractItem {
         var lore = new ArrayList<>(plugin.messenger().componentList(player, NodePath.path("gui", "interactables", "item", "slot", "lore")));
 
 
-        lore.addAll(Arrays.stream(PlotFlagAccessModifier.values()).map(accessModifier -> {
+        lore.addAll(Arrays.stream(PlotAccessModifier.values()).map(accessModifier -> {
             var accessModifierName = plugin.messenger().component(player, NodePath.path("gui", "interactables", "item", "slot", "access-modifier", accessModifier.name()));
 
             if (interactable.accessModifier() == accessModifier) {
@@ -64,8 +64,8 @@ public class InteractablesItem extends AbstractItem {
     }
 
 
-    private PlotFlagAccessModifier getNextInteractable(PlotFlagAccessModifier accessModifier, boolean reverse) {
-        var values = PlotFlagAccessModifier.values();
+    private PlotAccessModifier getNextInteractable(PlotAccessModifier accessModifier, boolean reverse) {
+        var values = PlotAccessModifier.values();
         int index = reverse ? ((accessModifier.ordinal() == 0) ? values.length - 1 : accessModifier.ordinal() - 1) :
                 ((accessModifier.ordinal() == values.length - 1) ? 0 : accessModifier.ordinal() + 1);
         return values[index];

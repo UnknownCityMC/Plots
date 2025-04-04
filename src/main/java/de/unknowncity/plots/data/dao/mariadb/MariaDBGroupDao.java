@@ -2,7 +2,7 @@ package de.unknowncity.plots.data.dao.mariadb;
 
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.unknowncity.plots.data.dao.GroupDao;
-import de.unknowncity.plots.data.model.plot.group.PlotGroup;
+import de.unknowncity.plots.plot.group.PlotGroup;
 import org.intellij.lang.annotations.Language;
 
 import java.util.List;

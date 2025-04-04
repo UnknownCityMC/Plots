@@ -2,8 +2,7 @@ package de.unknowncity.plots.data.dao.mariadb;
 
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.unknowncity.plots.data.dao.PlotLocationDao;
-import de.unknowncity.plots.data.model.plot.PlotLocationType;
-import de.unknowncity.plots.data.model.plot.RelativePlotLocation;
+import de.unknowncity.plots.plot.location.RelativePlotLocation;
 import org.intellij.lang.annotations.Language;
 
 import java.util.List;
@@ -24,13 +23,13 @@ public class MariaDBPlotLocationDao implements PlotLocationDao {
     public CompletableFuture<Boolean> write(RelativePlotLocation plotLocation, String plotId) {
         @Language("mariadb")
         var queryString = """
-                REPLACE INTO plot_location (plot_id, type, x, y, z, yaw, pitch)
-                VALUES (:plotId, :type, :x, :y, :z, :yaw, :pitch)
+                REPLACE INTO plot_location (plot_id, name, x, y, z, yaw, pitch)
+                VALUES (:plotId, :name, :x, :y, :z, :yaw, :pitch)
                 """;
         return CompletableFuture.supplyAsync(queryConfiguration.query(queryString)
                 .single(call()
                         .bind("plotId", plotId)
-                        .bind("type", plotLocation.type())
+                        .bind("name", plotLocation.name())
                         .bind("x", plotLocation.x())
                         .bind("y", plotLocation.y())
                         .bind("z", plotLocation.z())
@@ -50,12 +49,12 @@ public class MariaDBPlotLocationDao implements PlotLocationDao {
         return CompletableFuture.supplyAsync(queryConfiguration.query(queryString)
                 .single(call().bind("plotId", plotId))
                 .map(row -> new RelativePlotLocation(
-                        row.getEnum("type", PlotLocationType.class),
+                        row.getString("name"),
                         row.getDouble("x"),
                         row.getDouble("y"),
                         row.getDouble("z"),
-                        row.getDouble("yaw"),
-                        row.getDouble("pitch")
+                        row.getFloat("yaw"),
+                        row.getFloat("pitch")
                 ))::all
         );
     }
