@@ -16,7 +16,7 @@ import org.bukkit.World;
 
 import java.util.*;
 
-public class RegionService implements Service<PlotsPlugin> {
+public class RegionService extends Service<PlotsPlugin> {
     private final WorldGuard worldGuard = WorldGuard.getInstance();
 
     @Override

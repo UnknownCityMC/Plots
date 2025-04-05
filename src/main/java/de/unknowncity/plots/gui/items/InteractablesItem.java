@@ -2,7 +2,7 @@ package de.unknowncity.plots.gui.items;
 
 import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.plot.access.PlotAccessModifier;
+import de.unknowncity.plots.plot.access.type.PlotAccessModifier;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -41,10 +41,10 @@ public class InteractablesItem extends AbstractItem {
             var accessModifierName = plugin.messenger().component(player, NodePath.path("gui", "interactables", "item", "slot", "access-modifier", accessModifier.name()));
 
             if (interactable.accessModifier() == accessModifier) {
-                return plugin.messenger().component(player, NodePath.path("gui", "access-modifier-format", "active"),
+                return plugin.messenger().component(player, NodePath.path("gui", "interactables", "format", "active"),
                         Placeholder.component("access-modifier", accessModifierName));
             } else {
-                return plugin.messenger().component(player, NodePath.path("gui", "access-modifier-format", "inactive"),
+                return plugin.messenger().component(player, NodePath.path("gui", "interactables", "format", "inactive"),
                         Placeholder.component("access-modifier", accessModifierName));
             }
         }).toList());

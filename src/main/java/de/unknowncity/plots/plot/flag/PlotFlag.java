@@ -8,6 +8,10 @@ import java.util.List;
 
 public abstract class PlotFlag<T> implements Registrable<PlotsPlugin> {
 
+    public enum Category {
+        PLAYER, ENTITY, VEHICLE, BLOCK
+    }
+
     protected final String flagId;
     protected final T defaultValue;
     private final Material displayMaterial;

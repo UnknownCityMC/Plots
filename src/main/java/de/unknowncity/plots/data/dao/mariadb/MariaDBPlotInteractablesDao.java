@@ -2,7 +2,7 @@ package de.unknowncity.plots.data.dao.mariadb;
 
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.unknowncity.plots.data.dao.PlotInteractablesDao;
-import de.unknowncity.plots.plot.access.PlotAccessModifier;
+import de.unknowncity.plots.plot.access.type.PlotAccessModifier;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
 import org.bukkit.Material;
 import org.intellij.lang.annotations.Language;

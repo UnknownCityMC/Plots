@@ -6,8 +6,8 @@ import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.unknowncity.astralib.common.message.lang.Language;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
-import de.unknowncity.plots.plot.access.BannedPlayer;
-import de.unknowncity.plots.plot.access.PlotMember;
+import de.unknowncity.plots.plot.access.entity.BannedPlayer;
+import de.unknowncity.plots.plot.access.entity.PlotMember;
 import de.unknowncity.plots.plot.access.PlotState;
 import de.unknowncity.plots.plot.flag.PlotFlag;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
@@ -214,6 +214,13 @@ public abstract class Plot {
         }
     }
 
+    public Optional<PlotMember> findPlotMember(UUID uuid) {
+        return members.stream().filter(plotMember -> plotMember.memberID().equals(uuid)).findFirst();
+    }
+
+    public Optional<BannedPlayer> findPlotBannedPlayer(UUID uuid) {
+        return bannedPlayers.stream().filter(bannedPlayer -> bannedPlayer.uuid().equals(uuid)).findFirst();
+    }
 
     public int height() {
         return protectedRegion().getMaximumPoint().y() - protectedRegion().getMinimumPoint().y() + 1;

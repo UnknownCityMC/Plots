@@ -3,24 +3,17 @@ package de.unknowncity.plots.gui.items;
 import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.Plot;
-import de.unknowncity.plots.plot.access.PlotAccessModifier;
-import de.unknowncity.plots.plot.flag.FlagRegistry;
 import de.unknowncity.plots.plot.flag.PlotFlag;
-import de.unknowncity.plots.plot.flag.WorldGuardFlag;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.NodePath;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
-import xyz.xenondevs.invui.item.impl.SimpleItem;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class FlagItem<T> extends AbstractItem {
     private final PlotFlag<T> plotFlag;
@@ -41,17 +34,21 @@ public class FlagItem<T> extends AbstractItem {
     public ItemProvider getItemProvider() {
         var itemBuilder = ItemBuilder.of(plotFlag.displayMaterial());
         itemBuilder.name(plugin.messenger().component(player, NodePath.path("flags", "name", plotFlag.flagId())));
-        var lore = new ArrayList<>(plugin.messenger().componentList(player, NodePath.path("gui", "flags", "item", "slot", "lore")));
 
+        var flagDescription = plugin.messenger().component(player, NodePath.path("flags", "description", plotFlag.flagId()));
+
+        var lore = new ArrayList<>(plugin.messenger().componentList(player, NodePath.path("gui", "flags", "item", "slot", "lore"),
+                Placeholder.component("flag-description", flagDescription)
+        ));
 
         lore.addAll(plotFlag.possibleValues().stream().map(possibleValue -> {
             var valueName = plugin.messenger().component(player, NodePath.path("flags", "value", possibleValue.toString()));
 
             if (plot.getFlag(plotFlag) == possibleValue) {
-                return plugin.messenger().component(player, NodePath.path("gui", "flag-format", "active"),
+                return plugin.messenger().component(player, NodePath.path("gui", "flags", "format", "active"),
                         Placeholder.component("value", valueName));
             } else {
-                return plugin.messenger().component(player, NodePath.path("gui", "flag-format", "inactive"),
+                return plugin.messenger().component(player, NodePath.path("gui", "flags", "format", "inactive"),
                         Placeholder.component("value", valueName));
             }
         }).toList());

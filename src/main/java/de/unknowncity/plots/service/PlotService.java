@@ -21,16 +21,19 @@ import com.sk89q.worldedit.world.biome.BiomeType;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.unknowncity.astralib.common.message.lang.Language;
 import de.unknowncity.astralib.common.service.Service;
 import de.unknowncity.plots.PlotsPlugin;
+import de.unknowncity.plots.data.dao.mariadb.*;
 import de.unknowncity.plots.plot.BuyPlot;
 import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.plot.RentPlot;
-import de.unknowncity.plots.plot.access.PlotMember;
-import de.unknowncity.plots.plot.access.PlotMemberRole;
+import de.unknowncity.plots.plot.access.entity.PlotMember;
+import de.unknowncity.plots.plot.access.type.PlotMemberRole;
 import de.unknowncity.plots.plot.access.PlotState;
 import de.unknowncity.plots.plot.flag.FlagRegistry;
+import de.unknowncity.plots.plot.flag.PlotFlags;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
 import de.unknowncity.plots.plot.group.PlotGroup;
 import de.unknowncity.plots.data.repository.PlotGroupRepository;
@@ -54,11 +57,12 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
 
-public class PlotService implements Service<PlotsPlugin> {
-    private final PlotGroupRepository plotGroupRepository;
+public class PlotService extends Service<PlotsPlugin> {
+    private final QueryConfiguration queryConfiguration;
     private final PlotsPlugin plugin;
 
     private final HashMap<String, Plot> plotCache = new HashMap<>();
@@ -66,17 +70,28 @@ public class PlotService implements Service<PlotsPlugin> {
     private final EconomyService economyService;
 
     private final FlagRegistry flagRegistry;
+    private PlotGroupRepository plotGroupRepository;
 
-    public PlotService(FlagRegistry flagRegistry, PlotGroupRepository plotGroupRepository, EconomyService economyService, PlotsPlugin plugin) {
-        this.flagRegistry = flagRegistry;
-        this.plotGroupRepository = plotGroupRepository;
+    public PlotService(QueryConfiguration queryConfiguration, EconomyService economyService, PlotsPlugin plugin) {
+        this.flagRegistry = new FlagRegistry(plugin);
+        this.queryConfiguration = queryConfiguration;
         this.economyService = economyService;
         this.plugin = plugin;
     }
 
     @Override
-    public void shutdown() {
+    public void startup() {
+        PlotFlags.registerAllFlags(this);
+        var plotDao = new MariaDBPlotDao(queryConfiguration);
+        var plotFlagDao = new MariaDBPlotFlagDao(queryConfiguration, flagRegistry);
+        var plotInteractablesDao = new MariaDBPlotInteractablesDao(queryConfiguration);
+        var plotGroupDao = new MariaDBGroupDao(queryConfiguration);
+        var plotLocationDao = new MariaDBPlotLocationDao(queryConfiguration);
+        var plotMemberDao = new MariaDBPlotMemberDao(queryConfiguration);
 
+        this.plotGroupRepository = new PlotGroupRepository(
+                plotGroupDao, plotDao, plotFlagDao, plotInteractablesDao, plotLocationDao, plotMemberDao
+        );
     }
 
     public void cacheAll() {
@@ -276,6 +291,23 @@ public class PlotService implements Service<PlotsPlugin> {
         });
     }
 
+    public Optional<Plot> findPlotAt(Location location) {
+        var regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
+        var possibleRegion = regionService.getSuitableRegion(location);
+
+        if (possibleRegion.isEmpty()) {
+            return Optional.empty();
+        }
+
+        var plotId = PlotId.generate(location.getWorld(), possibleRegion.get());
+
+        if (!existsPlot(plotId)) {
+            return Optional.empty();
+        }
+
+        return Optional.of(getPlot(plotId));
+    }
+
     public void deletePlot(String id) {
         var plot = plotCache.get(id);
         deletePlot(plot);
@@ -422,5 +454,13 @@ public class PlotService implements Service<PlotsPlugin> {
 
     public FlagRegistry flagRegistry() {
         return flagRegistry;
+    }
+
+    public PlotGroupRepository plotGroupRepository() {
+        return plotGroupRepository;
+    }
+
+    public PlotsPlugin plugin() {
+        return plugin;
     }
 }

@@ -1,4 +1,4 @@
-package de.unknowncity.plots.plot.access;
+package de.unknowncity.plots.plot.access.entity;
 
 import java.util.UUID;
 

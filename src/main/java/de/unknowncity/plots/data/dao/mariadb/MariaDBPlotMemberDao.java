@@ -3,8 +3,8 @@ package de.unknowncity.plots.data.dao.mariadb;
 import de.chojo.sadu.mapper.reader.StandardReader;
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.unknowncity.plots.data.dao.PlotMemberDao;
-import de.unknowncity.plots.plot.access.PlotMember;
-import de.unknowncity.plots.plot.access.PlotMemberRole;
+import de.unknowncity.plots.plot.access.entity.PlotMember;
+import de.unknowncity.plots.plot.access.type.PlotMemberRole;
 import org.intellij.lang.annotations.Language;
 
 import java.util.List;

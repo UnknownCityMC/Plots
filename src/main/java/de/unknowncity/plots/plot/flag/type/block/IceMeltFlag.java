@@ -1,4 +1,4 @@
-package de.unknowncity.plots.plot.flag.type;
+package de.unknowncity.plots.plot.flag.type.block;
 
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
@@ -10,7 +10,7 @@ import java.util.List;
 
 public class IceMeltFlag extends WorldGuardFlag<StateFlag.State> {
     public IceMeltFlag() {
-        super("ice-melt", StateFlag.State.ALLOW, Material.ICE, Flags.ICE_MELT);
+        super("ice-melt", StateFlag.State.ALLOW, Material.BLUE_ICE, Flags.ICE_MELT);
     }
 
     @Override

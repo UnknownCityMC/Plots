@@ -1,7 +1,7 @@
 package de.unknowncity.plots.gui.items;
 
 import de.unknowncity.plots.plot.Plot;
-import de.unknowncity.plots.plot.access.PlotMember;
+import de.unknowncity.plots.plot.access.entity.PlotMember;
 import de.unknowncity.plots.service.PlotService;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

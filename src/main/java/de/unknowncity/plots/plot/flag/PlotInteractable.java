@@ -1,7 +1,7 @@
 package de.unknowncity.plots.plot.flag;
 
-import de.unknowncity.plots.plot.access.PlotMemberRole;
-import de.unknowncity.plots.plot.access.PlotAccessModifier;
+import de.unknowncity.plots.plot.access.type.PlotMemberRole;
+import de.unknowncity.plots.plot.access.type.PlotAccessModifier;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 

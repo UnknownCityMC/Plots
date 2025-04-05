@@ -20,7 +20,7 @@ import de.unknowncity.plots.listener.PlotInteractListener;
 import de.unknowncity.plots.listener.PlotSignLinkListener;
 import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.plot.flag.FlagRegistry;
-import de.unknowncity.plots.plot.flag.type.IceMeltFlag;
+import de.unknowncity.plots.plot.flag.type.block.IceMeltFlag;
 import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
@@ -142,19 +142,8 @@ public class PlotsPlugin extends PaperAstraPlugin {
 
         var queryConfig = StandardDataBaseProvider.updateAndConnectToDataBase(databaseSetting, getClassLoader(), getDataPath());
 
-        var flagRegistry = new FlagRegistry(this);
-        flagRegistry.register(new IceMeltFlag());
+        this.serviceRegistry.register(new PlotService(queryConfig, economyService, this));
 
-        this.serviceRegistry.register(new PlotService(
-                flagRegistry,
-                new PlotGroupRepository(
-                        new MariaDBGroupDao(queryConfig),
-                        new MariaDBPlotDao(queryConfig),
-                        new MariaDBPlotFlagDao(queryConfig, flagRegistry),
-                        new MariaDBPlotInteractablesDao(queryConfig),
-                        new MariaDBPlotLocationDao(queryConfig),
-                        new MariaDBPlotMemberDao(queryConfig)
-                ), economyService, this));
 
         this.serviceRegistry().getRegistered(PlotService.class).cacheAll();
     }

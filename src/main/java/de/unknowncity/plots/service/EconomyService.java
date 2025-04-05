@@ -8,7 +8,7 @@ import su.nightexpress.coinsengine.api.currency.Currency;
 
 import java.util.UUID;
 
-public class EconomyService implements Service<PlotsPlugin> {
+public class EconomyService extends Service<PlotsPlugin> {
     private final Currency currency;
 
     public EconomyService(EconomySettings economySettings) {
@@ -25,10 +25,5 @@ public class EconomyService implements Service<PlotsPlugin> {
 
     public boolean hasEnoughFunds(UUID uuid, double amount) {
         return CoinsEngineAPI.getBalance(uuid, currency) >= amount;
-    }
-
-    @Override
-    public void shutdown() {
-
     }
 }

@@ -1,4 +1,6 @@
-package de.unknowncity.plots.plot.access;
+package de.unknowncity.plots.plot.access.entity;
+
+import de.unknowncity.plots.plot.access.type.PlotMemberRole;
 
 import java.util.UUID;
 
