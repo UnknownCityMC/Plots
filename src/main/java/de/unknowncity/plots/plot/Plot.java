@@ -172,7 +172,7 @@ public abstract class Plot {
                         : messenger.component(player, NodePath.path("plot", "no-owner"))),
                 Placeholder.parsed("world", worldName()),
 
-                Placeholder.component("members", !members().isEmpty() ? messenger.component(Language.GERMAN, NodePath.path("plot", "no-members")) :
+                Placeholder.component("members", !members().isEmpty() ? messenger.component(player, NodePath.path("plot", "no-members")) :
                         Component.text(String.join(", ", members().stream().map(PlotMember::name).toList()))),
                 Placeholder.parsed("flags", flags() != null ? flags().toString() : ""),
         };
