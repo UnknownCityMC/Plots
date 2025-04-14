@@ -45,7 +45,7 @@ public class MariaDBPlotLocationDao implements PlotLocationDao {
     public CompletableFuture<List<RelativePlotLocation>> readAll(String plotId) {
         @Language("mariadb")
         var queryString = """
-                SELECT type, x, y, z, yaw, pitch FROM plot_location WHERE plot_id = :plotId;
+                SELECT name, x, y, z, yaw, pitch FROM plot_location WHERE plot_id = :plotId;
                 """;
         return CompletableFuture.supplyAsync(queryConfiguration.query(queryString)
                 .single(call().bind("plotId", plotId))
