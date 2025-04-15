@@ -42,22 +42,19 @@ public class FlagsGUI {
                 messenger.component(player, NodePath.path("gui", "flags", "item", "back", "name"))
         ).item(), click -> PlotMainGUI.open(player, plot, plugin));
 
+        var flagCategories = plotService.flagRegistry().flagCategories();
 
-        List<Item> playerFlags = plotService.flagRegistry().flagCategories().get(PlotFlag.Category.PLAYER).stream().map(plotFlag -> {
-            return new FlagItem<>(player, plotFlag, plot, plugin);
-        }).collect(Collectors.toList());
+        var playerFlags = flagCategories.get(PlotFlag.Category.PLAYER);
+        List<Item> playerFLagItems = playerFlags.stream().map(plotFlag -> new FlagItem<>(player, plotFlag, plot, plugin)).collect(Collectors.toList());
 
-        List<Item> entityFlags = plotService.flagRegistry().flagCategories().get(PlotFlag.Category.PLAYER).stream().map(plotFlag -> {
-            return new FlagItem<>(player, plotFlag, plot, plugin);
-        }).collect(Collectors.toList());
+        var entityFlags = flagCategories.get(PlotFlag.Category.ENTITY);
+        List<Item> entityFlagItems = entityFlags.stream().map(plotFlag -> new FlagItem<>(player, plotFlag, plot, plugin)).collect(Collectors.toList());
 
-        List<Item> vehicleFlags = plotService.flagRegistry().flagCategories().get(PlotFlag.Category.PLAYER).stream().map(plotFlag -> {
-            return new FlagItem<>(player, plotFlag, plot, plugin);
-        }).collect(Collectors.toList());
+        var vehicleFlags = flagCategories.get(PlotFlag.Category.VEHICLE);
+        List<Item> vehicleFlagItems = vehicleFlags.stream().map(plotFlag -> new FlagItem<>(player, plotFlag, plot, plugin)).collect(Collectors.toList());
 
-        List<Item> blockFlags = plotService.flagRegistry().flagCategories().get(PlotFlag.Category.BLOCK).stream().map(plotFlag -> {
-            return new FlagItem<>(player, plotFlag, plot, plugin);
-        }).collect(Collectors.toList());
+        var blockFlags = flagCategories.get(PlotFlag.Category.BLOCK);
+        List<Item> blockFlagItems = blockFlags.stream().map(plotFlag -> new FlagItem<>(player, plotFlag, plot, plugin)).collect(Collectors.toList());
 
         var guis = new ArrayList<Gui>();
         var innerStructure = new Structure(
@@ -72,55 +69,54 @@ public class FlagsGUI {
                 .addIngredient('#', PlotMainGUI.BORDER_ITEM)
                 .addIngredient('.', Markers.CONTENT_LIST_SLOT_HORIZONTAL);
 
-        guis.add(PagedGui.ofItems(innerStructure, playerFlags));
-        guis.add(PagedGui.ofItems(innerStructure, entityFlags));
-        guis.add(PagedGui.ofItems(innerStructure, vehicleFlags));
-        guis.add(PagedGui.ofItems(innerStructure, blockFlags));
+        guis.add(PagedGui.ofItems(innerStructure, playerFLagItems));
+        guis.add(PagedGui.ofItems(innerStructure, entityFlagItems));
+        guis.add(PagedGui.ofItems(innerStructure, vehicleFlagItems));
+        guis.add(PagedGui.ofItems(innerStructure, blockFlagItems));
 
-        var playerTab = new DefaultTabItem(0,
-                ItemBuilder.of(Material.PLAYER_HEAD).name(
-                                messenger.component(player, NodePath.path("gui", "flags", "item", "player-tab", "name"),
-                                        Placeholder.parsed("flag-amount", String.valueOf(playerFlags.size())))
-                        )
-                        .lore(
-                                messenger.componentList(player, NodePath.path("gui", "flags", "item", "player-tab", "lore"),
-                                        Placeholder.parsed("flag-amount", String.valueOf(playerFlags.size())),
-                                        Placeholder.parsed("flag-description", String.valueOf(playerFlags.size())))
-                        ).item()
+        // Player Flag Tab Item
+        var playerTabLore = new ArrayList<Component>();
+        playerTabLore.addAll(messenger.componentList(player, NodePath.path("gui", "flags", "item", "player-tab", "lore"),
+                Placeholder.parsed("flag-amount", String.valueOf(playerFlags.size())))
         );
+        playerTabLore.addAll(flagCategoryLore(playerFlags, plugin, player));
+        var playerTab = new DefaultTabItem(0, ItemBuilder.of(Material.PLAYER_HEAD).name(
+                messenger.component(player, NodePath.path("gui", "flags", "item", "player-tab", "name"),
+                        Placeholder.parsed("flag-amount", String.valueOf(playerFlags.size())))
+        ).lore(playerTabLore).item());
 
-        var entityTab = new DefaultTabItem(1,
-                ItemBuilder.of(Material.ZOMBIE_SPAWN_EGG).name(
-                                messenger.component(player, NodePath.path("gui", "flags", "item", "entity-tab", "name"),
-                                        Placeholder.parsed("flag-amount", String.valueOf(entityFlags.size())))
-                        )
-                        .lore(
-                                messenger.componentList(player, NodePath.path("gui", "flags", "item", "entity-tab", "lore"),
-                                        Placeholder.parsed("flag-amount", String.valueOf(playerFlags.size())))
-                        ).item()
+        // Entity Flag Tab Item
+        var entityTabLore = new ArrayList<Component>();
+        entityTabLore.addAll(messenger.componentList(player, NodePath.path("gui", "flags", "item", "entity-tab", "lore"),
+                Placeholder.parsed("flag-amount", String.valueOf(playerFlags.size())))
         );
+        entityTabLore.addAll(flagCategoryLore(entityFlags, plugin, player));
+        var entityTab = new DefaultTabItem(1, ItemBuilder.of(Material.ZOMBIE_SPAWN_EGG).name(
+                messenger.component(player, NodePath.path("gui", "flags", "item", "entity-tab", "name"),
+                        Placeholder.parsed("flag-amount", String.valueOf(entityFlags.size())))
+        ).lore(entityTabLore).item());
 
-        var vehicleTab = new DefaultTabItem(2,
-                ItemBuilder.of(Material.MINECART).name(
-                                messenger.component(player, NodePath.path("gui", "flags", "item", "vehicle-tab", "name"),
-                                        Placeholder.parsed("flag-amount", String.valueOf(vehicleFlags.size())))
-                        )
-                        .lore(
-                                messenger.componentList(player, NodePath.path("gui", "flags", "item", "vehicle-tab", "lore"),
-                                        Placeholder.parsed("flag-amount", String.valueOf(playerFlags.size())))
-                        ).item()
+        // Vehicle Flag Tab Item
+        var vehicleTabLore = new ArrayList<Component>();
+        vehicleTabLore.addAll(messenger.componentList(player, NodePath.path("gui", "flags", "item", "vehicle-tab", "lore"),
+                Placeholder.parsed("flag-amount", String.valueOf(playerFlags.size())))
         );
+        vehicleTabLore.addAll(flagCategoryLore(vehicleFlags, plugin, player));
+        var vehicleTab = new DefaultTabItem(2, ItemBuilder.of(Material.MINECART).name(
+                messenger.component(player, NodePath.path("gui", "flags", "item", "vehicle-tab", "name"),
+                        Placeholder.parsed("flag-amount", String.valueOf(vehicleFlags.size())))
+        ).lore(vehicleTabLore).item());
 
-        var blockTab = new DefaultTabItem(3,
-                ItemBuilder.of(Material.BLUE_ICE).name(
-                                messenger.component(player, NodePath.path("gui", "flags", "item", "block-tab", "name"),
-                                        Placeholder.parsed("flag-amount", String.valueOf(blockFlags.size())))
-                        )
-                        .lore(
-                                messenger.componentList(player, NodePath.path("gui", "flags", "item", "block-tab", "lore"),
-                                        Placeholder.parsed("flag-amount", String.valueOf(playerFlags.size())))
-                        ).item()
+        // Block Flag Tab Item
+        var blockTabLore = new ArrayList<Component>();
+        blockTabLore.addAll(messenger.componentList(player, NodePath.path("gui", "flags", "item", "block-tab", "lore"),
+                Placeholder.parsed("flag-amount", String.valueOf(blockFlags.size())))
         );
+        blockTabLore.addAll(flagCategoryLore(blockFlags, plugin, player));
+        var blockTab = new DefaultTabItem(3, ItemBuilder.of(Material.BLUE_ICE).name(
+                messenger.component(player, NodePath.path("gui", "flags", "item", "block-tab", "name"),
+                        Placeholder.parsed("flag-amount", String.valueOf(blockFlags.size())))
+        ).lore(blockTabLore).item());
 
         var tabbedGUI = TabGui.normal()
                 .setStructure(
@@ -148,11 +144,20 @@ public class FlagsGUI {
     }
 
 
-    public List<Component> flagCategoryLore(List<PlotFlag<?>> flags, PlotsPlugin plugin, Player player) {
+    private static List<Component> flagCategoryLore(List<PlotFlag<?>> flags, PlotsPlugin plugin, Player player) {
         var lore = new ArrayList<Component>();
 
         flags.forEach(plotFlag -> {
-            lore.add(plugin.messenger().component(player, NodePath.path("flags", "description", plotFlag.flagId())));
+            var flagInfo = plugin.messenger().component(player, NodePath.path("flags", "info", plotFlag.flagId()));
+            var flagName = plugin.messenger().component(player, NodePath.path("flags", "name", plotFlag.flagId()));
+            var flagDescription = plugin.messenger().component(player, NodePath.path("flags", "description", plotFlag.flagId()));
+            var loreLine = plugin.messenger().component(player, NodePath.path("gui", "flags", "item", "tab", "lore", "slot"),
+                    Placeholder.component("flag-info", flagInfo),
+                    Placeholder.component("flag-description", flagDescription),
+                    Placeholder.component("flag-name", flagName)
+            );
+
+            lore.add(loreLine);
         });
 
         return lore;
