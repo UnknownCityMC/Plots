@@ -2,8 +2,7 @@ package de.unknowncity.plots.data.dao.mariadb;
 
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.unknowncity.plots.data.dao.PlotLocationDao;
-import de.unknowncity.plots.plot.location.PlotLocationType;
-import de.unknowncity.plots.plot.location.RelativePlotLocation;
+import de.unknowncity.plots.plot.location.PlotLocation;
 import org.intellij.lang.annotations.Language;
 
 import java.util.List;
@@ -21,16 +20,17 @@ public class MariaDBPlotLocationDao implements PlotLocationDao {
     }
 
     @Override
-    public CompletableFuture<Boolean> write(RelativePlotLocation plotLocation, String plotId) {
+    public CompletableFuture<Boolean> write(PlotLocation plotLocation, String plotId) {
         @Language("mariadb")
         var queryString = """
-                REPLACE INTO plot_location (plot_id, name, x, y, z, yaw, pitch)
-                VALUES (:plotId, :name, :x, :y, :z, :yaw, :pitch)
+                REPLACE INTO plot_location (plot_id, name, public, x, y, z, yaw, pitch)
+                VALUES (:plotId, :name, :public, :x, :y, :z, :yaw, :pitch)
                 """;
         return CompletableFuture.supplyAsync(queryConfiguration.query(queryString)
                 .single(call()
                         .bind("plotId", plotId)
-                        .bind("name", plotLocation.type().toString())
+                        .bind("name", plotLocation.name())
+                        .bind("public", plotLocation.isPublic())
                         .bind("x", plotLocation.x())
                         .bind("y", plotLocation.y())
                         .bind("z", plotLocation.z())
@@ -42,15 +42,16 @@ public class MariaDBPlotLocationDao implements PlotLocationDao {
     }
 
     @Override
-    public CompletableFuture<List<RelativePlotLocation>> readAll(String plotId) {
+    public CompletableFuture<List<PlotLocation>> readAll(String plotId) {
         @Language("mariadb")
         var queryString = """
-                SELECT name, x, y, z, yaw, pitch FROM plot_location WHERE plot_id = :plotId;
+                SELECT name, public, x, y, z, yaw, pitch FROM plot_location WHERE plot_id = :plotId;
                 """;
         return CompletableFuture.supplyAsync(queryConfiguration.query(queryString)
                 .single(call().bind("plotId", plotId))
-                .map(row -> new RelativePlotLocation(
-                        PlotLocationType.valueOf(row.getString("name")),
+                .map(row -> new PlotLocation(
+                        row.getString("name"),
+                        row.getBoolean("public"),
                         row.getDouble("x"),
                         row.getDouble("y"),
                         row.getDouble("z"),

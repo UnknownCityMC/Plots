@@ -3,6 +3,7 @@ package de.unknowncity.plots.task;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.RentPlot;
 import de.unknowncity.plots.plot.access.PlotState;
+import de.unknowncity.plots.plot.location.signs.SignManager;
 import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -47,7 +48,7 @@ public class RentTask {
                                 }
 
                                 plotService.savePlot(plot);
-                                plotService.updateSings(plot);
+                                SignManager.updateSings(plot, plugin.messenger());
 
                                 plugin.messenger().sendMessage(player, NodePath.path("task", "rent", "not-enough-money"), Placeholder.parsed("id", plot.id()));
                                 return;

@@ -12,6 +12,8 @@ jackson = "2.18.3"
 adventure = "4.19.0"
 papi = "2.11.6"
 
+glowing-entities = "1.4.3"
+
 coinsengine = "2.4.1"
 invui = "1.45"
 
@@ -31,6 +33,7 @@ coinsengine = { group = "su.nightexpress.coinsengine", name = "CoinsEngine", ver
 invui = { group = "xyz.xenondevs.invui", name = "invui", version.ref = "invui"}
 worldguard = { group = "com.sk89q.worldguard", name = "worldguard-bukkit", version.ref = "worldguard"}
 astralib = { group = "de.unknowncity.astralib", name = "astralib-paper-api", version.ref = "astralib" }
+glowing-entities = { group = "fr.skytasul", name = "glowingentities", version.ref = "glowing-entities"}
 
 
 # Storage

@@ -25,6 +25,7 @@ import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import de.unknowncity.plots.task.RentTask;
+import fr.skytasul.glowingentities.GlowingEntities;
 import org.bukkit.command.CommandSender;
 import org.incendo.cloud.processors.cache.SimpleCache;
 import org.incendo.cloud.processors.confirmation.ConfirmationConfiguration;
@@ -44,8 +45,8 @@ public class PlotsPlugin extends PaperAstraPlugin {
     private PaperMessenger messenger;
     private ConfirmationManager<CommandSender> confirmationManager;
     private RentTask rentTask;
-    public HashMap<UUID, Plot> signLinkPlayers = new HashMap<>();
     public HashMap<UUID, PlotLocations> createPlotPlayers = new HashMap<>();
+    private GlowingEntities glowingEntities;
 
     @Override
     public void onPluginEnable() {
@@ -53,6 +54,8 @@ public class PlotsPlugin extends PaperAstraPlugin {
         initializeDataServices();
 
         registerCommands();
+
+        glowingEntities = new GlowingEntities(this);
 
         var pluginManager = getServer().getPluginManager();
         pluginManager.registerEvents(new PlotInteractListener(this), this);
@@ -162,5 +165,9 @@ public class PlotsPlugin extends PaperAstraPlugin {
 
     public PlotsConfiguration configuration() {
         return configuration;
+    }
+
+    public GlowingEntities glowingEntities() {
+        return glowingEntities;
     }
 }

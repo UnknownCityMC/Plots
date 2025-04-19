@@ -12,7 +12,8 @@ import de.unknowncity.plots.plot.access.PlotState;
 import de.unknowncity.plots.plot.flag.PlotFlag;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
 import de.unknowncity.plots.plot.flag.WorldGuardFlag;
-import de.unknowncity.plots.plot.location.RelativePlotLocation;
+import de.unknowncity.plots.plot.location.PlotLocation;
+import de.unknowncity.plots.plot.location.signs.PlotSign;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -43,7 +44,8 @@ public abstract class Plot {
     private List<BannedPlayer> bannedPlayers = new ArrayList<>();
     private final Map<PlotFlag<?>, Object> flags = new HashMap<>();
     private List<PlotInteractable> interactables = new ArrayList<>();
-    private List<RelativePlotLocation> locations = new ArrayList<>();
+    private List<PlotLocation> locations = new ArrayList<>();
+    private List<PlotSign> signs = new ArrayList<>();
 
     public Plot(String plotId, String groupName, UUID owner, String regionId, double price, String worldName, PlotState state) {
         this.plotId = plotId;
@@ -87,8 +89,12 @@ public abstract class Plot {
         return groupName;
     }
 
-    public List<RelativePlotLocation> locations() {
+    public List<PlotLocation> locations() {
         return locations;
+    }
+
+    public List<PlotSign> signs() {
+        return signs;
     }
 
     public Map<PlotFlag<?>, ?> flags() {
@@ -114,8 +120,12 @@ public abstract class Plot {
         this.members = plotMembers;
     }
 
-    public void locations(List<RelativePlotLocation> locations) {
+    public void locations(List<PlotLocation> locations) {
         this.locations = locations;
+    }
+
+    public void signs(List<PlotSign> signs) {
+        this.signs = signs;
     }
 
     public void groupName(String groupName) {

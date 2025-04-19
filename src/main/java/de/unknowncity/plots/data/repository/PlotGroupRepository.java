@@ -4,6 +4,7 @@ import de.unknowncity.plots.data.dao.*;
 import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
 import de.unknowncity.plots.plot.group.PlotGroup;
+import de.unknowncity.plots.plot.location.signs.PlotSign;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ public class PlotGroupRepository {
     private final PlotFlagDao plotFlagDao;
     private final PlotInteractablesDao plotInteractablesDao;
     private final PlotLocationDao plotLocationDao;
+    private final PlotSignDao plotSignDao;
     private final PlotMemberDao plotMemberDao;
 
     public PlotGroupRepository(
@@ -23,6 +25,7 @@ public class PlotGroupRepository {
             PlotFlagDao plotFlagDao,
             PlotInteractablesDao plotInteractablesDao,
             PlotLocationDao plotLocationDao,
+            PlotSignDao plotSignDao,
             PlotMemberDao plotMemberDao
     ) {
         this.plotGroupDao = plotGroupDao;
@@ -30,6 +33,7 @@ public class PlotGroupRepository {
         this.plotFlagDao = plotFlagDao;
         this.plotInteractablesDao = plotInteractablesDao;
         this.plotLocationDao = plotLocationDao;
+        this.plotSignDao = plotSignDao;
         this.plotMemberDao = plotMemberDao;
     }
 
@@ -44,6 +48,7 @@ public class PlotGroupRepository {
                 });
                 plotMemberDao.readAll(plot.id()).thenAccept(plot::members);
                 plotLocationDao.readAll(plot.id()).thenAccept(plot::locations);
+                plotSignDao.readAll(plot.id()).thenAccept(plot::signs);
                 plotInteractablesDao.readAll(plot.id()).thenAccept(plotInteractables -> {
                     var updatedInteractables = new ArrayList<>(PlotInteractable.defaults());
                     plotInteractables.forEach(interactable -> {
@@ -87,6 +92,8 @@ public class PlotGroupRepository {
         plot.interactables().forEach(plotInteractable -> plotInteractablesDao.write(plotInteractable, plot.id()));
         plot.members().forEach(plotMember -> plotMemberDao.write(plotMember, plot.id()));
         plot.locations().forEach(plotLocation -> plotLocationDao.write(plotLocation, plot.id()));
+        plotSignDao.deleteAll(plot.id());
+        plotSignDao.writeAll(plot.signs(), plot.id());
     }
 
     public void deletePlot(Plot plot) {

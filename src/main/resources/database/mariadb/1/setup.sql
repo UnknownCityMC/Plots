@@ -26,14 +26,31 @@ CREATE TABLE IF NOT EXISTS plot_location
 (
     plot_id VARCHAR(256) NOT NULL,
     name    VARCHAR(256) NOT NULL,
+    public  BOOLEAN DEFAULT true,
     x       DOUBLE,
     y       DOUBLE,
     z       DOUBLE,
     yaw     DOUBLE,
     pitch   DOUBLE,
-    CONSTRAINT plot_member_pk
+    CONSTRAINT plot_location_pk
         PRIMARY KEY (plot_id, name),
     CONSTRAINT plot_location_plot_plot_id_id_fk
+        FOREIGN KEY (plot_id) REFERENCES plot (id)
+            ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS plot_sign
+(
+    plot_id VARCHAR(256) NOT NULL,
+    id      INTEGER,
+    x       DOUBLE,
+    y       DOUBLE,
+    z       DOUBLE,
+    yaw     DOUBLE,
+    pitch   DOUBLE,
+    CONSTRAINT plot_sign_pk
+        PRIMARY KEY (plot_id, id),
+    CONSTRAINT plot_sign_plot_plot_id_id_fk
         FOREIGN KEY (plot_id) REFERENCES plot (id)
             ON DELETE CASCADE
 );

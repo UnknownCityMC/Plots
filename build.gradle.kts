@@ -28,6 +28,7 @@ repositories {
 dependencies {
     bukkitLibrary(libs.jackson.yaml)
     bukkitLibrary(libs.configurate.yaml)
+    bukkitLibrary(libs.glowing.entities)
 
 
     implementation(libs.invui)
