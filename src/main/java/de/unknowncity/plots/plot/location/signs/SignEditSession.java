@@ -23,12 +23,17 @@ public class SignEditSession {
     }
 
     public void finish() {
+        if (plot == null) {
+            return;
+        }
+        
         plot.signs().forEach(plotSign -> {
             setOutline(plot, plotSign, false);
         });
     }
 
     public void setPlot(Plot plot) {
+        finish();
         this.plot = plot;
         open();
     }
