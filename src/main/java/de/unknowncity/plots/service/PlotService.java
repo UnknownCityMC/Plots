@@ -36,7 +36,9 @@ import de.unknowncity.plots.plot.flag.FlagRegistry;
 import de.unknowncity.plots.plot.flag.PlotFlags;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
 import de.unknowncity.plots.plot.group.PlotGroup;
+import de.unknowncity.plots.plot.location.PlotLocation;
 import de.unknowncity.plots.plot.location.signs.SignManager;
+import de.unknowncity.plots.util.LocationUtil;
 import de.unknowncity.plots.util.PlotId;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -146,6 +148,10 @@ public class PlotService extends Service<PlotsPlugin> {
 
         flagRegistry.getAllRegistered().forEach(plotFlag -> plot.setFlag(plotFlag, plotFlag.defaultValue()));
 
+        var possibleLoc = LocationUtil.findSaveTeleportLocation(plot.world(), region);
+        var plotHome = new PlotLocation("warp", true, possibleLoc);
+
+        plot.plotHomeLocation(plotHome);
         plot.interactables(PlotInteractable.defaults());
 
         savePlot(plot);

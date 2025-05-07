@@ -17,13 +17,15 @@ glowing-entities = "1.4.3"
 coinsengine = "2.4.1"
 invui = "1.45"
 
+plan = "5.6.2965"
+
 worldguard = "7.0.13"
 astralib = "0.6.0-SNAPSHOT"
 
 [libraries]
 paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper-api" }
-jackson-yaml = { group = "com.fasterxml.jackson.dataformat", name =  "jackson-dataformat-yaml", version.ref = "jackson"}
-jackson-toml = { group = "com.fasterxml.jackson.dataformat", name =  "jackson-dataformat-toml", version.ref = "jackson"}
+jackson-yaml = { group = "com.fasterxml.jackson.dataformat", name =  "jackson-dataformat-yaml", version.ref = "jackson" }
+jackson-toml = { group = "com.fasterxml.jackson.dataformat", name =  "jackson-dataformat-toml", version.ref = "jackson" }
 configurate-yaml = { group = "org.spongepowered", name = "configurate-hocon", version.ref = "configurate"}
 adventure-api = { group = "net.kyori", name = "adventure-api", version.ref = "adventure" }
 adventure-text-minimessage = { group = "net.kyori", name = "adventure-text-minimessage", version.ref = "adventure" }
@@ -31,10 +33,11 @@ papi = { group = "me.clip", name = "placeholderapi", version.ref = "papi" }
 
 coinsengine = { group = "su.nightexpress.coinsengine", name = "CoinsEngine", version.ref = "coinsengine"}
 invui = { group = "xyz.xenondevs.invui", name = "invui", version.ref = "invui"}
-worldguard = { group = "com.sk89q.worldguard", name = "worldguard-bukkit", version.ref = "worldguard"}
+worldguard = { group = "com.sk89q.worldguard", name = "worldguard-bukkit", version.ref = "worldguard" }
 astralib = { group = "de.unknowncity.astralib", name = "astralib-paper-api", version.ref = "astralib" }
-glowing-entities = { group = "fr.skytasul", name = "glowingentities", version.ref = "glowing-entities"}
+glowing-entities = { group = "fr.skytasul", name = "glowingentities", version.ref = "glowing-entities" }
 
+plan = { group = "com.github.plan-player-analytics", name = "Plan", version.ref = "plan" }
 
 # Storage
 sadu-queries = { group = "de.chojo.sadu", name = "sadu-queries", version.ref = "sadu" }

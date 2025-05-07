@@ -39,12 +39,12 @@ public abstract class Plot {
     private String groupName;
     private double price;
     private PlotState state;
+    private PlotLocation plotHomeLocation;
 
     private List<PlotMember> members = new ArrayList<>();
     private List<BannedPlayer> bannedPlayers = new ArrayList<>();
     private final Map<PlotFlag<?>, Object> flags = new HashMap<>();
     private List<PlotInteractable> interactables = new ArrayList<>();
-    private List<PlotLocation> locations = new ArrayList<>();
     private List<PlotSign> signs = new ArrayList<>();
 
     public Plot(String plotId, String groupName, UUID owner, String regionId, double price, String worldName, PlotState state) {
@@ -89,8 +89,12 @@ public abstract class Plot {
         return groupName;
     }
 
-    public List<PlotLocation> locations() {
-        return locations;
+    public PlotLocation plotHomeLocation() {
+        return plotHomeLocation;
+    }
+
+    public void plotHomeLocation(PlotLocation plotHomeLocation) {
+        this.plotHomeLocation = plotHomeLocation;
     }
 
     public List<PlotSign> signs() {
@@ -118,10 +122,6 @@ public abstract class Plot {
 
     public void members(List<PlotMember> plotMembers) {
         this.members = plotMembers;
-    }
-
-    public void locations(List<PlotLocation> locations) {
-        this.locations = locations;
     }
 
     public void signs(List<PlotSign> signs) {

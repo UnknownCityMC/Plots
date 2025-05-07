@@ -15,6 +15,7 @@ import de.unknowncity.plots.data.dao.mariadb.*;
 
 import de.unknowncity.plots.data.model.plot.PlotLocations;
 import de.unknowncity.plots.data.repository.PlotGroupRepository;
+import de.unknowncity.plots.hook.PlanHook;
 import de.unknowncity.plots.listener.PlotCreateListener;
 import de.unknowncity.plots.listener.PlotInteractListener;
 import de.unknowncity.plots.listener.PlotSignLinkListener;
@@ -52,6 +53,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
     public void onPluginEnable() {
         onPluginReload();
         initializeDataServices();
+        initializeHooks();
 
         registerCommands();
 
@@ -81,6 +83,11 @@ public class PlotsPlugin extends PaperAstraPlugin {
     @Override
     public void onPluginDisable() {
         rentTask.cancel();
+    }
+
+
+    public void initializeHooks() {
+        this.hookRegistry.register(new PlanHook(this));
     }
 
     public void registerCommands() {

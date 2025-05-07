@@ -22,6 +22,8 @@ repositories {
     maven("https://repo.unknowncity.de/snapshots")
 
     maven("https://repo.nightexpressdev.com/releases")
+    maven("https://jitpack.io")
+
     mavenLocal()
 }
 
@@ -40,6 +42,7 @@ dependencies {
     compileOnly(libs.papi)
     compileOnly(libs.astralib)
     compileOnly(libs.worldguard)
+    compileOnly(libs.plan)
 
     testImplementation(platform("org.junit:junit-bom:5.12.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")

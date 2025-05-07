@@ -47,7 +47,11 @@ public class PlotGroupRepository {
                     });
                 });
                 plotMemberDao.readAll(plot.id()).thenAccept(plot::members);
-                plotLocationDao.readAll(plot.id()).thenAccept(plot::locations);
+
+                plotLocationDao.read(plot.id()).thenAccept(plotLocationWrapper -> {
+                    plotLocationWrapper.ifPresent(plot::plotHomeLocation);
+                });
+
                 plotSignDao.readAll(plot.id()).thenAccept(plot::signs);
                 plotInteractablesDao.readAll(plot.id()).thenAccept(plotInteractables -> {
                     var updatedInteractables = new ArrayList<>(PlotInteractable.defaults());
@@ -91,7 +95,7 @@ public class PlotGroupRepository {
         plot.flags().forEach((plotFlag, value) -> plotFlagDao.write(plot.id(), plotFlag.flagId(), plotFlag.marshall(value)));
         plot.interactables().forEach(plotInteractable -> plotInteractablesDao.write(plotInteractable, plot.id()));
         plot.members().forEach(plotMember -> plotMemberDao.write(plotMember, plot.id()));
-        plot.locations().forEach(plotLocation -> plotLocationDao.write(plotLocation, plot.id()));
+        plotLocationDao.write(plot.plotHomeLocation(), plot.id());
         plotSignDao.deleteAll(plot.id());
         plotSignDao.writeAll(plot.signs(), plot.id());
     }
