@@ -9,7 +9,7 @@ paper-api = "1.21.3-R0.1-SNAPSHOT"
 # Config
 configurate = "4.2.0"
 jackson = "2.18.3"
-adventure = "4.19.0"
+adventure = "4.21.0"
 papi = "2.11.6"
 
 glowing-entities = "1.4.4"
