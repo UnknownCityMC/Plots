@@ -22,32 +22,29 @@ import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
-import de.unknowncity.astralib.common.message.lang.Language;
 import de.unknowncity.astralib.common.service.Service;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.data.dao.mariadb.*;
+import de.unknowncity.plots.data.repository.PlotGroupRepository;
 import de.unknowncity.plots.plot.BuyPlot;
 import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.plot.RentPlot;
+import de.unknowncity.plots.plot.access.PlotState;
 import de.unknowncity.plots.plot.access.entity.PlotMember;
 import de.unknowncity.plots.plot.access.type.PlotMemberRole;
-import de.unknowncity.plots.plot.access.PlotState;
 import de.unknowncity.plots.plot.flag.FlagRegistry;
 import de.unknowncity.plots.plot.flag.PlotFlags;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
 import de.unknowncity.plots.plot.group.PlotGroup;
-import de.unknowncity.plots.data.repository.PlotGroupRepository;
-import de.unknowncity.plots.plot.location.PlotLocationType;
-import de.unknowncity.plots.plot.location.RelativePlotLocation;
+import de.unknowncity.plots.plot.location.PlotLocation;
+import de.unknowncity.plots.plot.location.signs.SignManager;
+import de.unknowncity.plots.util.LocationUtil;
 import de.unknowncity.plots.util.PlotId;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
-import org.bukkit.block.Sign;
-import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
-import org.spongepowered.configurate.NodePath;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,10 +52,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 
 public class PlotService extends Service<PlotsPlugin> {
@@ -70,6 +64,7 @@ public class PlotService extends Service<PlotsPlugin> {
     private final EconomyService economyService;
 
     private final FlagRegistry flagRegistry;
+    private final SignManager signManager;
     private PlotGroupRepository plotGroupRepository;
 
     public PlotService(QueryConfiguration queryConfiguration, EconomyService economyService, PlotsPlugin plugin) {
@@ -77,6 +72,8 @@ public class PlotService extends Service<PlotsPlugin> {
         this.queryConfiguration = queryConfiguration;
         this.economyService = economyService;
         this.plugin = plugin;
+
+        this.signManager = new SignManager(plugin);
     }
 
     @Override
@@ -87,11 +84,14 @@ public class PlotService extends Service<PlotsPlugin> {
         var plotInteractablesDao = new MariaDBPlotInteractablesDao(queryConfiguration);
         var plotGroupDao = new MariaDBGroupDao(queryConfiguration);
         var plotLocationDao = new MariaDBPlotLocationDao(queryConfiguration);
+        var plotSignDao = new MariaDBPlotSignDao(queryConfiguration);
         var plotMemberDao = new MariaDBPlotMemberDao(queryConfiguration);
 
         this.plotGroupRepository = new PlotGroupRepository(
-                plotGroupDao, plotDao, plotFlagDao, plotInteractablesDao, plotLocationDao, plotMemberDao
+                plotGroupDao, plotDao, plotFlagDao, plotInteractablesDao, plotLocationDao, plotSignDao, plotMemberDao
         );
+
+
     }
 
     public void cacheAll() {
@@ -99,7 +99,7 @@ public class PlotService extends Service<PlotsPlugin> {
             this.plotCache.putAll(plotCache);
             plotGroupRepository.loadPlotGroupCache(plotCache).whenComplete((plotGroupCache, thr2) -> {
                 this.plotGroupCache.putAll(plotGroupCache);
-            });
+            }).whenComplete((stringPlotGroupHashMap, throwable) -> signManager.collectGarbage());
         });
     }
 
@@ -120,7 +120,7 @@ public class PlotService extends Service<PlotsPlugin> {
         if (plotCache.containsKey(plotId)) {
             return false;
         }
-        var plot = new BuyPlot(plotId, null, plotGroupName, region.getId(), price, world.getName(), PlotState.AVAILABLE);
+        var plot = new BuyPlot(plotId, plotGroupName, null, region.getId(), price, world.getName(), PlotState.AVAILABLE, null);
 
         createPlot(region, plot, plotGroupName);
         return true;
@@ -131,7 +131,7 @@ public class PlotService extends Service<PlotsPlugin> {
         if (plotCache.containsKey(plotId)) {
             return false;
         }
-        var plot = new RentPlot(plotId, null, plotGroupName, region.getId(), price, world.getName(), PlotState.AVAILABLE, null, rentInterval.toMinutes());
+        var plot = new RentPlot(plotId, null, plotGroupName, region.getId(), price, world.getName(), PlotState.AVAILABLE, null, null, rentInterval.toMinutes());
 
         createPlot(region, plot, plotGroupName);
         return true;
@@ -144,6 +144,10 @@ public class PlotService extends Service<PlotsPlugin> {
         region.setFlag(Flags.USE, StateFlag.State.ALLOW);
 
         flagRegistry.getAllRegistered().forEach(plotFlag -> plot.setFlag(plotFlag, plotFlag.defaultValue()));
+
+        var location = LocationUtil.findSuitablePlotLocation(plot.world(), region);
+        var plotHome = new PlotLocation(plot.id(), true, location.x(), location.y(), location.z(), 0, 0);
+        plot.plotHome(plotHome);
 
         plot.interactables(PlotInteractable.defaults());
 
@@ -188,7 +192,7 @@ public class PlotService extends Service<PlotsPlugin> {
             createSchematic(plot);
         }
 
-        updateSings(plot);
+        SignManager.updateSings(plot, plugin.messenger());
     }
 
     public void unClaimPlot(Plot plot) {
@@ -205,7 +209,7 @@ public class PlotService extends Service<PlotsPlugin> {
             loadSchematic(plot);
         }
 
-        updateSings(plot);
+        SignManager.updateSings(plot, plugin.messenger());
     }
 
     public boolean backup(Plot plot, UUID owner) {
@@ -247,13 +251,13 @@ public class PlotService extends Service<PlotsPlugin> {
         plot.state(PlotState.SOLD);
         plot.owner(player.getUniqueId());
         savePlot(plot);
-        updateSings(plot);
+        SignManager.updateSings(plot, plugin.messenger());
     }
 
     public void setPlotPrice(double price, Plot plot) {
         plot.price(price);
         savePlot(plot);
-        updateSings(plot);
+        SignManager.updateSings(plot, plugin.messenger());
     }
 
     public void setPlotGroup(String groupName, Plot plot) {
@@ -264,7 +268,7 @@ public class PlotService extends Service<PlotsPlugin> {
         plot.groupName(groupName);
         plotGroupCache.get(groupName).plotsInGroup().put(plot.id(), plot);
         savePlot(plot);
-        updateSings(plot);
+        SignManager.updateSings(plot, plugin.messenger());
     }
 
     public void createPlotGroup(String name) {
@@ -328,38 +332,6 @@ public class PlotService extends Service<PlotsPlugin> {
         });
         plotGroupRepository.deletePlotGroup(plotGroup);
         plotGroupCache.remove(plotGroup.name());
-    }
-
-    public boolean addSign(Plot plot, Location location) {
-        RelativePlotLocation sign = new RelativePlotLocation(PlotLocationType.SIGN, location.x(), location.y(), location.z(), location.getYaw(), location.getPitch());
-        if (plot.locations().stream().anyMatch(loc -> loc.type() == PlotLocationType.SIGN && loc.x() == location.x() && loc.y() == location.y() && loc.z() == location.z())) {
-            return false;
-        }
-        plot.locations().add(sign);
-        savePlot(plot);
-
-        updateSings(plot);
-        return true;
-    }
-
-    public void updateSings(Plot plot) {
-        plot.locations().stream().filter(relativePlotLocation -> relativePlotLocation.type() == PlotLocationType.SIGN).forEach(relativePlotLocation -> {
-            var loc = new Location(plot.world(), relativePlotLocation.x(), relativePlotLocation.y(), relativePlotLocation.z());
-            var block = plot.world().getBlockAt(loc);
-
-            if (!block.getType().toString().contains("SIGN")) {
-                plot.locations().remove(relativePlotLocation);
-                return;
-            }
-
-            var state = plot.state().name().toLowerCase();
-            Sign sign = (Sign) block.getState();
-            sign.getSide(Side.FRONT).line(0, plugin.messenger().component(Language.GERMAN, NodePath.path("sign", state, "line-1"), plot.tagResolvers(plugin.messenger())));
-            sign.getSide(Side.FRONT).line(1, plugin.messenger().component(Language.GERMAN, NodePath.path("sign", state, "line-2"), plot.tagResolvers(plugin.messenger())));
-            sign.getSide(Side.FRONT).line(2, plugin.messenger().component(Language.GERMAN, NodePath.path("sign", state, "line-3"), plot.tagResolvers(plugin.messenger())));
-            sign.getSide(Side.FRONT).line(3, plugin.messenger().component(Language.GERMAN, NodePath.path("sign", state, "line-4"), plot.tagResolvers(plugin.messenger())));
-            sign.update();
-        });
     }
 
     public PlotGroup getPlotGroupWithPlots(String name) {
@@ -444,6 +416,10 @@ public class PlotService extends Service<PlotsPlugin> {
 
     }
 
+    public List<Plot> findPlotsByOwnerUUID(UUID uuid) {
+        return plotCache.values().stream().filter(plot -> plot.owner().equals(uuid)).sorted(Comparator.comparing(Plot::claimed)).toList();
+    }
+
     public HashMap<String, PlotGroup> groupCache() {
         return plotGroupCache;
     }
@@ -462,5 +438,9 @@ public class PlotService extends Service<PlotsPlugin> {
 
     public PlotsPlugin plugin() {
         return plugin;
+    }
+
+    public SignManager signManager() {
+        return signManager;
     }
 }

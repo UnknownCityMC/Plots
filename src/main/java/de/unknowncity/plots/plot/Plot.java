@@ -12,7 +12,8 @@ import de.unknowncity.plots.plot.access.PlotState;
 import de.unknowncity.plots.plot.flag.PlotFlag;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
 import de.unknowncity.plots.plot.flag.WorldGuardFlag;
-import de.unknowncity.plots.plot.location.RelativePlotLocation;
+import de.unknowncity.plots.plot.location.PlotLocation;
+import de.unknowncity.plots.plot.location.signs.PlotSign;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -25,6 +26,7 @@ import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
 import org.spongepowered.configurate.NodePath;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -38,14 +40,16 @@ public abstract class Plot {
     private String groupName;
     private double price;
     private PlotState state;
+    private LocalDateTime claimed;
 
     private List<PlotMember> members = new ArrayList<>();
     private List<BannedPlayer> bannedPlayers = new ArrayList<>();
     private final Map<PlotFlag<?>, Object> flags = new HashMap<>();
     private List<PlotInteractable> interactables = new ArrayList<>();
-    private List<RelativePlotLocation> locations = new ArrayList<>();
+    private PlotLocation plotHome;
+    private List<PlotSign> signs = new ArrayList<>();
 
-    public Plot(String plotId, String groupName, UUID owner, String regionId, double price, String worldName, PlotState state) {
+    public Plot(String plotId, String groupName, UUID owner, String regionId, double price, String worldName, PlotState state, LocalDateTime claimed) {
         this.plotId = plotId;
         this.groupName = groupName;
         this.owner = owner;
@@ -53,6 +57,7 @@ public abstract class Plot {
         this.price = price;
         this.worldName = worldName;
         this.state = state;
+        this.claimed = claimed;
     }
 
     public List<PlotMember> members() {
@@ -87,8 +92,20 @@ public abstract class Plot {
         return groupName;
     }
 
-    public List<RelativePlotLocation> locations() {
-        return locations;
+    public PlotLocation plotHome() {
+        return plotHome;
+    }
+
+    public void plotHome(PlotLocation plotHome) {
+        this.plotHome = plotHome;
+    }
+
+    public List<PlotSign> signs() {
+        return signs;
+    }
+
+    public LocalDateTime claimed() {
+        return claimed;
     }
 
     public Map<PlotFlag<?>, ?> flags() {
@@ -114,8 +131,8 @@ public abstract class Plot {
         this.members = plotMembers;
     }
 
-    public void locations(List<RelativePlotLocation> locations) {
-        this.locations = locations;
+    public void signs(List<PlotSign> signs) {
+        this.signs = signs;
     }
 
     public void groupName(String groupName) {

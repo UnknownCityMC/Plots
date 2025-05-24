@@ -3,20 +3,24 @@
 shadow = "8.1.8"
 pluginyml = "0.6.0"
 
-sadu = "2.3.1"
 paper-api = "1.21.5-R0.1-SNAPSHOT"
+sadu = "2.3.2"
 
 # Config
 configurate = "4.2.0"
-jackson = "2.18.3"
-adventure = "4.19.0"
+jackson = "2.19.0"
+adventure = "4.21.0"
 papi = "2.11.6"
+
+glowing-entities = "1.4.4"
 
 coinsengine = "2.4.1"
 invui = "1.45"
 
 worldguard = "7.0.13"
 astralib = "0.6.0-SNAPSHOT"
+
+plan = "5.6.2965"
 
 [libraries]
 paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper-api" }
@@ -31,7 +35,9 @@ coinsengine = { group = "su.nightexpress.coinsengine", name = "CoinsEngine", ver
 invui = { group = "xyz.xenondevs.invui", name = "invui", version.ref = "invui"}
 worldguard = { group = "com.sk89q.worldguard", name = "worldguard-bukkit", version.ref = "worldguard"}
 astralib = { group = "de.unknowncity.astralib", name = "astralib-paper-api", version.ref = "astralib" }
+glowing-entities = { group = "fr.skytasul", name = "glowingentities", version.ref = "glowing-entities"}
 
+plan = { group = "com.github.plan-player-analytics", name = "Plan", version.ref = "plan"}
 
 # Storage
 sadu-queries = { group = "de.chojo.sadu", name = "sadu-queries", version.ref = "sadu" }
