@@ -92,7 +92,7 @@ public class MariaDBPlotDao implements PlotDao {
     public CompletableFuture<List<? extends Plot>> readAll() {
         @Language("mariadb")
         var queryString = """
-                SELECT id, owner_id, region_id, group_name, world, state, payment_type, price, rent_interval, last_rent_paid
+                SELECT id, owner_id, region_id, group_name, world, state, payment_type, price, rent_interval, last_rent_paid, claimed
                 FROM plot
                 """;
         return CompletableFuture.supplyAsync(queryConfiguration.query(queryString)
@@ -133,7 +133,7 @@ public class MariaDBPlotDao implements PlotDao {
     public CompletableFuture<List<? extends Plot>> readAllFromGroup(String groupName) {
         @Language("mariadb")
         var queryString = """
-                SELECT id, owner_id, region_id, group_name, world, state, payment_type, price, rent_interval, last_rent_paid
+                SELECT id, owner_id, region_id, group_name, world, state, payment_type, price, rent_interval, last_rent_paid, claimed
                 FROM plot
                 WHERE group_name = :groupName
                 """;

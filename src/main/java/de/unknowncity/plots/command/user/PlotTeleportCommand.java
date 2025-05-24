@@ -9,12 +9,13 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
+import org.spongepowered.configurate.NodePath;
 
+import static org.incendo.cloud.bukkit.parser.OfflinePlayerParser.offlinePlayerParser;
 import static org.incendo.cloud.parser.standard.IntegerParser.integerParser;
-import static org.incendo.cloud.parser.standard.StringParser.stringParser;
 
 public class PlotTeleportCommand extends SubCommand {
-    private PlotService plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
+    private final PlotService plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
 
     public PlotTeleportCommand(PlotsPlugin plugin, Command.Builder<CommandSender> builder) {
         super(plugin, builder);
@@ -22,19 +23,37 @@ public class PlotTeleportCommand extends SubCommand {
 
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
-        commandManager.command(commandManager.commandBuilder("teleport", "tp", "home", "h")
+        commandManager.command(builder.literal("teleport", "tp", "home", "h")
                 .permission("plots.command.plot.teleport")
                 .senderType(Player.class)
-                .required("player", stringParser())
+                .required("player", offlinePlayerParser())
                 .optional("id", integerParser(1))
                 .handler(this::handleTeleportPlayer)
+                .build()
         );
     }
 
     private void handleTeleportPlayer(@NonNull CommandContext<Player> context) {
         var sender = context.sender();
-        var plots = plotService.findPlotsByOwnerUUID(sender.getUniqueId());
+        var id = context.getOrDefault("id", 1);
+        var targetPlayer = context.getOrDefault("player", sender);
 
-        var targetPlayer = context.getOrDefault("player", sender.name());
+        var plots = plotService.findPlotsByOwnerUUID(targetPlayer.getUniqueId());
+
+        if (plots.size() < id) {
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot-tp", "not-found"));
+            return;
+        }
+
+        var plot = plots.get(id - 1);
+        if (
+                plot.plotHome().isPublic() ||
+                plot.owner().equals(sender.getUniqueId()) ||
+                plot.members().stream().anyMatch(plotMember -> plotMember.memberID().equals(sender.getUniqueId())) ||
+                sender.hasPermission("plots.command.plot.teleport.others")
+        ) {
+            sender.teleport(plot.plotHome().getLocation(plot.world()));
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot-tp", "success"));
+        }
     }
 }

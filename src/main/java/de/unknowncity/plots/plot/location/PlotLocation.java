@@ -1,5 +1,7 @@
 package de.unknowncity.plots.plot.location;
 
+import org.bukkit.Location;
+
 public class PlotLocation extends PlotPosition {
     private final String name;
     private final boolean isPublic;

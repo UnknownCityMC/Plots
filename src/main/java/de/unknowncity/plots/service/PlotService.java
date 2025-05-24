@@ -145,9 +145,12 @@ public class PlotService extends Service<PlotsPlugin> {
 
         flagRegistry.getAllRegistered().forEach(plotFlag -> plot.setFlag(plotFlag, plotFlag.defaultValue()));
 
-        var location = LocationUtil.findSuitablePlotLocation(plot.world(), region);
-        var plotHome = new PlotLocation(plot.id(), true, location.x(), location.y(), location.z(), 0, 0);
-        plot.plotHome(plotHome);
+        var optLocation = LocationUtil.findSuitablePlotLocation(plot.world(), region);
+        if (optLocation.isPresent()) {
+            var location = optLocation.get();
+            var plotHome = new PlotLocation(plot.id(), true, location.x(), location.y(), location.z(), 0, 0);
+            plot.plotHome(plotHome);
+        }
 
         plot.interactables(PlotInteractable.defaults());
 
@@ -289,7 +292,7 @@ public class PlotService extends Service<PlotsPlugin> {
     }
 
     public void savePlot(Plot plot) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->  {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             plotGroupRepository.savePlot(plot);
             plotCache.put(plot.id(), plot);
         });

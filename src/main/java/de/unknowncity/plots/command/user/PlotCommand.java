@@ -57,5 +57,6 @@ public class PlotCommand extends PaperCommand<PlotsPlugin> {
         new PlotAddMemberCommand(plugin, builder).apply(commandManager);
         new PlotRemoveMemberCommand(plugin, builder).apply(commandManager);
         new PlotChangeRoleCommand(plugin, builder).apply(commandManager);
+        new PlotTeleportCommand(plugin, builder).apply(commandManager);
     }
 }

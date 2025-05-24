@@ -1,5 +1,8 @@
 package de.unknowncity.plots.plot.location;
 
+import org.bukkit.Location;
+import org.bukkit.World;
+
 public class PlotPosition {
     private final double x;
     private final double y;
@@ -33,5 +36,9 @@ public class PlotPosition {
 
     public float pitch() {
         return pitch;
+    }
+
+    public Location getLocation(World world) {
+        return new Location(world, x, y, z, yaw, pitch);
     }
 }

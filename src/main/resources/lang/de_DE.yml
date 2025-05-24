@@ -44,6 +44,9 @@ command:
     unclaim:
       no-owner: <prefix><red>Das darf nur der Besitzer tun!
       success: <prefix><gray>Du hast <gold><id> <grayfür <gold><price>$ <red>verkauft!
+    plot-tp:
+      not-found: <prefix><red>Teleport nicht möglich!
+      success: <prefix><gray>Du wurdest erfolgreich teleportiert!
   plotadmin:
     reload: <prefix><gray>Einstellungen und Nachrichten neu geladen! <green>✔
     no-plot: <prefix><red>An dieser Stelle befindet sich kein Plot
