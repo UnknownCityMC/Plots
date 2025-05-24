@@ -20,6 +20,8 @@ invui = "1.45"
 worldguard = "7.0.13"
 astralib = "0.6.0-SNAPSHOT"
 
+plan = "5.6.2965"
+
 [libraries]
 paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper-api" }
 jackson-yaml = { group = "com.fasterxml.jackson.dataformat", name =  "jackson-dataformat-yaml", version.ref = "jackson"}
@@ -35,6 +37,7 @@ worldguard = { group = "com.sk89q.worldguard", name = "worldguard-bukkit", versi
 astralib = { group = "de.unknowncity.astralib", name = "astralib-paper-api", version.ref = "astralib" }
 glowing-entities = { group = "fr.skytasul", name = "glowingentities", version.ref = "glowing-entities"}
 
+plan = { group = "com.github.plan-player-analytics", name = "Plan", version.ref = "plan"}
 
 # Storage
 sadu-queries = { group = "de.chojo.sadu", name = "sadu-queries", version.ref = "sadu" }
