@@ -10,9 +10,9 @@ public class RentPlot extends Plot {
     private long rentIntervalInMin;
 
     public RentPlot(String plotId, UUID owner, String groupName, String regionId, double price, String worldName,
-                    PlotState state, LocalDateTime lastRentPayed, long rentIntervalInMin
+                    PlotState state, LocalDateTime claimed, LocalDateTime lastRentPayed, long rentIntervalInMin
     ) {
-        super(plotId, groupName, owner, regionId, price, worldName, state);
+        super(plotId, groupName, owner, regionId, price, worldName, state, claimed);
         this.lastRentPayed = lastRentPayed;
         this.rentIntervalInMin = rentIntervalInMin;
     }

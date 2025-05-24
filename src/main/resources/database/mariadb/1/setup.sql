@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS plot
 
     rent_interval  LONG                                      DEFAULT 0,
     last_rent_paid DATETIME,
+    claimed        DATETIME                                  DEFAULT NOW(),
 
     CONSTRAINT plot_plot_group_group_name_name_fk
         FOREIGN KEY (group_name) REFERENCES plot_group (name)

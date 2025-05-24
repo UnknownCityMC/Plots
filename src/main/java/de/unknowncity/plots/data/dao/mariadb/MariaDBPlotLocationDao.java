@@ -7,6 +7,7 @@ import org.intellij.lang.annotations.Language;
 
 import java.util.List;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static de.chojo.sadu.queries.api.call.Call.call;
@@ -42,7 +43,7 @@ public class MariaDBPlotLocationDao implements PlotLocationDao {
     }
 
     @Override
-    public CompletableFuture<List<PlotLocation>> readAll(String plotId) {
+    public CompletableFuture<Optional<PlotLocation>> read(String plotId) {
         @Language("mariadb")
         var queryString = """
                 SELECT name, public, x, y, z, yaw, pitch FROM plot_location WHERE plot_id = :plotId;
@@ -57,7 +58,7 @@ public class MariaDBPlotLocationDao implements PlotLocationDao {
                         row.getDouble("z"),
                         row.getFloat("yaw"),
                         row.getFloat("pitch")
-                ))::all
+                ))::first
         );
     }
 }

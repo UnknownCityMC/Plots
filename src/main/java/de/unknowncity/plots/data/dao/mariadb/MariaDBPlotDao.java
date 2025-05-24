@@ -38,12 +38,13 @@ public class MariaDBPlotDao implements PlotDao {
                     if (paymentType == PlotPaymentType.BUY) {
                         return new BuyPlot(
                                 plotId,
-                                row.get("owner_id", StandardReader.UUID_FROM_STRING),
                                 row.getString("group_name"),
+                                row.get("owner_id", StandardReader.UUID_FROM_STRING),
                                 row.getString("region_id"),
                                 row.getDouble("price"),
                                 row.getString("world"),
-                                row.getEnum("state", PlotState.class)
+                                row.getEnum("state", PlotState.class),
+                                row.get("claimed", StandardReader.LOCAL_DATE_TIME)
                         );
                     } else {
                         return new RentPlot(
@@ -54,6 +55,7 @@ public class MariaDBPlotDao implements PlotDao {
                                 row.getDouble("price"),
                                 row.getString("world"),
                                 row.getEnum("state", PlotState.class),
+                                row.get("claimed", StandardReader.LOCAL_DATE_TIME),
                                 row.get("last_rent_paid", StandardReader.LOCAL_DATE_TIME),
                                 row.getLong("rent_interval")
                         );
@@ -101,12 +103,13 @@ public class MariaDBPlotDao implements PlotDao {
                     if (paymentType == PlotPaymentType.BUY) {
                         return new BuyPlot(
                                 plotId,
-                                row.get("owner_id", StandardReader.UUID_FROM_STRING),
                                 row.getString("group_name"),
+                                row.get("owner_id", StandardReader.UUID_FROM_STRING),
                                 row.getString("region_id"),
                                 row.getDouble("price"),
                                 row.getString("world"),
-                                row.getEnum("state", PlotState.class)
+                                row.getEnum("state", PlotState.class),
+                                row.get("claimed", StandardReader.LOCAL_DATE_TIME)
                         );
                     } else {
                         return new RentPlot(
@@ -117,6 +120,7 @@ public class MariaDBPlotDao implements PlotDao {
                                 row.getDouble("price"),
                                 row.getString("world"),
                                 row.getEnum("state", PlotState.class),
+                                row.get("claimed", StandardReader.LOCAL_DATE_TIME),
                                 row.get("last_rent_paid", StandardReader.LOCAL_DATE_TIME),
                                 row.getLong("rent_interval")
                         );
@@ -141,12 +145,13 @@ public class MariaDBPlotDao implements PlotDao {
                     if (paymentType == PlotPaymentType.BUY) {
                         return new BuyPlot(
                                 plotId,
-                                row.get("owner_id", StandardReader.UUID_FROM_STRING),
                                 row.getString("group_name"),
+                                row.get("owner_id", StandardReader.UUID_FROM_STRING),
                                 row.getString("region_id"),
                                 row.getDouble("price"),
                                 row.getString("world"),
-                                row.getEnum("state", PlotState.class)
+                                row.getEnum("state", PlotState.class),
+                                row.get("claimed", StandardReader.LOCAL_DATE_TIME)
                         );
                     } else {
                         return new RentPlot(
@@ -157,6 +162,7 @@ public class MariaDBPlotDao implements PlotDao {
                                 row.getDouble("price"),
                                 row.getString("world"),
                                 row.getEnum("state", PlotState.class),
+                                row.get("claimed", StandardReader.LOCAL_DATE_TIME),
                                 row.get("last_rent_paid", StandardReader.LOCAL_DATE_TIME),
                                 row.getLong("rent_interval")
                         );

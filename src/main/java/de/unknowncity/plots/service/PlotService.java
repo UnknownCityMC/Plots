@@ -36,7 +36,9 @@ import de.unknowncity.plots.plot.flag.FlagRegistry;
 import de.unknowncity.plots.plot.flag.PlotFlags;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
 import de.unknowncity.plots.plot.group.PlotGroup;
+import de.unknowncity.plots.plot.location.PlotLocation;
 import de.unknowncity.plots.plot.location.signs.SignManager;
+import de.unknowncity.plots.util.LocationUtil;
 import de.unknowncity.plots.util.PlotId;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -50,10 +52,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 
 public class PlotService extends Service<PlotsPlugin> {
@@ -121,7 +120,7 @@ public class PlotService extends Service<PlotsPlugin> {
         if (plotCache.containsKey(plotId)) {
             return false;
         }
-        var plot = new BuyPlot(plotId, null, plotGroupName, region.getId(), price, world.getName(), PlotState.AVAILABLE);
+        var plot = new BuyPlot(plotId, plotGroupName, null, region.getId(), price, world.getName(), PlotState.AVAILABLE, null);
 
         createPlot(region, plot, plotGroupName);
         return true;
@@ -132,7 +131,7 @@ public class PlotService extends Service<PlotsPlugin> {
         if (plotCache.containsKey(plotId)) {
             return false;
         }
-        var plot = new RentPlot(plotId, null, plotGroupName, region.getId(), price, world.getName(), PlotState.AVAILABLE, null, rentInterval.toMinutes());
+        var plot = new RentPlot(plotId, null, plotGroupName, region.getId(), price, world.getName(), PlotState.AVAILABLE, null, null, rentInterval.toMinutes());
 
         createPlot(region, plot, plotGroupName);
         return true;
@@ -145,6 +144,10 @@ public class PlotService extends Service<PlotsPlugin> {
         region.setFlag(Flags.USE, StateFlag.State.ALLOW);
 
         flagRegistry.getAllRegistered().forEach(plotFlag -> plot.setFlag(plotFlag, plotFlag.defaultValue()));
+
+        var location = LocationUtil.findSuitablePlotLocation(plot.world(), region);
+        var plotHome = new PlotLocation(plot.id(), true, location.x(), location.y(), location.z(), 0, 0);
+        plot.plotHome(plotHome);
 
         plot.interactables(PlotInteractable.defaults());
 
@@ -411,6 +414,10 @@ public class PlotService extends Service<PlotsPlugin> {
             plugin.getLogger().log(Level.SEVERE, e.getMessage());
         }
 
+    }
+
+    public List<Plot> findPlotsByOwnerUUID(UUID uuid) {
+        return plotCache.values().stream().filter(plot -> plot.owner().equals(uuid)).sorted(Comparator.comparing(Plot::claimed)).toList();
     }
 
     public HashMap<String, PlotGroup> groupCache() {
