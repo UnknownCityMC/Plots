@@ -4,7 +4,6 @@ import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
-import de.unknowncity.plots.util.PlotId;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -44,7 +43,7 @@ public class PlotRemoveMemberCommand extends SubCommand {
             return;
         }
 
-        var plotId = PlotId.generate(sender.getWorld(), possibleRegion.get());
+        var plotId = possibleRegion.get().getId();
 
         if (!plotService.existsPlot(plotId)) {
             plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot"));

@@ -43,14 +43,12 @@ public class PlotAdminSetMemberCommand extends SubCommand {
         var region = regionService.getSuitableRegion(player.getLocation());
 
         region.ifPresentOrElse(protectedRegion -> {
-            var world = player.getWorld();
-
-            if (!plotService.existsPlot(protectedRegion, world)) {
+            if (!plotService.existsPlot(protectedRegion)) {
                 plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "no-plot"));
                 return;
             }
 
-            var plot = plotService.getPlot(world, protectedRegion);
+            var plot = plotService.getPlot(protectedRegion);
 
             if (plot.owner() == null) {
                 plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "member", "not-sold"));

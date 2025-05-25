@@ -39,7 +39,6 @@ import de.unknowncity.plots.plot.group.PlotGroup;
 import de.unknowncity.plots.plot.location.PlotLocation;
 import de.unknowncity.plots.plot.location.signs.SignManager;
 import de.unknowncity.plots.util.LocationUtil;
-import de.unknowncity.plots.util.PlotId;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -111,12 +110,12 @@ public class PlotService extends Service<PlotsPlugin> {
         return plotGroupCache.containsKey(id);
     }
 
-    public boolean existsPlot(ProtectedRegion region, World world) {
-        return existsPlot(PlotId.generate(world, region));
+    public boolean existsPlot(ProtectedRegion region) {
+        return existsPlot(region.getId());
     }
 
     public boolean createBuyPlotFromRegion(ProtectedRegion region, World world, double price, String plotGroupName) {
-        var plotId = PlotId.generate(world, region);
+        var plotId = region.getId();
         if (plotCache.containsKey(plotId)) {
             return false;
         }
@@ -127,7 +126,7 @@ public class PlotService extends Service<PlotsPlugin> {
     }
 
     public boolean createRentPlotFromRegion(ProtectedRegion region, World world, double price, String plotGroupName, Duration rentInterval) {
-        var plotId = PlotId.generate(world, region);
+        var plotId = region.getId();
         if (plotCache.containsKey(plotId)) {
             return false;
         }
@@ -306,7 +305,7 @@ public class PlotService extends Service<PlotsPlugin> {
             return Optional.empty();
         }
 
-        var plotId = PlotId.generate(location.getWorld(), possibleRegion.get());
+        var plotId = possibleRegion.get().getId();
 
         if (!existsPlot(plotId)) {
             return Optional.empty();
@@ -349,8 +348,8 @@ public class PlotService extends Service<PlotsPlugin> {
         return plotGroupCache.get(id);
     }
 
-    public Plot getPlot(World world, ProtectedRegion region) {
-        return plotCache.get(PlotId.generate(world, region));
+    public Plot getPlot(ProtectedRegion region) {
+        return plotCache.get(region.getId());
     }
 
     public Plot getPlotFromGroup(String id, String groupName) {

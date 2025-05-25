@@ -40,14 +40,12 @@ public class PlotAdminLoadBackupCommand extends SubCommand {
         var region = regionService.getSuitableRegion(player.getLocation());
 
         region.ifPresentOrElse(protectedRegion -> {
-            var world = player.getWorld();
-
-            if (!plotService.existsPlot(protectedRegion, world)) {
+            if (!plotService.existsPlot(protectedRegion)) {
                 plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "no-plot"));
                 return;
             }
 
-            var plot = plotService.getPlot(world, protectedRegion);
+            var plot = plotService.getPlot(protectedRegion);
 
             if (!plotService.hasBackup(plot, target.getUniqueId())) {
                 plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "load-backup", "not-found"));

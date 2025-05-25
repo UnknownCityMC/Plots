@@ -49,12 +49,12 @@ public class PlotModExpandCommand extends SubCommand {
         region.ifPresentOrElse(protectedRegion -> {
             var world = player.getWorld();
 
-            if (!plotService.existsPlot(protectedRegion, world)) {
+            if (!plotService.existsPlot(protectedRegion)) {
                 plugin.messenger().sendMessage(player, NodePath.path("command", "plotmod", "expand", "no-region"));
                 return;
             }
 
-            var plot = plotService.getPlot(world, protectedRegion);
+            var plot = plotService.getPlot(protectedRegion);
 
             var price = regionService.expandRegionInDirectionBlockCount(protectedRegion, direction, blocks, world) * plugin.configuration().fb().price() - plot.price();
 

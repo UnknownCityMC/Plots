@@ -7,7 +7,6 @@ import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.data.model.plot.PlotLocations;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
-import de.unknowncity.plots.util.PlotId;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.incendo.cloud.Command;
@@ -109,7 +108,7 @@ public class PlotModCreateCommand extends SubCommand {
             return;
         }
 
-        if (plotService.existsPlot(PlotId.generate(world, id))) {
+        if (plotService.existsPlot(id)) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotmod", "create", "id-exists"));
             return;
         }

@@ -82,7 +82,7 @@ public class PlotAdminCreateCommand extends SubCommand {
         region.ifPresentOrElse(protectedRegion -> {
             var world = player.getWorld();
 
-            if (plotService.existsPlot(protectedRegion, world)) {
+            if (plotService.existsPlot(protectedRegion)) {
                 plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "aleady-exists"));
                 return;
             }
@@ -109,7 +109,7 @@ public class PlotAdminCreateCommand extends SubCommand {
             return;
         }
 
-        if (plotService.existsPlot(protectedRegion, world)) {
+        if (plotService.existsPlot(protectedRegion)) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "aleady-exists"));
             return;
         }
@@ -133,7 +133,7 @@ public class PlotAdminCreateCommand extends SubCommand {
         region.ifPresentOrElse(protectedRegion -> {
             var world = player.getWorld();
 
-            if (plotService.existsPlot(protectedRegion, world)) {
+            if (plotService.existsPlot(protectedRegion)) {
                 plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "already-exists"));
                 return;
             }
@@ -162,7 +162,7 @@ public class PlotAdminCreateCommand extends SubCommand {
             return;
         }
 
-        if (plotService.existsPlot(protectedRegion, world)) {
+        if (plotService.existsPlot(protectedRegion)) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "already-exists"));
             return;
         }

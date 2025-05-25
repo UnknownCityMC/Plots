@@ -40,14 +40,12 @@ public class PlotAdminSetOwnerCommand extends SubCommand {
         var region = regionService.getSuitableRegion(player.getLocation());
 
         region.ifPresentOrElse(protectedRegion -> {
-            var world = player.getWorld();
-
-            if (!plotService.existsPlot(protectedRegion, world)) {
+            if (!plotService.existsPlot(protectedRegion)) {
                 plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "no-plot"));
                 return;
             }
 
-            plotService.setPlotOwner(player, plotService.getPlot(world, protectedRegion));
+            plotService.setPlotOwner(player, plotService.getPlot(protectedRegion));
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "set-owner", "success"));
 
         }, () -> plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "no-suitable-region")));

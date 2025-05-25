@@ -51,17 +51,16 @@ public class PlotSignLinkListener implements Listener {
 
         var block = event.getClickedBlock();
         var location = block.getLocation();
-        var world = block.getWorld();
 
         if (!MaterialTags.SIGNS.isTagged(block)) {
             var region = regionService.getSuitableRegion(location);
             region.ifPresentOrElse(protectedRegion -> {
-                if (!plotService.existsPlot(protectedRegion, world)) {
+                if (!plotService.existsPlot(protectedRegion)) {
                     plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "sign", "no-region"));
                     return;
                 }
 
-                var plot = plotService.getPlot(world, protectedRegion);
+                var plot = plotService.getPlot(protectedRegion);
                 editSession.setPlot(plot);
                 plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "sign", "set-region"), plot.tagResolvers(player, plugin.messenger()));
             }, () -> plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "no-suitable-region")));
