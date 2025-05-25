@@ -192,4 +192,33 @@ gui:
         name: <!i><red>Zurück
       biome:
         name: "<!i><aqua><biome>"
-
+  flags:
+    title: <!i><#1d71ad>Plot <black>| <dark_gray>Flags
+    format:
+      active: <!i><gray>▶ <green><value>
+      inactive: <!i><gray>▸ <dark_gray><value>
+    item:
+      slot:
+        lore:
+          - <!i><gray>Ändere wer dieses Item / diesen Block benutzen
+          - <!i>
+          - <!i><gray>Bedienung
+          - <!i><gray>▸ <yellow>↑ <white>🖰 <gray>[<gold>Right Button<gray>]
+          - <!i><gray>▸ <yellow>↓ <white>🖰 <gray>[<gold>Left Button<gray>]
+          - <!i>
+      player-tab:
+        name: "<!i><aqua>Spieler Flags <gray>(<yellow><flag-amount><gray> Flags)"
+        lore:
+          - "<!i><gray>Folgen Flags sind enthalten:"
+      entity-tab:
+        name: "<!i><aqua>Entity Flags <gray>(<yellow><flag-amount><gray> Flags)"
+        lore:
+          - "<!i><gray>Folgen Flags sind enthalten:"
+      vehicle-tab:
+        name: "<!i><aqua>Vehicle Flags <gray>(<yellow><flag-amount><gray> Flags)"
+        lore:
+          - "<!i><gray>Folgen Flags sind enthalten:"
+      block-tab:
+        name: "<!i><aqua>Block Flags <gray>(<yellow><flag-amount><gray> Flags)"
+        lore:
+          - "<!i><gray>Folgen Flags sind enthalten:"
