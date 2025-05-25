@@ -26,7 +26,7 @@ public class PlotAdminDeleteCommand extends SubCommand {
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("delete")
-                .permission("ucplots.command.plotadmin")
+                .permission("plots.command.plotadmin")
                 .required("id", stringParser(), (sender, input) -> CompletableFuture.completedFuture(plotService.plotCache().keySet().stream().map(Suggestion::suggestion).toList()))
                 .apply(plugin.confirmationManager())
                 .handler(this::handleDelete)
@@ -34,7 +34,7 @@ public class PlotAdminDeleteCommand extends SubCommand {
         );
 
         commandManager.command(builder.literal("delete")
-                .permission("ucplots.command.plotadmin")
+                .permission("plots.command.plotadmin")
                 .literal("confirm")
                 .handler(plugin.confirmationManager().createExecutionHandler())
                 .build()

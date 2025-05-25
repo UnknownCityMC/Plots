@@ -22,7 +22,7 @@ public class PlotAdminSignLinkCommand extends SubCommand {
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("signLink")
-                .permission("ucplots.command.plotadmin")
+                .permission("plots.command.plotadmin")
                 .senderType(Player.class)
                 .handler(this::signLink)
                 .build()

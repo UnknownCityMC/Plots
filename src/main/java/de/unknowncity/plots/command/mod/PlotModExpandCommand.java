@@ -30,7 +30,7 @@ public class PlotModExpandCommand extends SubCommand {
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("expand")
-                .permission("ucplots.command.plotmod")
+                .permission("plots.command.plotmod")
                 .required("direction", enumParser(PlotExpandDirection.class))
                 .required("blocks", integerParser())
                 .senderType(Player.class)

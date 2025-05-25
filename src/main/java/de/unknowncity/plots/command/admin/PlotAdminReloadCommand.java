@@ -17,7 +17,7 @@ public class PlotAdminReloadCommand extends SubCommand {
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("reload")
-                .permission("ucplots.command.plotadmin")
+                .permission("plots.command.plotadmin")
                 .handler(this::handleReload)
         );
     }

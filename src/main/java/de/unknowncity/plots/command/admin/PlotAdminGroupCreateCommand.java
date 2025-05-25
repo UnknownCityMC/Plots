@@ -23,7 +23,7 @@ public class PlotAdminGroupCreateCommand extends SubCommand {
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("group").literal("create")
-                .permission("ucplots.command.plotadmin")
+                .permission("plots.command.plotadmin")
                 .required("group-name", stringParser())
                 .handler(this::handleCreate)
                 .build()

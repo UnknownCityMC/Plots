@@ -27,7 +27,7 @@ public class PlotAdminSetMemberCommand extends SubCommand {
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("setMember")
-                .permission("ucplots.command.plotadmin")
+                .permission("plots.command.plotadmin")
                 .required("target", playerParser())
                 .required("role", enumParser(PlotMemberRole.class))
                 .senderType(Player.class)

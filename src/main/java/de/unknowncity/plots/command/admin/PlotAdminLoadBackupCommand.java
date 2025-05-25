@@ -27,7 +27,7 @@ public class PlotAdminLoadBackupCommand extends SubCommand {
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("loadBackup")
-                .permission("ucplots.command.plotadmin")
+                .permission("plots.command.plotadmin")
                 .required("target", playerParser())
                 .senderType(Player.class)
                 .handler(this::handleLoadBackup)

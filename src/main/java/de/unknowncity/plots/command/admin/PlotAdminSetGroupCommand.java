@@ -25,7 +25,7 @@ public class PlotAdminSetGroupCommand extends SubCommand {
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("setGroup")
-                .permission("ucplots.command.plotadmin")
+                .permission("plots.command.plotadmin")
                 .required("group-name", stringParser())
                 .senderType(Player.class)
                 .handler(this::setGroup)

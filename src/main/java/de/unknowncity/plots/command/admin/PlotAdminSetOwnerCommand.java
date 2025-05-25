@@ -26,7 +26,7 @@ public class PlotAdminSetOwnerCommand extends SubCommand {
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("setOwner")
-                .permission("ucplots.command.plotadmin")
+                .permission("plots.command.plotadmin")
                 .required("target", playerParser())
                 .flag(commandManager.flagBuilder("plotGroup").withComponent(stringParser()).build())
                 .senderType(Player.class)

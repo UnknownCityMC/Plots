@@ -13,7 +13,7 @@ public class PlotAdminCommand extends PaperCommand<PlotsPlugin> {
 
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
-        var builder = commandManager.commandBuilder("plotadmin").permission("ucplots.command.plotadmin");
+        var builder = commandManager.commandBuilder("plotadmin").permission("plots.command.plotadmin");
 
         new PlotAdminGroupCreateCommand(plugin, builder).apply(commandManager);
         new PlotAdminGroupDeleteCommand(plugin, builder).apply(commandManager);
@@ -29,5 +29,6 @@ public class PlotAdminCommand extends PaperCommand<PlotsPlugin> {
         new PlotAdminLoadBackupCommand(plugin, builder).apply(commandManager);
 
         new PlotAdminReloadCommand(plugin, builder).apply(commandManager);
+        new PlotAdminTeleportCommand(plugin, builder).apply(commandManager);
     }
 }

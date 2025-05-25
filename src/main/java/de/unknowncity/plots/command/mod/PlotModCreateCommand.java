@@ -29,13 +29,13 @@ public class PlotModCreateCommand extends SubCommand {
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("setLocations")
-                .permission("ucplots.command.plotadmin")
+                .permission("plots.command.plotadmin")
                 .senderType(Player.class)
                 .handler(this::createPlot)
                 .build()
         );
         commandManager.command(builder.literal("create")
-                .permission("ucplots.command.plotmod")
+                .permission("plots.command.plotmod")
                 .required("id", stringParser())
                 .flag(commandManager.flagBuilder("plotGroup").withComponent(stringParser()).build())
                 .senderType(Player.class)
@@ -43,7 +43,7 @@ public class PlotModCreateCommand extends SubCommand {
                 .build()
         );
         commandManager.command(builder.literal("expandLocationsVert")
-                .permission("ucplots.command.plotmod")
+                .permission("plots.command.plotmod")
                 .senderType(Player.class)
                 .handler(this::handleExpandVert)
                 .build()

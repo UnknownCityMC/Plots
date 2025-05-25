@@ -31,7 +31,7 @@ public class PlotAdminCreateCommand extends SubCommand {
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("createBuyFromRegion")
-                .permission("ucplots.command.plotadmin")
+                .permission("plots.command.plotadmin")
                 .required("price", doubleParser())
                 .flag(commandManager.flagBuilder("plotGroup").withComponent(stringParser()).build())
                 .senderType(Player.class)
@@ -40,7 +40,7 @@ public class PlotAdminCreateCommand extends SubCommand {
         );
 
         commandManager.command(builder.literal("createBuyFromRegionName")
-                .permission("ucplots.command.plotadmin")
+                .permission("plots.command.plotadmin")
                 .required("region", stringParser(), (sender, input) -> CompletableFuture.completedFuture(regionService.getAllRegions().keySet().stream().map(Suggestion::suggestion).toList()))
                 .required("price", doubleParser())
                 .flag(commandManager.flagBuilder("plotGroup").withComponent(stringParser()).build())
@@ -50,7 +50,7 @@ public class PlotAdminCreateCommand extends SubCommand {
         );
 
         commandManager.command(builder.literal("createRentFromRegion")
-                .permission("ucplots.command.plotadmin")
+                .permission("plots.command.plotadmin")
                 .required("price", doubleParser())
                 .required("rentInterval", durationParser())
                 .flag(commandManager.flagBuilder("plot-group").withComponent(stringParser()).build())
@@ -60,7 +60,7 @@ public class PlotAdminCreateCommand extends SubCommand {
         );
 
         commandManager.command(builder.literal("createRentFromRegionName")
-                .permission("ucplots.command.plotadmin")
+                .permission("plots.command.plotadmin")
                 .required("region", stringParser(), (sender, input) -> CompletableFuture.completedFuture(regionService.getAllRegions().keySet().stream().map(Suggestion::suggestion).toList()))
                 .required("price", doubleParser())
                 .required("rentInterval", durationParser())

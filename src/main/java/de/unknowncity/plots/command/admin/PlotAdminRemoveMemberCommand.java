@@ -25,7 +25,7 @@ public class PlotAdminRemoveMemberCommand extends SubCommand {
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("setMember")
-                .permission("ucplots.command.plotadmin")
+                .permission("plots.command.plotadmin")
                 .required("target", playerParser())
                 .senderType(Player.class)
                 .handler(this::setMember)
