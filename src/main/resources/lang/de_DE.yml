@@ -144,7 +144,7 @@ gui:
       biome:
         name: "<!i><gold>Biom ändern"
         lore:
-          - "<!i><gray>Derzeit: <green><biome>"
+          - "<!i><gray>Derzeit: <green><current-biome>"
       warp:
         name: "<!i><gold>Warp ändern"
         lore:
