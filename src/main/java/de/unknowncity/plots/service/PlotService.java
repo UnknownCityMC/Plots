@@ -249,7 +249,7 @@ public class PlotService extends Service<PlotsPlugin> {
         savePlot(plot);
     }
 
-    public void setPlotOwner(Player player, Plot plot) {
+    public void setPlotOwner(OfflinePlayer player, Plot plot) {
         plot.state(PlotState.SOLD);
         plot.owner(player.getUniqueId());
         savePlot(plot);

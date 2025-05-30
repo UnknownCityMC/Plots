@@ -4,6 +4,7 @@ import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.incendo.cloud.Command;
@@ -11,7 +12,7 @@ import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
 import org.spongepowered.configurate.NodePath;
 
-import static org.incendo.cloud.bukkit.parser.PlayerParser.playerParser;
+import static de.unknowncity.plots.command.argument.UcPlayerParser.ucPlayerParser;
 
 public class PlotAdminRemoveMemberCommand extends SubCommand {
 
@@ -24,18 +25,18 @@ public class PlotAdminRemoveMemberCommand extends SubCommand {
 
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
-        commandManager.command(builder.literal("setMember")
+        commandManager.command(builder.literal("removeMember")
                 .permission("plots.command.plotadmin")
-                .required("target", playerParser())
+                .required("target", ucPlayerParser())
                 .senderType(Player.class)
-                .handler(this::setMember)
+                .handler(this::removeMember)
                 .build()
         );
     }
 
-    private void setMember(CommandContext<Player> commandContext) {
-        var player = (Player) commandContext.get("target");
-        var target = (Player) commandContext.get("target");
+    private void removeMember(CommandContext<Player> commandContext) {
+        var player = commandContext.sender();
+        var target = (OfflinePlayer) commandContext.get("target");
         var region = regionService.getSuitableRegion(player.getLocation());
 
         region.ifPresentOrElse(protectedRegion -> {

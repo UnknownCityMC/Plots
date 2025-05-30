@@ -11,22 +11,19 @@ import de.unknowncity.plots.command.admin.PlotAdminCommand;
 import de.unknowncity.plots.command.mod.PlotModCommand;
 import de.unknowncity.plots.command.user.PlotCommand;
 import de.unknowncity.plots.configurration.PlotsConfiguration;
-import de.unknowncity.plots.data.dao.mariadb.*;
-
 import de.unknowncity.plots.data.model.plot.PlotLocations;
-import de.unknowncity.plots.data.repository.PlotGroupRepository;
 import de.unknowncity.plots.listener.PlotCreateListener;
 import de.unknowncity.plots.listener.PlotInteractListener;
 import de.unknowncity.plots.listener.PlotSignLinkListener;
-import de.unknowncity.plots.plot.Plot;
-import de.unknowncity.plots.plot.flag.FlagRegistry;
-import de.unknowncity.plots.plot.flag.type.block.IceMeltFlag;
 import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import de.unknowncity.plots.task.RentTask;
 import fr.skytasul.glowingentities.GlowingEntities;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.incendo.cloud.caption.Caption;
+import org.incendo.cloud.caption.CaptionProvider;
 import org.incendo.cloud.processors.cache.SimpleCache;
 import org.incendo.cloud.processors.confirmation.ConfirmationConfiguration;
 import org.incendo.cloud.processors.confirmation.ConfirmationManager;
@@ -65,6 +62,8 @@ public class PlotsPlugin extends PaperAstraPlugin {
 
         rentTask = new RentTask(this, serviceRegistry.getRegistered(PlotService.class), serviceRegistry.getRegistered(EconomyService.class));
         rentTask.start();
+
+        commandManager.captionRegistry().registerProvider(CaptionProvider.forCaption(Caption.of("argument.parse.failure.player"), sender -> messenger.getStringOrNotAvailable((Player) sender, NodePath.path("exception", "argument-parse", "player"))));
     }
 
     public void onPluginReload() {

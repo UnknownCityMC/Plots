@@ -222,3 +222,6 @@ gui:
         name: "<!i><aqua>Block Flags <gray>(<yellow><flag-amount><gray> Flags)"
         lore:
           - "<!i><gray>Folgen Flags sind enthalten:"
+exception:
+  argument-parse:
+    player: "<red>Kein Spieler gefunden"

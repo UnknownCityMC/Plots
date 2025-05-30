@@ -5,6 +5,7 @@ import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.plot.access.type.PlotMemberRole;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -13,7 +14,7 @@ import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
 import org.spongepowered.configurate.NodePath;
 
-import static org.incendo.cloud.bukkit.parser.PlayerParser.playerParser;
+import static de.unknowncity.plots.command.argument.UcPlayerParser.ucPlayerParser;
 import static org.incendo.cloud.parser.standard.EnumParser.enumParser;
 
 public class PlotChangeRoleCommand extends SubCommand {
@@ -28,7 +29,7 @@ public class PlotChangeRoleCommand extends SubCommand {
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("member").literal("changeRole")
                 .permission("plots.command.plot.member.changeRole")
-                .required("target", playerParser())
+                .required("target", ucPlayerParser())
                 .required("role", enumParser(PlotMemberRole.class))
                 .senderType(Player.class)
                 .handler(this::handleAdd)
@@ -37,7 +38,7 @@ public class PlotChangeRoleCommand extends SubCommand {
 
     private void handleAdd(@NonNull CommandContext<Player> context) {
         var sender = context.sender();
-        var target = (Player) context.get("target");
+        var target = (OfflinePlayer) context.get("target");
         var role = (PlotMemberRole) context.get("role");
 
         var possibleRegion = regionService.getSuitableRegion(sender.getLocation());
