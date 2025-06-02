@@ -44,7 +44,7 @@ dependencies {
     compileOnly(libs.worldguard)
     compileOnly(libs.plan)
 
-    testImplementation(platform("org.junit:junit-bom:5.12.2"))
+    testImplementation(platform("org.junit:junit-bom:5.13.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
