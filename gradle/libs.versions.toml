@@ -14,7 +14,7 @@ papi = "2.11.6"
 
 glowing-entities = "1.4.5"
 
-coinsengine = "2.4.2"
+coinsengine = "2.5.0"
 invui = "1.46"
 
 worldguard = "7.0.14"
