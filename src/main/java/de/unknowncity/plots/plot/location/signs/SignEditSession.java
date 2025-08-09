@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static de.unknowncity.plots.plot.location.signs.SignManager.*;
+import static de.unknowncity.plots.plot.location.signs.SignOutline.setOutline;
 
 public class SignEditSession {
     private final PlotsPlugin plugin;
