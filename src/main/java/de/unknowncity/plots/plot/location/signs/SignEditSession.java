@@ -50,7 +50,7 @@ public class SignEditSession {
     }
 
     public boolean addSign(Location location) {
-        var sign = new PlotSign(location.x(), location.y(), location.z(), location.getYaw(), location.getPitch());
+        var sign = new PlotSign(location.getBlockX(), location.getBlockY(), location.getBlockZ());
 
         if (plot.signs().stream().anyMatch(sign::equals)) {
             return false;
@@ -60,12 +60,13 @@ public class SignEditSession {
         setOutline(plot, sign, true);
 
         updateSings(plot, plugin.messenger());
+        plotService.plotSignCache().put(sign, plot);
         plotService.savePlot(plot);
         return true;
     }
 
     public boolean removeSign(Location location) {
-        var ignored = new PlotSign(location.x(), location.y(), location.z(), location.getYaw(), location.getPitch());
+        var ignored = new PlotSign(location.getBlockX(), location.getBlockY(), location.getBlockZ());
         if (plot.signs().stream().anyMatch(plotSign -> plotSign.equals(ignored))) {
             setOutline(plot, ignored, false);
             clearSign(location);

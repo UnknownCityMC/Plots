@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS plot_group
 (
     name VARCHAR(256) NOT NULL PRIMARY KEY
-    );
+);
 
 CREATE TABLE IF NOT EXISTS plot
 (
@@ -19,9 +19,9 @@ CREATE TABLE IF NOT EXISTS plot
     claimed        DATETIME                                  DEFAULT NOW(),
 
     CONSTRAINT plot_plot_group_group_name_name_fk
-    FOREIGN KEY (group_name) REFERENCES plot_group (name)
-    ON DELETE CASCADE
-    );
+        FOREIGN KEY (group_name) REFERENCES plot_group (name)
+            ON DELETE CASCADE
+);
 
 CREATE TABLE IF NOT EXISTS plot_location
 (
@@ -34,11 +34,11 @@ CREATE TABLE IF NOT EXISTS plot_location
     yaw     DOUBLE,
     pitch   DOUBLE,
     CONSTRAINT plot_location_pk
-    PRIMARY KEY (plot_id, name),
+        PRIMARY KEY (plot_id, name),
     CONSTRAINT plot_location_plot_plot_id_id_fk
-    FOREIGN KEY (plot_id) REFERENCES plot (id)
-    ON DELETE CASCADE
-    );
+        FOREIGN KEY (plot_id) REFERENCES plot (id)
+            ON DELETE CASCADE
+);
 
 CREATE TABLE IF NOT EXISTS plot_sign
 (
@@ -47,14 +47,12 @@ CREATE TABLE IF NOT EXISTS plot_sign
     x       DOUBLE,
     y       DOUBLE,
     z       DOUBLE,
-    yaw     DOUBLE,
-    pitch   DOUBLE,
     CONSTRAINT plot_sign_pk
-    PRIMARY KEY (plot_id, id),
+        PRIMARY KEY (plot_id, id),
     CONSTRAINT plot_sign_plot_plot_id_id_fk
-    FOREIGN KEY (plot_id) REFERENCES plot (id)
-    ON DELETE CASCADE
-    );
+        FOREIGN KEY (plot_id) REFERENCES plot (id)
+            ON DELETE CASCADE
+);
 
 CREATE TABLE IF NOT EXISTS plot_member
 (
@@ -63,11 +61,11 @@ CREATE TABLE IF NOT EXISTS plot_member
     role    ENUM ('CO_OWNER', 'MEMBER', 'TEMP_MEMBER') DEFAULT 'MEMBER',
 
     CONSTRAINT plot_member_pk
-    PRIMARY KEY (user_id, plot_id),
+        PRIMARY KEY (user_id, plot_id),
     CONSTRAINT plot_member_plot_plot_id_id_fk
-    FOREIGN KEY (plot_id) REFERENCES plot (id)
-    ON DELETE CASCADE
-    );
+        FOREIGN KEY (plot_id) REFERENCES plot (id)
+            ON DELETE CASCADE
+);
 
 CREATE TABLE IF NOT EXISTS plot_banned_players
 (
@@ -75,11 +73,11 @@ CREATE TABLE IF NOT EXISTS plot_banned_players
     user_id VARCHAR(36)  NOT NULL,
 
     CONSTRAINT plot_member_pk
-    PRIMARY KEY (user_id, plot_id),
+        PRIMARY KEY (user_id, plot_id),
     CONSTRAINT plot_banned_players_plot_plot_id_id_fk
-    FOREIGN KEY (plot_id) REFERENCES plot (id)
-    ON DELETE CASCADE
-    );
+        FOREIGN KEY (plot_id) REFERENCES plot (id)
+            ON DELETE CASCADE
+);
 
 CREATE TABLE IF NOT EXISTS plot_flag
 (
@@ -88,11 +86,11 @@ CREATE TABLE IF NOT EXISTS plot_flag
     value   TEXT         NOT NULL,
 
     CONSTRAINT plot_flag_pk
-    PRIMARY KEY (plot_id, flag_id),
+        PRIMARY KEY (plot_id, flag_id),
     CONSTRAINT plot_flag_plot_plot_id_id_fk
-    FOREIGN KEY (plot_id) REFERENCES plot (id)
-    ON DELETE CASCADE
-    );
+        FOREIGN KEY (plot_id) REFERENCES plot (id)
+            ON DELETE CASCADE
+);
 
 CREATE TABLE IF NOT EXISTS plot_interactables
 (
@@ -101,8 +99,8 @@ CREATE TABLE IF NOT EXISTS plot_interactables
     access_modifier ENUM ('OWNER', 'CO_OWNER', 'MEMBER', 'TEMP_MEMBER', 'EVERYBODY', 'NOBODY') DEFAULT 'MEMBER',
 
     CONSTRAINT plot_flag_pk
-    PRIMARY KEY (plot_id, block_type),
+        PRIMARY KEY (plot_id, block_type),
     CONSTRAINT plot_interactables_plot_plot_id_id_fk
-    FOREIGN KEY (plot_id) REFERENCES plot (id)
-    ON DELETE CASCADE
-    );
+        FOREIGN KEY (plot_id) REFERENCES plot (id)
+            ON DELETE CASCADE
+);

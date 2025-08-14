@@ -20,7 +20,7 @@ public class SignOutline {
     private static final NamespacedKey SIGN_GLOW = new NamespacedKey("ucplots", "signglow");
 
     public static void setOutline(Plot plot, PlotSign plotSign, boolean show) {
-        var location = new Location(plot.world(), plotSign.x(), plotSign.y(), plotSign.z(), plotSign.yaw(), plotSign.pitch());
+        var location = new Location(plot.world(), plotSign.x(), plotSign.y(), plotSign.z());
 
         // Hide outline (remove display entity)
         if (!show) {

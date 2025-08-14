@@ -37,6 +37,7 @@ import de.unknowncity.plots.plot.flag.PlotFlags;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
 import de.unknowncity.plots.plot.group.PlotGroup;
 import de.unknowncity.plots.plot.location.PlotLocation;
+import de.unknowncity.plots.plot.location.signs.PlotSign;
 import de.unknowncity.plots.plot.location.signs.SignManager;
 import de.unknowncity.plots.util.LocationUtil;
 import org.bukkit.Bukkit;
@@ -52,6 +53,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
 public class PlotService extends Service<PlotsPlugin> {
@@ -60,11 +62,18 @@ public class PlotService extends Service<PlotsPlugin> {
 
     private final HashMap<String, Plot> plotCache = new HashMap<>();
     private final HashMap<String, PlotGroup> plotGroupCache = new HashMap<>();
+    private final HashMap<PlotSign, Plot> plotSignCache = new HashMap<>();
     private final EconomyService economyService;
 
     private final FlagRegistry flagRegistry;
     private final SignManager signManager;
-    private PlotGroupRepository plotGroupRepository;
+    private MariaDBPlotDao plotDao;
+    private MariaDBPlotFlagDao plotFlagDao;
+    private MariaDBPlotInteractablesDao plotInteractablesDao;
+    private MariaDBGroupDao plotGroupDao;
+    private MariaDBPlotLocationDao plotLocationDao;
+    private MariaDBPlotSignDao plotSignDao;
+    private MariaDBPlotMemberDao plotMemberDao;
 
     public PlotService(QueryConfiguration queryConfiguration, EconomyService economyService, PlotsPlugin plugin) {
         this.flagRegistry = new FlagRegistry(plugin);
@@ -78,27 +87,67 @@ public class PlotService extends Service<PlotsPlugin> {
     @Override
     public void startup() {
         PlotFlags.registerAllFlags(this);
-        var plotDao = new MariaDBPlotDao(queryConfiguration);
-        var plotFlagDao = new MariaDBPlotFlagDao(queryConfiguration, flagRegistry);
-        var plotInteractablesDao = new MariaDBPlotInteractablesDao(queryConfiguration);
-        var plotGroupDao = new MariaDBGroupDao(queryConfiguration);
-        var plotLocationDao = new MariaDBPlotLocationDao(queryConfiguration);
-        var plotSignDao = new MariaDBPlotSignDao(queryConfiguration);
-        var plotMemberDao = new MariaDBPlotMemberDao(queryConfiguration);
 
-        this.plotGroupRepository = new PlotGroupRepository(
-                plotGroupDao, plotDao, plotFlagDao, plotInteractablesDao, plotLocationDao, plotSignDao, plotMemberDao
-        );
-
-
+        this.plotDao = new MariaDBPlotDao(queryConfiguration);
+        this.plotFlagDao = new MariaDBPlotFlagDao(queryConfiguration, flagRegistry);
+        this.plotInteractablesDao = new MariaDBPlotInteractablesDao(queryConfiguration);
+        this.plotGroupDao = new MariaDBGroupDao(queryConfiguration);
+        this.plotLocationDao = new MariaDBPlotLocationDao(queryConfiguration);
+        this.plotSignDao = new MariaDBPlotSignDao(queryConfiguration);
+        this.plotMemberDao = new MariaDBPlotMemberDao(queryConfiguration);
     }
 
     public void cacheAll() {
-        plotGroupRepository.loadPlotCache().whenComplete((plotCache, thr1) -> {
-            this.plotCache.putAll(plotCache);
-            plotGroupRepository.loadPlotGroupCache(plotCache).whenComplete((plotGroupCache, thr2) -> {
-                this.plotGroupCache.putAll(plotGroupCache);
-            }).whenComplete((stringPlotGroupHashMap, throwable) -> signManager.collectGarbage());
+        loadPlotCache();
+    }
+
+    public void loadPlotCache() {
+        plotDao.readAll().whenComplete((plots, throwable) -> {
+            plots.forEach(plot -> {
+                plotFlagDao.readAll(plot.id()).thenAccept(plotFlagWrappers -> {
+                    plotFlagWrappers.forEach(plotFlagWrapper -> {
+                        plot.setFlag(plotFlagWrapper.flag(), plotFlagWrapper.flagValue());
+                    });
+                });
+                plotMemberDao.readAll(plot.id()).thenAccept(plot::members);
+                plotLocationDao.read(plot.id()).thenAccept(plotLocation -> plotLocation.ifPresent(plot::plotHome));
+                plotSignDao.readAll(plot.id()).thenAccept(plot::signs);
+                plotInteractablesDao.readAll(plot.id()).thenAccept(plotInteractables -> {
+                    var updatedInteractables = new ArrayList<>(PlotInteractable.defaults());
+                    plotInteractables.forEach(interactable -> {
+                        updatedInteractables.removeIf(pi -> pi.blockType() == interactable.blockType());
+                    });
+                    updatedInteractables.addAll(plotInteractables);
+                    plot.interactables(updatedInteractables);
+                });
+                plotCache.put(plot.id(), plot);
+            });
+        }).thenRun(() -> {
+            loadPlotGroupCache(plotCache);
+            loadPlotSignCache(plotCache);
+        });
+    }
+
+    public void loadPlotGroupCache(HashMap<String, Plot> plotCache) {
+        plotGroupDao.readAll().whenComplete((plotGroups, throwable) -> {
+            plotGroups.forEach(plotGroup -> {
+                var plots = new HashMap<String, Plot>();
+                plotCache.values().forEach(plot -> {
+                    if (plot.groupName() != null && plot.groupName().equals(plotGroup.name())) {
+                        plots.put(plot.id(), plot);
+                    }
+                });
+                plotGroup.plotsInGroup(plots);
+                plotGroupCache.put(plotGroup.name(), plotGroup);
+            });
+        });
+    }
+
+    private void loadPlotSignCache(HashMap<String, Plot> plotCache) {
+        plotCache.forEach((id, plot) -> {
+            plot.signs().forEach(plotSign -> {
+                plotSignCache.put(plotSign, plot);
+            });
         });
     }
 
@@ -112,6 +161,26 @@ public class PlotService extends Service<PlotsPlugin> {
 
     public boolean existsPlot(ProtectedRegion region) {
         return existsPlot(region.getId());
+    }
+
+    public void savePlotGroup(PlotGroup plotGroup) {
+        plotGroupDao.write(plotGroup);
+        plotGroupCache.put(plotGroup.name(), plotGroup);
+        plotGroup.plotsInGroup().values().forEach(this::savePlot);
+    }
+
+    public void deletePlotGroup(String name) {
+        var plotGroup = plotGroupCache.get(name);
+        deletePlotGroup(plotGroup);
+    }
+
+    public void deletePlotGroup(PlotGroup plotGroup) {
+        plotGroup.plotsInGroup().values().forEach(plot -> {
+            plot.groupName(null);
+            savePlot(plot);
+        });
+        plotGroupCache.remove(plotGroup.name());
+        plotGroupDao.delete(plotGroup.name());
     }
 
     public boolean createBuyPlotFromRegion(ProtectedRegion region, World world, double price, String plotGroupName) {
@@ -275,24 +344,20 @@ public class PlotService extends Service<PlotsPlugin> {
 
     public void createPlotGroup(String name) {
         var plotGroup = new PlotGroup(name);
-        plotGroupRepository.savePlotGroup(plotGroup);
+        savePlotGroup(plotGroup);
         plotGroupCache.put(name, plotGroup);
-    }
-
-    public void deletePlotGroup(String name) {
-        var plotGroup = plotGroupCache.get(name);
-        plotGroupRepository.deletePlotGroup(plotGroup);
-        this.deletePlotGroup(plotGroup);
-    }
-
-    public void savePlotGroup(PlotGroup plotGroup) {
-        plotGroupRepository.savePlotGroup(plotGroup);
-        plotGroupCache.put(plotGroup.name(), plotGroup);
     }
 
     public void savePlot(Plot plot) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            plotGroupRepository.savePlot(plot);
+            plotDao.write(plot);
+
+            plot.flags().forEach((plotFlag, value) -> plotFlagDao.write(plot.id(), plotFlag.flagId(), plotFlag.marshall(value)));
+            plot.interactables().forEach(plotInteractable -> plotInteractablesDao.write(plotInteractable, plot.id()));
+            plot.members().forEach(plotMember -> plotMemberDao.write(plotMember, plot.id()));
+            plotLocationDao.write(plot.plotHome(), plot.id());
+            plotSignDao.deleteAll(plot.id());
+            plotSignDao.writeAll(plot.signs(), plot.id());
             plotCache.put(plot.id(), plot);
         });
     }
@@ -320,20 +385,11 @@ public class PlotService extends Service<PlotsPlugin> {
     }
 
     public void deletePlot(Plot plot) {
-        plotGroupRepository.deletePlot(plot);
+        plotDao.delete(plot.id());
         plotCache.remove(plot.id());
         if (plot.groupName() != null) {
             plotGroupCache.get(plot.groupName()).plotsInGroup().remove(plot.id());
         }
-    }
-
-    public void deletePlotGroup(PlotGroup plotGroup) {
-        plotGroup.plotsInGroup().values().forEach(plot -> {
-            plot.groupName(null);
-            savePlot(plot);
-        });
-        plotGroupRepository.deletePlotGroup(plotGroup);
-        plotGroupCache.remove(plotGroup.name());
     }
 
     public PlotGroup getPlotGroupWithPlots(String name) {
@@ -422,6 +478,16 @@ public class PlotService extends Service<PlotsPlugin> {
         return plotCache.values().stream().filter(plot -> plot.owner().equals(uuid)).sorted(Comparator.comparing(Plot::claimed)).toList();
     }
 
+    public Optional<Plot> getPlotForSignLocation(Location location) {
+        var plotSign = new PlotSign(
+                location.getBlockX(),
+                location.getBlockY(),
+                location.getBlockZ()
+        );
+
+        return plotSignCache.keySet().stream().anyMatch(sign -> sign.equals(plotSign))? Optional.of(plotSignCache.get(plotSign)) : Optional.empty();
+    }
+
     public HashMap<String, PlotGroup> groupCache() {
         return plotGroupCache;
     }
@@ -430,12 +496,12 @@ public class PlotService extends Service<PlotsPlugin> {
         return plotCache;
     }
 
-    public FlagRegistry flagRegistry() {
-        return flagRegistry;
+    public HashMap<PlotSign, Plot> plotSignCache() {
+        return plotSignCache;
     }
 
-    public PlotGroupRepository plotGroupRepository() {
-        return plotGroupRepository;
+    public FlagRegistry flagRegistry() {
+        return flagRegistry;
     }
 
     public PlotsPlugin plugin() {

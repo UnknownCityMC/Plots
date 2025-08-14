@@ -47,8 +47,6 @@ CREATE TABLE IF NOT EXISTS plot_sign
     x       DOUBLE,
     y       DOUBLE,
     z       DOUBLE,
-    yaw     DOUBLE,
-    pitch   DOUBLE,
     CONSTRAINT plot_sign_pk
         PRIMARY KEY (plot_id, id),
     CONSTRAINT plot_sign_plot_plot_id_id_fk

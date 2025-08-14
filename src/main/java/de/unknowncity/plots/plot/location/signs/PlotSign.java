@@ -1,13 +1,6 @@
 package de.unknowncity.plots.plot.location.signs;
 
-import de.unknowncity.plots.plot.location.PlotPosition;
-
-public class PlotSign extends PlotPosition {
-
-    public PlotSign(double x, double y, double z, float yaw, float pitch) {
-        super(x, y, z, yaw, pitch);
-    }
-
+public record PlotSign(int x, int y, int z) {
 
     @Override
     public boolean equals(Object obj) {

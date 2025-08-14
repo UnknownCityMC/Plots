@@ -21,20 +21,15 @@ public class MariaDBPlotSignDao implements PlotSignDao {
     public CompletableFuture<Boolean> writeAll(List<PlotSign> plotSigns, String plotId) {
         @Language("mariadb")
         var queryString = """
-                REPLACE INTO plot_sign (plot_id, id, x, y, z, yaw, pitch)
-                VALUES (:plotId, :id, :x, :y, :z, :yaw, :pitch)
+                REPLACE INTO plot_sign (plot_id, id, x, y, z)
+                VALUES (:plotId, :id, :x, :y, :z)
                 """;
         return CompletableFuture.supplyAsync(queryConfiguration.query(queryString)
-                .batch(plotSigns.stream().map(plotSign -> {
-                    return call().bind("plotId", plotId)
-                            .bind("id", plotSigns.indexOf(plotSign))
-                            .bind("x", plotSign.x())
-                            .bind("y", plotSign.y())
-                            .bind("z", plotSign.z())
-                            .bind("yaw", plotSign.yaw())
-                            .bind("pitch", plotSign.pitch());
-
-                }))
+                .batch(plotSigns.stream().map(plotSign -> call().bind("plotId", plotId)
+                        .bind("id", plotSigns.indexOf(plotSign))
+                        .bind("x", plotSign.x())
+                        .bind("y", plotSign.y())
+                        .bind("z", plotSign.z())))
                 .insert()::changed
         );
     }
@@ -43,16 +38,14 @@ public class MariaDBPlotSignDao implements PlotSignDao {
     public CompletableFuture<List<PlotSign>> readAll(String plotId) {
         @Language("mariadb")
         var queryString = """
-                SELECT x, y, z, yaw, pitch FROM plot_sign WHERE plot_id = :plotId;
+                SELECT x, y, z FROM plot_sign WHERE plot_id = :plotId;
                 """;
         return CompletableFuture.supplyAsync(queryConfiguration.query(queryString)
                 .single(call().bind("plotId", plotId))
                 .map(row -> new PlotSign(
-                        row.getDouble("x"),
-                        row.getDouble("y"),
-                        row.getDouble("z"),
-                        row.getFloat("yaw"),
-                        row.getFloat("pitch")
+                        row.getInt("x"),
+                        row.getInt("y"),
+                        row.getInt("z")
                 ))::all
         );
     }

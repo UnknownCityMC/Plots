@@ -14,6 +14,7 @@ import de.unknowncity.plots.configurration.PlotsConfiguration;
 import de.unknowncity.plots.data.model.plot.PlotLocations;
 import de.unknowncity.plots.listener.PlotCreateListener;
 import de.unknowncity.plots.listener.PlotInteractListener;
+import de.unknowncity.plots.listener.PlotSignInteractListener;
 import de.unknowncity.plots.listener.PlotSignLinkListener;
 import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
@@ -58,6 +59,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
         pluginManager.registerEvents(new PlotInteractListener(this), this);
         pluginManager.registerEvents(new PlotSignLinkListener(this), this);
         pluginManager.registerEvents(new PlotCreateListener(this), this);
+        pluginManager.registerEvents(new PlotSignInteractListener(this), this);
 
 
         rentTask = new RentTask(this, serviceRegistry.getRegistered(PlotService.class), serviceRegistry.getRegistered(EconomyService.class));
