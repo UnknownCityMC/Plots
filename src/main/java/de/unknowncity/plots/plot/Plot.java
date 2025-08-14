@@ -185,8 +185,10 @@ public abstract class Plot {
                         messenger.component(player, NodePath.path("plot", "no-group"))),
                 Placeholder.parsed("price", String.valueOf(price())),
                 Placeholder.parsed("state", state().name()),
-                Placeholder.component("owner", owner() != null ? Component.text(owner().toString())
+                Placeholder.component("owner-id", owner() != null ? Component.text(owner().toString())
                         : messenger.component(player, NodePath.path("plot", "no-owner"))),
+                Placeholder.component("owner-name", owner() != null && Bukkit.getOfflinePlayer(owner()).getName() != null ? Component.text(Bukkit.getOfflinePlayer(owner()).getName())
+                        : messenger.component(Language.GERMAN, NodePath.path("plot", "no-owner"))),
                 Placeholder.parsed("world", worldName()),
 
                 Placeholder.component("members", !members().isEmpty() ? messenger.component(player, NodePath.path("plot", "no-members")) :
@@ -202,7 +204,9 @@ public abstract class Plot {
                         messenger.component(Language.GERMAN, NodePath.path("plot", "no-group"))),
                 Placeholder.parsed("price", String.valueOf(price())),
                 Placeholder.parsed("state", state().name()),
-                Placeholder.component("owner", owner() != null ? Component.text(owner().toString())
+                Placeholder.component("owner-id", owner() != null ? Component.text(owner().toString())
+                        : messenger.component(Language.GERMAN, NodePath.path("plot", "no-owner"))),
+                Placeholder.component("owner-name", owner() != null && Bukkit.getOfflinePlayer(owner()).getName() != null ? Component.text(Bukkit.getOfflinePlayer(owner()).getName())
                         : messenger.component(Language.GERMAN, NodePath.path("plot", "no-owner"))),
                 Placeholder.parsed("world", worldName()),
                 Placeholder.component("members", members().isEmpty() ? messenger.component(Language.GERMAN, NodePath.path("plot", "no-members")) :
