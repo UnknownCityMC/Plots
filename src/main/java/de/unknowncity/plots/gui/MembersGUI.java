@@ -2,24 +2,16 @@ package de.unknowncity.plots.gui;
 
 import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.gui.items.ManageMembersItem;
 import de.unknowncity.plots.gui.util.PagedGUI;
+import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.service.PlotService;
+import de.unknowncity.plots.util.SkullHelper;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.spongepowered.configurate.NodePath;
-import xyz.xenondevs.inventoryaccess.component.AdventureComponentWrapper;
 import xyz.xenondevs.invui.item.Item;
-import xyz.xenondevs.invui.item.ItemProvider;
-import xyz.xenondevs.invui.item.builder.SkullBuilder;
-import xyz.xenondevs.invui.item.impl.SimpleItem;
-import xyz.xenondevs.invui.util.MojangApiUtils;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class MembersGUI {
 
@@ -29,29 +21,27 @@ public class MembersGUI {
 
         var title = messenger.component(player, NodePath.path("gui", "members", "title"));
 
-        var backItem = new SimpleItem(ItemBuilder.of(Material.BARRIER).name(
-                messenger.component(player, NodePath.path("gui", "members", "item", "back", "name"))
-        ).item(), click -> PlotMainGUI.open(player, plot, plugin));
+        var backItem = Item.builder().setItemProvider(ItemBuilder.of(Material.BARRIER).name(
+                        messenger.component(player, NodePath.path("gui", "members", "item", "back", "name"))
+                ).item())
+                .addClickHandler(click -> PlotMainGUI.open(player, plot, plugin))
+                .build();
 
-        var friends = plot.members();
+        var members = plot.members();
 
-        List<Item> items = friends.stream().map(friend -> {
-            ItemProvider skull;
-            try {
-                skull = new SkullBuilder(friend.memberID()).setDisplayName(new AdventureComponentWrapper(
-                        messenger.component(player, NodePath.path("gui", "members", "item", "member", "name"), Placeholder.parsed("name", friend.memberID().toString())
-                        )));
-            } catch (MojangApiUtils.MojangApiException | IOException e) {
-                skull = new xyz.xenondevs.invui.item.builder.ItemBuilder((Material.PLAYER_HEAD)).setDisplayName(
-                        new AdventureComponentWrapper(
-                                messenger.component(player, NodePath.path("gui", "members", "item", "member", "name"), Placeholder.parsed("name", friend.memberID().toString())))
-                );
-            }
-            return new ManageMembersItem(skull, plotService, plot, friend);
-        }).collect(Collectors.toList());
+        var items = members.stream().map(member -> {
+
+            var skull = SkullHelper.getSkull(member.memberID());
+
+            var itemBuilder = new xyz.xenondevs.invui.item.ItemBuilder(skull)
+                    .setName(messenger.component(player, NodePath.path("gui", "banned-players", "item", "member", "name"), Placeholder.parsed("name", member.name())))
+                    .addLoreLines(messenger.component(player, NodePath.path("gui", "banned-players", "item", "member", "lore"), Placeholder.parsed("name", member.name())));
+
+            return new ManageMembersItem(itemBuilder, plotService, plot, member);
+        }).toList();
 
         var gui = PagedGUI.createAndOpenPagedGUI(messenger, title, backItem, items, player);
-        gui.addCloseHandler(() -> plotService.savePlot(plot));
+        gui.addCloseHandler((reason) -> plotService.savePlot(plot));
         gui.open();
     }
 }

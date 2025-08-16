@@ -8,11 +8,12 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.NodePath;
+import xyz.xenondevs.invui.Click;
+import xyz.xenondevs.invui.item.AbstractItem;
+import xyz.xenondevs.invui.item.Item;
 import xyz.xenondevs.invui.item.ItemProvider;
-import xyz.xenondevs.invui.item.impl.AbstractItem;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +30,7 @@ public class InteractablesItem extends AbstractItem {
     }
 
     @Override
-    public ItemProvider getItemProvider() {
+    public @NotNull ItemProvider getItemProvider(@NotNull Player player) {
         var itemBuilder = ItemBuilder.of(interactable.blockType());
         itemBuilder.name(plugin.messenger().component(player, NodePath.path("gui", "interactables", "item", "slot", "name"),
                 Placeholder.component("item-name", Component.translatable(interactable.blockType().translationKey())))
@@ -49,20 +50,21 @@ public class InteractablesItem extends AbstractItem {
             }
         }).toList());
         itemBuilder.lore(lore);
-        return new xyz.xenondevs.invui.item.builder.ItemBuilder(itemBuilder.item());
+        return Item.simple(itemBuilder.item()).getItemProvider(player);
     }
 
     @Override
-    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent event) {
-       if (clickType == ClickType.LEFT) {
-           interactable.accessModifier(getNextInteractable(interactable.accessModifier(), false));
-       }
-       if (clickType == ClickType.RIGHT) {
-           interactable.accessModifier(getNextInteractable(interactable.accessModifier(), true));
-       }
-       notifyWindows();
-    }
+    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull Click click) {
 
+        if (clickType == ClickType.LEFT) {
+            interactable.accessModifier(getNextInteractable(interactable.accessModifier(), false));
+        }
+        if (clickType == ClickType.RIGHT) {
+            interactable.accessModifier(getNextInteractable(interactable.accessModifier(), true));
+        }
+
+        notifyWindows();
+    }
 
     private PlotAccessModifier getNextInteractable(PlotAccessModifier accessModifier, boolean reverse) {
         var values = PlotAccessModifier.values();

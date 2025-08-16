@@ -15,7 +15,7 @@ papi = "2.11.6"
 glowing-entities = "1.4.6"
 
 coinsengine = "2.5.0"
-invui = "1.46"
+invui = "2.0.0-alpha.17"
 
 worldguard = "7.0.14"
 astralib = "0.6.0-SNAPSHOT"
@@ -39,14 +39,6 @@ glowing-entities = { group = "fr.skytasul", name = "glowingentities", version.re
 
 plan = { group = "com.github.plan-player-analytics", name = "Plan", version.ref = "plan"}
 
-# Storage
-sadu-queries = { group = "de.chojo.sadu", name = "sadu-queries", version.ref = "sadu" }
-sadu-datasource = { group = "de.chojo.sadu", name = "sadu-datasource", version.ref = "sadu" }
-sadu-mysql = { group = "de.chojo.sadu", name = "sadu-mysql", version.ref = "sadu" }
-sadu-mariadb = { group = "de.chojo.sadu", name = "sadu-mariadb", version.ref = "sadu" }
-sadu-postgresql = { group = "de.chojo.sadu", name = "sadu-postgresql", version.ref = "sadu" }
-sadu-sqlite = { group = "de.chojo.sadu", name = "sadu-sqlite", version.ref = "sadu" }
-sadu-mapper = { group = "de.chojo.sadu", name = "sadu-mapper", version.ref = "sadu" }
 
 [plugins]
 shadow = { id = "io.github.goooler.shadow", version.ref = "shadow" }

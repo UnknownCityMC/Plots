@@ -7,10 +7,10 @@ import de.unknowncity.plots.service.PlotService;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
+import xyz.xenondevs.invui.Click;
+import xyz.xenondevs.invui.item.AbstractItem;
 import xyz.xenondevs.invui.item.ItemProvider;
-import xyz.xenondevs.invui.item.impl.AbstractItem;
 
 public class BiomeChangeItem extends AbstractItem {
     private final PlotService plotService;
@@ -26,12 +26,13 @@ public class BiomeChangeItem extends AbstractItem {
     }
 
     @Override
-    public ItemProvider getItemProvider() {
+    public @NotNull ItemProvider getItemProvider(@NotNull Player viewer) {
         return itemProvider;
     }
 
+
     @Override
-    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent event) {
+    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull Click click) {
         plotService.setBiome(plot, BukkitAdapter.adapt(biome));
     }
 }

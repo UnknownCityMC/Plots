@@ -21,4 +21,14 @@ public class SkullHelper {
         });
         return head;
     }
+
+    public static ItemStack getSkull(UUID uuid) {
+        var head = new ItemStack(Material.PLAYER_HEAD);
+
+        head.editMeta(SkullMeta.class, skullMeta -> {
+            var playerProfile = Bukkit.createProfile(uuid);
+            skullMeta.setPlayerProfile(playerProfile);
+        });
+        return head;
+    }
 }

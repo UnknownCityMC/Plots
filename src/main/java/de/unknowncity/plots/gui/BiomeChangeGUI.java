@@ -11,13 +11,12 @@ import io.papermc.paper.registry.RegistryKey;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
 import org.spongepowered.configurate.NodePath;
 import xyz.xenondevs.invui.item.Item;
-import xyz.xenondevs.invui.item.impl.SimpleItem;
+import xyz.xenondevs.invui.item.ItemProvider;
 
 import java.util.HashMap;
 import java.util.List;
@@ -65,16 +64,18 @@ public class BiomeChangeGUI {
 
         var title = messenger.component(player, NodePath.path("gui", "biome", "title"));
 
-        var backItem = new SimpleItem(ItemBuilder.of(Material.BARRIER).name(
-                messenger.component(player, NodePath.path("gui", "biome", "item", "back", "name"))
-        ).item(), click -> PlotMainGUI.open(player, plot, plugin));
+        var backItem = Item.builder().setItemProvider(ItemBuilder.of(Material.BARRIER).name(
+                        messenger.component(player, NodePath.path("gui", "biome", "item", "back", "name"))
+                ).item())
+                .addClickHandler(click -> PlotMainGUI.open(player, plot, plugin))
+                .build();
 
-        List<Item> items = biomeBlockMap.keySet().stream().map(biome -> new BiomeChangeItem(new xyz.xenondevs.invui.item.builder.ItemBuilder(ItemBuilder.of(getItemForBiome(biome)).name(
+        var items = biomeBlockMap.keySet().stream().map(biome -> new BiomeChangeItem(Item.simple(ItemBuilder.of(getItemForBiome(biome)).name(
                 messenger.component(player, NodePath.path("gui", "biome", "item", "biome", "name"), Placeholder.component("biome", Component.translatable(biome.translationKey())))
-        ).item()), plot, biome, plugin)).collect(Collectors.toList());
+        ).item()).getItemProvider(player), plot, biome, plugin)).collect(Collectors.toList());
 
         var gui = PagedGUI.createAndOpenPagedGUI(messenger, title, backItem, items, player);
-        gui.addCloseHandler(() -> plugin.serviceRegistry().getRegistered(PlotService.class).savePlot(plot));
+        gui.addCloseHandler((reason) -> plugin.serviceRegistry().getRegistered(PlotService.class).savePlot(plot));
         gui.open();
     }
 

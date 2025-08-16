@@ -3,12 +3,11 @@ package de.unknowncity.plots.gui;
 import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.gui.items.DefaultTabItem;
-import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.gui.items.FlagItem;
 import de.unknowncity.plots.gui.items.NextPageItem;
 import de.unknowncity.plots.gui.items.PrevPageItem;
+import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.plot.flag.PlotFlag;
-import de.unknowncity.plots.plot.flag.PlotFlags;
 import de.unknowncity.plots.service.PlotService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -16,14 +15,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.spongepowered.configurate.NodePath;
-import xyz.xenondevs.inventoryaccess.component.AdventureComponentWrapper;
-import xyz.xenondevs.invui.gui.Gui;
-import xyz.xenondevs.invui.gui.PagedGui;
-import xyz.xenondevs.invui.gui.TabGui;
-import xyz.xenondevs.invui.gui.structure.Markers;
-import xyz.xenondevs.invui.gui.structure.Structure;
+import xyz.xenondevs.invui.gui.*;
+import xyz.xenondevs.invui.item.AbstractItem;
 import xyz.xenondevs.invui.item.Item;
-import xyz.xenondevs.invui.item.impl.SimpleItem;
 import xyz.xenondevs.invui.window.Window;
 
 import java.util.ArrayList;
@@ -38,23 +32,32 @@ public class FlagsGUI {
 
         var title = messenger.component(player, NodePath.path("gui", "flags", "title"));
 
-        var backItem = new SimpleItem(ItemBuilder.of(Material.BARRIER).name(
-                messenger.component(player, NodePath.path("gui", "flags", "item", "back", "name"))
-        ).item(), click -> PlotMainGUI.open(player, plot, plugin));
+        var backItem = Item.builder().setItemProvider(ItemBuilder.of(Material.BARRIER).name(
+                        messenger.component(player, NodePath.path("gui", "flags", "item", "back", "name"))
+                ).item()).addClickHandler(click -> PlotMainGUI.open(player, plot, plugin))
+                .build();
 
         var flagCategories = plotService.flagRegistry().flagCategories();
 
         var playerFlags = flagCategories.get(PlotFlag.Category.PLAYER);
-        List<Item> playerFLagItems = playerFlags.stream().map(plotFlag -> new FlagItem<>(player, plotFlag, plot, plugin)).collect(Collectors.toList());
+        var playerFLagItems = playerFlags.stream()
+                .map(plotFlag -> new FlagItem<>(player, plotFlag, plot, plugin))
+                .toList();
 
         var entityFlags = flagCategories.get(PlotFlag.Category.ENTITY);
-        List<Item> entityFlagItems = entityFlags.stream().map(plotFlag -> new FlagItem<>(player, plotFlag, plot, plugin)).collect(Collectors.toList());
+        var entityFlagItems = entityFlags.stream()
+                .map(plotFlag -> new FlagItem<>(player, plotFlag, plot, plugin))
+                .toList();
 
         var vehicleFlags = flagCategories.get(PlotFlag.Category.VEHICLE);
-        List<Item> vehicleFlagItems = vehicleFlags.stream().map(plotFlag -> new FlagItem<>(player, plotFlag, plot, plugin)).collect(Collectors.toList());
+        var vehicleFlagItems = vehicleFlags.stream()
+                .map(plotFlag -> new FlagItem<>(player, plotFlag, plot, plugin))
+                .toList();
 
         var blockFlags = flagCategories.get(PlotFlag.Category.BLOCK);
-        List<Item> blockFlagItems = blockFlags.stream().map(plotFlag -> new FlagItem<>(player, plotFlag, plot, plugin)).collect(Collectors.toList());
+        var blockFlagItems = blockFlags.stream()
+                .map(plotFlag -> new FlagItem<>(player, plotFlag, plot, plugin))
+                .toList();
 
         var guis = new ArrayList<Gui>();
         var innerStructure = new Structure(
@@ -64,8 +67,8 @@ public class FlagsGUI {
                 ". . . . . .",
                 "# < # # > #"
         )
-                .addIngredient('<', new PrevPageItem(ItemStack.of(Material.PAPER), messenger, player))
-                .addIngredient('>', new NextPageItem(ItemStack.of(Material.PAPER), messenger, player))
+                .addIngredient('<', new PrevPageItem(ItemStack.of(Material.PAPER), messenger))
+                .addIngredient('>', new NextPageItem(ItemStack.of(Material.PAPER), messenger))
                 .addIngredient('#', PlotMainGUI.BORDER_ITEM)
                 .addIngredient('.', Markers.CONTENT_LIST_SLOT_HORIZONTAL);
 
@@ -118,29 +121,30 @@ public class FlagsGUI {
                         Placeholder.parsed("flag-amount", String.valueOf(blockFlags.size())))
         ).lore(blockTabLore).item());
 
-        var tabbedGUI = TabGui.normal()
-                .setStructure(
+        var tabbedGUI = TabGui.builder()
+                .setStructure(new Structure(
                         "# # # # # # # # #",
                         "P # . . . . . . #",
                         "E # . . . . . . #",
                         "V # . . . . . . #",
                         "B # . . . . . . #",
-                        "# # . . . . . . X"
-                )
-                .addIngredient('#', PlotMainGUI.BORDER_ITEM)
-                .addIngredient('X', backItem)
-                .addIngredient('P', playerTab)
-                .addIngredient('E', entityTab)
-                .addIngredient('V', vehicleTab)
-                .addIngredient('B', blockTab)
-                .addIngredient('.', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
-                .setTabs(guis)
+                        "# # . . . . . . X")
+                        .addIngredient('#', PlotMainGUI.BORDER_ITEM)
+                        .addIngredient('X', backItem)
+                        .addIngredient('P', playerTab)
+                        .addIngredient('E', entityTab)
+                        .addIngredient('V', vehicleTab)
+                        .addIngredient('B', blockTab)
+                        .addIngredient('.', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
+                ).setTabs(guis)
                 .build();
 
 
-        Window.single().setGui(tabbedGUI).setTitle(new AdventureComponentWrapper(title)).addCloseHandler(() -> {
-            plotService.savePlot(plot);
-        }).open(player);
+        Window.builder()
+                .setUpperGui(tabbedGUI)
+                .setTitle(title)
+                .addCloseHandler((reason) -> plotService.savePlot(plot))
+                .open(player);
     }
 
 
@@ -151,6 +155,7 @@ public class FlagsGUI {
             var flagInfo = plugin.messenger().component(player, NodePath.path("flags", "info", plotFlag.flagId()));
             var flagName = plugin.messenger().component(player, NodePath.path("flags", "name", plotFlag.flagId()));
             var flagDescription = plugin.messenger().component(player, NodePath.path("flags", "description", plotFlag.flagId()));
+
             var loreLine = plugin.messenger().component(player, NodePath.path("gui", "flags", "item", "tab", "lore", "slot"),
                     Placeholder.component("flag-info", flagInfo),
                     Placeholder.component("flag-description", flagDescription),

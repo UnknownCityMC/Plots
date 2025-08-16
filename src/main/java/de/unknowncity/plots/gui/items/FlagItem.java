@@ -7,11 +7,12 @@ import de.unknowncity.plots.plot.flag.PlotFlag;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.NodePath;
+import xyz.xenondevs.invui.Click;
+import xyz.xenondevs.invui.item.AbstractItem;
+import xyz.xenondevs.invui.item.Item;
 import xyz.xenondevs.invui.item.ItemProvider;
-import xyz.xenondevs.invui.item.impl.AbstractItem;
 
 import java.util.ArrayList;
 
@@ -19,19 +20,17 @@ public class FlagItem<T> extends AbstractItem {
     private final PlotFlag<T> plotFlag;
     private final PlotsPlugin plugin;
     private final Plot plot;
-    private final Player player;
     private T value;
 
     public FlagItem(Player player, PlotFlag<T> plotFlag, Plot plot, PlotsPlugin plugin) {
         this.plotFlag = plotFlag;
         this.plugin = plugin;
         this.plot = plot;
-        this.player = player;
         this.value = plot.getFlag(plotFlag);
     }
 
     @Override
-    public ItemProvider getItemProvider() {
+    public @NotNull ItemProvider getItemProvider(@NotNull Player player) {
         var itemBuilder = ItemBuilder.of(plotFlag.displayMaterial());
         itemBuilder.name(plugin.messenger().component(player, NodePath.path("flags", "name", plotFlag.flagId())));
 
@@ -53,12 +52,11 @@ public class FlagItem<T> extends AbstractItem {
             }
         }).toList());
         itemBuilder.lore(lore);
-        return new xyz.xenondevs.invui.item.builder.ItemBuilder(itemBuilder.item());
+        return Item.simple(itemBuilder.item()).getItemProvider(player);
     }
 
     @Override
-    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent event) {
-
+    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull Click click) {
         if (clickType == ClickType.LEFT) {
             value = getNextValue(value, false);
             plot.setFlag(plotFlag, value);

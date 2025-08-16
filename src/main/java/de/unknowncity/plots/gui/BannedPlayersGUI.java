@@ -1,25 +1,17 @@
 package de.unknowncity.plots.gui;
 
-import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.plot.Plot;
-import de.unknowncity.plots.gui.items.ManageMembersItem;
+import de.unknowncity.plots.gui.items.ManageBannedMember;
 import de.unknowncity.plots.gui.util.PagedGUI;
+import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.service.PlotService;
+import de.unknowncity.plots.util.SkullHelper;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.spongepowered.configurate.NodePath;
-import xyz.xenondevs.inventoryaccess.component.AdventureComponentWrapper;
 import xyz.xenondevs.invui.item.Item;
-import xyz.xenondevs.invui.item.ItemProvider;
-import xyz.xenondevs.invui.item.builder.SkullBuilder;
-import xyz.xenondevs.invui.item.impl.SimpleItem;
-import xyz.xenondevs.invui.util.MojangApiUtils;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
+import xyz.xenondevs.invui.item.ItemBuilder;
 
 public class BannedPlayersGUI {
 
@@ -29,30 +21,26 @@ public class BannedPlayersGUI {
 
         var title = messenger.component(player, NodePath.path("gui", "banned-players", "title"));
 
-        var backItem = new SimpleItem(ItemBuilder.of(Material.BARRIER).name(
-                messenger.component(player, NodePath.path("gui", "banned-players", "item", "back", "name"))
-        ).item(), click -> PlotMainGUI.open(player, plot, plugin));
+        var backItem = Item.builder().setItemProvider(new ItemBuilder(Material.BARRIER).setName(
+                        messenger.component(player, NodePath.path("gui", "banned-players", "item", "back", "name"))
+                )).addClickHandler(click -> PlotMainGUI.open(player, plot, plugin))
+                .build();
 
-        var friends = plot.members();
+        var bannedPlayers = plot.bannedPlayers();
 
-        List<Item> items = friends.stream().map(friend -> {
-            ItemProvider skull;
-            try {
-                skull = new SkullBuilder(friend.memberID()).setDisplayName(new AdventureComponentWrapper(
-                        messenger.component(player, NodePath.path("gui", "banned-players", "item", "member", "name"), Placeholder.parsed("name", friend.memberID().toString())
-                        )));
-            } catch (MojangApiUtils.MojangApiException | IOException e) {
-                skull = new xyz.xenondevs.invui.item.builder.ItemBuilder((Material.PLAYER_HEAD)).setDisplayName(
-                        new AdventureComponentWrapper(
-                                messenger.component(player, NodePath.path("gui", "banned-players", "item", "member", "name"), Placeholder.parsed("name", friend.memberID().toString())
-                                ))
-                );
-            }
-            return new ManageMembersItem(skull, plotService, plot, friend);
-        }).collect(Collectors.toList());
+        var items = bannedPlayers.stream().map(bannedPlayer -> {
+
+            var skull = SkullHelper.getSkull(bannedPlayer.uuid());
+
+            var itemBuilder = new ItemBuilder(skull)
+                    .setName(messenger.component(player, NodePath.path("gui", "banned-players", "item", "member", "name"), Placeholder.parsed("name", bannedPlayer.name())))
+                    .addLoreLines(messenger.component(player, NodePath.path("gui", "banned-players", "item", "member", "lore"), Placeholder.parsed("name", bannedPlayer.name())));
+
+            return new ManageBannedMember(itemBuilder, plotService, plot, bannedPlayer);
+        }).toList();
 
         var gui = PagedGUI.createAndOpenPagedGUI(messenger, title, backItem, items, player);
-        gui.addCloseHandler(() -> plotService.savePlot(plot));
+        gui.addCloseHandler((reason -> plotService.savePlot(plot)));
         gui.open();
     }
 }
