@@ -36,7 +36,7 @@ public class BannedPlayersGUI {
                     .setName(messenger.component(player, NodePath.path("gui", "banned-players", "item", "member", "name"), Placeholder.parsed("name", bannedPlayer.name())))
                     .addLoreLines(messenger.component(player, NodePath.path("gui", "banned-players", "item", "member", "lore"), Placeholder.parsed("name", bannedPlayer.name())));
 
-            return new ManageBannedMember(itemBuilder, plotService, plot, bannedPlayer);
+            return new ManageBannedMember(itemBuilder, plot, bannedPlayer);
         }).toList();
 
         var gui = PagedGUI.createAndOpenPagedGUI(messenger, title, backItem, items, player);

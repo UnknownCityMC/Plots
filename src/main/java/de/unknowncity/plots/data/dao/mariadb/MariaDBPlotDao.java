@@ -1,13 +1,16 @@
 package de.unknowncity.plots.data.dao.mariadb;
 
 import de.chojo.sadu.mapper.reader.StandardReader;
+import de.chojo.sadu.mapper.wrapper.Row;
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.unknowncity.plots.data.dao.PlotDao;
 import de.unknowncity.plots.plot.BuyPlot;
 import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.plot.RentPlot;
 import de.unknowncity.plots.plot.access.PlotState;
+import de.unknowncity.plots.plot.access.entity.PlotPlayer;
 import de.unknowncity.plots.plot.economy.PlotPaymentType;
+import org.bukkit.Bukkit;
 import org.intellij.lang.annotations.Language;
 
 import java.util.List;
@@ -35,11 +38,18 @@ public class MariaDBPlotDao implements PlotDao {
                 .single(call().bind("plotId", plotId))
                 .map(row -> {
                     var paymentType = row.getEnum("payment_type", PlotPaymentType.class);
+
+                    var ownerId = row.get("owner_id", StandardReader.UUID_FROM_STRING);
+                    var owner = ownerId != null ? new PlotPlayer(
+                            ownerId,
+                            Bukkit.getOfflinePlayer(ownerId).getName()
+                    ) : null;
+
                     if (paymentType == PlotPaymentType.BUY) {
                         return new BuyPlot(
                                 plotId,
+                                owner,
                                 row.getString("group_name"),
-                                row.get("owner_id", StandardReader.UUID_FROM_STRING),
                                 row.getString("region_id"),
                                 row.getDouble("price"),
                                 row.getString("world"),
@@ -49,7 +59,7 @@ public class MariaDBPlotDao implements PlotDao {
                     } else {
                         return new RentPlot(
                                 plotId,
-                                row.get("owner_id", StandardReader.UUID_FROM_STRING),
+                                owner,
                                 row.getString("group_name"),
                                 row.getString("region_id"),
                                 row.getDouble("price"),
@@ -100,11 +110,18 @@ public class MariaDBPlotDao implements PlotDao {
                 .map(row -> {
                     var paymentType = row.getEnum("payment_type", PlotPaymentType.class);
                     var plotId = row.getString("id");
+
+                    var ownerId = row.get("owner_id", StandardReader.UUID_FROM_STRING);
+                    var owner = ownerId != null ? new PlotPlayer(
+                            ownerId,
+                            Bukkit.getOfflinePlayer(ownerId).getName()
+                    ) : null;
+
                     if (paymentType == PlotPaymentType.BUY) {
                         return new BuyPlot(
                                 plotId,
+                                owner,
                                 row.getString("group_name"),
-                                row.get("owner_id", StandardReader.UUID_FROM_STRING),
                                 row.getString("region_id"),
                                 row.getDouble("price"),
                                 row.getString("world"),
@@ -114,7 +131,7 @@ public class MariaDBPlotDao implements PlotDao {
                     } else {
                         return new RentPlot(
                                 plotId,
-                                row.get("owner_id", StandardReader.UUID_FROM_STRING),
+                                owner,
                                 row.getString("group_name"),
                                 row.getString("region_id"),
                                 row.getDouble("price"),
@@ -142,11 +159,18 @@ public class MariaDBPlotDao implements PlotDao {
                 .map(row -> {
                     var paymentType = row.getEnum("payment_type", PlotPaymentType.class);
                     var plotId = row.getString("id");
+
+                    var ownerId = row.get("owner_id", StandardReader.UUID_FROM_STRING);
+                    var owner = ownerId != null ? new PlotPlayer(
+                            ownerId,
+                            Bukkit.getOfflinePlayer(ownerId).getName()
+                    ) : null;
+
                     if (paymentType == PlotPaymentType.BUY) {
                         return new BuyPlot(
                                 plotId,
+                                owner,
                                 row.getString("group_name"),
-                                row.get("owner_id", StandardReader.UUID_FROM_STRING),
                                 row.getString("region_id"),
                                 row.getDouble("price"),
                                 row.getString("world"),
@@ -156,7 +180,7 @@ public class MariaDBPlotDao implements PlotDao {
                     } else {
                         return new RentPlot(
                                 plotId,
-                                row.get("owner_id", StandardReader.UUID_FROM_STRING),
+                                owner,
                                 row.getString("group_name"),
                                 row.getString("region_id"),
                                 row.getDouble("price"),

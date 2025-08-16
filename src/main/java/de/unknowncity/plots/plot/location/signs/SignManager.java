@@ -64,10 +64,10 @@ public class SignManager {
 
             Sign sign = (Sign) block.getState();
 
-            sign.getSide(Side.FRONT).line(0, messenger.component(Language.GERMAN, NodePath.path("sign", state, "line-1"), plot.tagResolvers(messenger)));
-            sign.getSide(Side.FRONT).line(1, messenger.component(Language.GERMAN, NodePath.path("sign", state, "line-2"), plot.tagResolvers(messenger)));
-            sign.getSide(Side.FRONT).line(2, messenger.component(Language.GERMAN, NodePath.path("sign", state, "line-3"), plot.tagResolvers(messenger)));
-            sign.getSide(Side.FRONT).line(3, messenger.component(Language.GERMAN, NodePath.path("sign", state, "line-4"), plot.tagResolvers(messenger)));
+            sign.getSide(Side.FRONT).line(0, messenger.component(Language.GERMAN, NodePath.path("sign", state, "line-1"), plot.tagResolvers(null, messenger)));
+            sign.getSide(Side.FRONT).line(1, messenger.component(Language.GERMAN, NodePath.path("sign", state, "line-2"), plot.tagResolvers(null, messenger)));
+            sign.getSide(Side.FRONT).line(2, messenger.component(Language.GERMAN, NodePath.path("sign", state, "line-3"), plot.tagResolvers(null, messenger)));
+            sign.getSide(Side.FRONT).line(3, messenger.component(Language.GERMAN, NodePath.path("sign", state, "line-4"), plot.tagResolvers(null, messenger)));
             sign.update();
         });
     }

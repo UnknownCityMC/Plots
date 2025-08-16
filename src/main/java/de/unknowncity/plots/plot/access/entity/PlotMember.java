@@ -4,35 +4,19 @@ import de.unknowncity.plots.plot.access.type.PlotMemberRole;
 
 import java.util.UUID;
 
-public class PlotMember {
-    private final UUID memberID;
-    private final PlotMemberRole plotMemberRole;
-    private String name;
+public class PlotMember extends PlotPlayer {
+    private PlotMemberRole role;
 
-    public PlotMember(UUID memberID, PlotMemberRole plotMemberRole) {
-        this.memberID = memberID;
-        this.plotMemberRole = plotMemberRole;
+    public PlotMember(UUID uuid, String name, PlotMemberRole role) {
+        super(uuid, name);
+        this.role = role;
     }
 
-    public PlotMember(UUID memberID, PlotMemberRole plotMemberRole, String name) {
-        this.memberID = memberID;
-        this.plotMemberRole = plotMemberRole;
-        this.name = name;
+    public PlotMemberRole role() {
+        return role;
     }
 
-    public String name() {
-        return name;
-    }
-
-    public void name(String name) {
-        this.name = name;
-    }
-
-    public UUID memberID() {
-        return memberID;
-    }
-
-    public PlotMemberRole plotMemberRole() {
-        return plotMemberRole;
+    public void role(PlotMemberRole role) {
+        this.role = role;
     }
 }

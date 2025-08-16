@@ -17,10 +17,10 @@ public class PlotAccessUtil {
 
         var plotMemberOpt = plot.findPlotMember(player.getUniqueId());
 
-        if (plot.owner().equals(player.getUniqueId())) {
+        if (plot.owner().uuid().equals(player.getUniqueId())) {
             return true;
         }
 
-        return plotMemberOpt.filter(plotMember -> plotMember.plotMemberRole().ordinal() + 1 >= plotAccessModifier.ordinal()).isPresent();
+        return plotMemberOpt.filter(plotMember -> plotMember.role().ordinal() + 1 >= plotAccessModifier.ordinal()).isPresent();
     }
 }

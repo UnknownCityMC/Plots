@@ -31,13 +31,13 @@ public class MembersGUI {
 
         var items = members.stream().map(member -> {
 
-            var skull = SkullHelper.getSkull(member.memberID());
+            var skull = SkullHelper.getSkull(member.uuid());
 
             var itemBuilder = new xyz.xenondevs.invui.item.ItemBuilder(skull)
                     .setName(messenger.component(player, NodePath.path("gui", "banned-players", "item", "member", "name"), Placeholder.parsed("name", member.name())))
                     .addLoreLines(messenger.component(player, NodePath.path("gui", "banned-players", "item", "member", "lore"), Placeholder.parsed("name", member.name())));
 
-            return new ManageMembersItem(itemBuilder, plotService, plot, member);
+            return new ManageMembersItem(itemBuilder, plot, member);
         }).toList();
 
         var gui = PagedGUI.createAndOpenPagedGUI(messenger, title, backItem, items, player);

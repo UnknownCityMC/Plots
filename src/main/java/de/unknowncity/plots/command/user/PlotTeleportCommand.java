@@ -49,8 +49,8 @@ public class PlotTeleportCommand extends SubCommand {
         var plot = plots.get(id - 1);
         if (
                 plot.plotHome().isPublic() ||
-                        plot.owner().equals(sender.getUniqueId()) ||
-                        plot.members().stream().anyMatch(plotMember -> plotMember.memberID().equals(sender.getUniqueId())) ||
+                        plot.owner().uuid().equals(sender.getUniqueId()) ||
+                        plot.members().stream().anyMatch(plotMember -> plotMember.uuid().equals(sender.getUniqueId())) ||
                         sender.hasPermission("plots.command.plot.teleport.others")
         ) {
             sender.teleport(plot.plotHome().getLocation(plot.world()));

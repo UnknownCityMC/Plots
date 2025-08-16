@@ -6,9 +6,10 @@ import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.unknowncity.astralib.common.message.lang.Language;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
-import de.unknowncity.plots.plot.access.entity.BannedPlayer;
-import de.unknowncity.plots.plot.access.entity.PlotMember;
 import de.unknowncity.plots.plot.access.PlotState;
+import de.unknowncity.plots.plot.access.entity.PlotMember;
+import de.unknowncity.plots.plot.access.entity.PlotPlayer;
+import de.unknowncity.plots.plot.access.type.PlotMemberRole;
 import de.unknowncity.plots.plot.flag.PlotFlag;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
 import de.unknowncity.plots.plot.flag.WorldGuardFlag;
@@ -17,7 +18,6 @@ import de.unknowncity.plots.plot.location.signs.PlotSign;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import org.apache.logging.log4j.util.Strings;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -27,29 +27,26 @@ import org.bukkit.entity.Player;
 import org.spongepowered.configurate.NodePath;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 import java.util.*;
 
 public abstract class Plot {
     private final String plotId;
     private final String regionId;
     private final String worldName;
-    private UUID owner;
+    private PlotPlayer owner;
     private String groupName;
     private double price;
     private PlotState state;
     private LocalDateTime claimed;
 
     private List<PlotMember> members = new ArrayList<>();
-    private List<BannedPlayer> bannedPlayers = new ArrayList<>();
+    private List<PlotPlayer> bannedPlayers = new ArrayList<>();
     private final Map<PlotFlag<?>, Object> flags = new HashMap<>();
     private List<PlotInteractable> interactables = new ArrayList<>();
     private PlotLocation plotHome;
     private List<PlotSign> signs = new ArrayList<>();
 
-    public Plot(String plotId, String groupName, UUID owner, String regionId, double price, String worldName, PlotState state, LocalDateTime claimed) {
+    public Plot(String plotId, String groupName, PlotPlayer owner, String regionId, double price, String worldName, PlotState state, LocalDateTime claimed) {
         this.plotId = plotId;
         this.groupName = groupName;
         this.owner = owner;
@@ -64,12 +61,12 @@ public abstract class Plot {
         return members;
     }
 
-    public List<BannedPlayer> bannedPlayers() {
+    public List<PlotPlayer> bannedPlayers() {
         return bannedPlayers;
     }
 
-    public void bannedPlayers(List<BannedPlayer> bannedPlayers) {
-        this.bannedPlayers = bannedPlayers;
+    public void bannedPlayers(List<PlotPlayer> bannedPlayers) {
+        this.bannedPlayers.addAll(bannedPlayers);
     }
 
     public String id() {
@@ -80,11 +77,11 @@ public abstract class Plot {
         return regionId;
     }
 
-    public UUID owner() {
+    public PlotPlayer owner() {
         return owner;
     }
 
-    public void owner(UUID owner) {
+    public void owner(PlotPlayer owner) {
         this.owner = owner;
     }
 
@@ -187,33 +184,12 @@ public abstract class Plot {
                 Placeholder.parsed("state", state().name()),
                 Placeholder.component("owner-id", owner() != null ? Component.text(owner().toString())
                         : messenger.component(player, NodePath.path("plot", "no-owner"))),
-                Placeholder.component("owner-name", owner() != null && Bukkit.getOfflinePlayer(owner()).getName() != null ? Component.text(Bukkit.getOfflinePlayer(owner()).getName())
+                Placeholder.component("owner-name", owner() != null ? Component.text(owner.name())
                         : messenger.component(Language.GERMAN, NodePath.path("plot", "no-owner"))),
                 Placeholder.parsed("world", worldName()),
 
                 Placeholder.component("members", !members().isEmpty() ? messenger.component(player, NodePath.path("plot", "no-members")) :
                         Component.text(String.join(", ", members().stream().map(PlotMember::name).toList()))),
-                Placeholder.parsed("flags", flags() != null ? flags().toString() : ""),
-        };
-    }
-
-    public TagResolver[] tagResolvers(PaperMessenger messenger) {
-        return new TagResolver[]{
-                Placeholder.parsed("id", plotId),
-                Placeholder.component("group", groupName() != null ? Component.text(groupName()) :
-                        messenger.component(Language.GERMAN, NodePath.path("plot", "no-group"))),
-                Placeholder.parsed("price", String.valueOf(price())),
-                Placeholder.parsed("state", state().name()),
-                Placeholder.component("owner-id", owner() != null ? Component.text(owner().toString())
-                        : messenger.component(Language.GERMAN, NodePath.path("plot", "no-owner"))),
-                Placeholder.component("owner-name", owner() != null && Bukkit.getOfflinePlayer(owner()).getName() != null ? Component.text(Bukkit.getOfflinePlayer(owner()).getName())
-                        : messenger.component(Language.GERMAN, NodePath.path("plot", "no-owner"))),
-                Placeholder.parsed("world", worldName()),
-                Placeholder.component("members", members().isEmpty() ? messenger.component(Language.GERMAN, NodePath.path("plot", "no-members")) :
-                        Component.text(Strings.join(members().stream().map(PlotMember::memberID).toList(), ','))),
-
-                Placeholder.component("banned", !bannedPlayers().isEmpty() ? Component.text(String.join(", ", bannedPlayers().stream().map(BannedPlayer::name).toList())) :
-                        messenger.component(Language.GERMAN, NodePath.path("plot", "no-banned"))),
                 Placeholder.parsed("flags", flags() != null ? flags().toString() : ""),
         };
     }
@@ -236,11 +212,18 @@ public abstract class Plot {
     }
 
     public Optional<PlotMember> findPlotMember(UUID uuid) {
-        return members.stream().filter(plotMember -> plotMember.memberID().equals(uuid)).findFirst();
+        return members.stream().filter(plotMember -> plotMember.uuid().equals(uuid)).findFirst();
     }
 
-    public Optional<BannedPlayer> findPlotBannedPlayer(UUID uuid) {
+    public Optional<PlotPlayer> findPlotBannedPlayer(UUID uuid) {
         return bannedPlayers.stream().filter(bannedPlayer -> bannedPlayer.uuid().equals(uuid)).findFirst();
+    }
+
+    public void changeMemberRole(UUID memberId, PlotMemberRole newRole) {
+        findPlotMember(memberId).ifPresent(plotMember -> {
+            members.removeIf(member -> member.uuid().equals(memberId));
+            members.add(new PlotMember(memberId, plotMember.name(), newRole));
+        });
     }
 
     public int height() {

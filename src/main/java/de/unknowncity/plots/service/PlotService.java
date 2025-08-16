@@ -25,13 +25,11 @@ import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.unknowncity.astralib.common.service.Service;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.data.dao.mariadb.*;
-import de.unknowncity.plots.data.repository.PlotGroupRepository;
 import de.unknowncity.plots.plot.BuyPlot;
 import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.plot.RentPlot;
 import de.unknowncity.plots.plot.access.PlotState;
-import de.unknowncity.plots.plot.access.entity.PlotMember;
-import de.unknowncity.plots.plot.access.type.PlotMemberRole;
+import de.unknowncity.plots.plot.access.entity.PlotPlayer;
 import de.unknowncity.plots.plot.flag.FlagRegistry;
 import de.unknowncity.plots.plot.flag.PlotFlags;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
@@ -53,7 +51,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
 public class PlotService extends Service<PlotsPlugin> {
@@ -188,7 +185,7 @@ public class PlotService extends Service<PlotsPlugin> {
         if (plotCache.containsKey(plotId)) {
             return false;
         }
-        var plot = new BuyPlot(plotId, plotGroupName, null, region.getId(), price, world.getName(), PlotState.AVAILABLE, null);
+        var plot = new BuyPlot(plotId, null, plotGroupName,  region.getId(), price, world.getName(), PlotState.AVAILABLE, null);
 
         createPlot(region, plot, plotGroupName);
         return true;
@@ -256,7 +253,7 @@ public class PlotService extends Service<PlotsPlugin> {
         }
 
         plot.state(PlotState.SOLD);
-        plot.owner(player.getUniqueId());
+        plot.owner(new PlotPlayer(player.getUniqueId(), player.getName()));
         savePlot(plot);
 
         if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
@@ -267,7 +264,7 @@ public class PlotService extends Service<PlotsPlugin> {
     }
 
     public void unClaimPlot(Plot plot) {
-        economyService.deposit(plot.owner(), plot.price());
+        economyService.deposit(plot.owner().uuid(), plot.price());
 
         plot.state(PlotState.AVAILABLE);
         plot.owner(null);
@@ -300,7 +297,7 @@ public class PlotService extends Service<PlotsPlugin> {
         }
 
         plot.state(PlotState.SOLD);
-        plot.owner(player.getUniqueId());
+        plot.owner(new PlotPlayer(player.getUniqueId(), player.getName()));
         savePlot(plot);
         if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
             createSchematic(plot);
@@ -308,19 +305,9 @@ public class PlotService extends Service<PlotsPlugin> {
         loadSchematicBackup(plot, player.getUniqueId());
     }
 
-    public void addMember(OfflinePlayer player, PlotMemberRole role, Plot plot) {
-        plot.members().add(new PlotMember(player.getUniqueId(), role, player.getName()));
-        savePlot(plot);
-    }
-
-    public void removeMember(OfflinePlayer player, Plot plot) {
-        plot.members().removeIf(plotMember -> plotMember.memberID().equals(player.getUniqueId()));
-        savePlot(plot);
-    }
-
     public void setPlotOwner(OfflinePlayer player, Plot plot) {
         plot.state(PlotState.SOLD);
-        plot.owner(player.getUniqueId());
+        plot.owner(new PlotPlayer(player.getUniqueId(), player.getName()));
         savePlot(plot);
         SignManager.updateSings(plot, plugin.messenger());
     }

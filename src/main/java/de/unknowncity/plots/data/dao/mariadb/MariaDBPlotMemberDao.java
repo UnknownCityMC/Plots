@@ -2,9 +2,11 @@ package de.unknowncity.plots.data.dao.mariadb;
 
 import de.chojo.sadu.mapper.reader.StandardReader;
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
+import de.chojo.sadu.queries.call.adapter.UUIDAdapter;
 import de.unknowncity.plots.data.dao.PlotMemberDao;
 import de.unknowncity.plots.plot.access.entity.PlotMember;
 import de.unknowncity.plots.plot.access.type.PlotMemberRole;
+import org.bukkit.Bukkit;
 import org.intellij.lang.annotations.Language;
 
 import java.util.List;
@@ -33,11 +35,17 @@ public class MariaDBPlotMemberDao implements PlotMemberDao {
                         .bind("plotId", plotId)
                         .bind("userId", String.valueOf(memberId))
                 )
-                .map(row -> new PlotMember(
-                        row.get("user_id", StandardReader.UUID_FROM_STRING),
-                        row.getEnum("role", PlotMemberRole.class)
+                .map(row -> {
+                            var role = row.getEnum("role", PlotMemberRole.class);
+                            var name = Bukkit.getOfflinePlayer(memberId).getName();
 
-                ))::first
+                            return new PlotMember(
+                                    memberId,
+                                    name,
+                                    role
+                            );
+                        }
+                )::first
         );
     }
 
@@ -50,9 +58,9 @@ public class MariaDBPlotMemberDao implements PlotMemberDao {
                 """;
         return CompletableFuture.supplyAsync(queryConfiguration.query(queryString)
                 .single(call()
-                        .bind("userId", String.valueOf(plotMember.memberID()))
+                        .bind("userId", plotMember.uuid(), UUIDAdapter.AS_STRING)
                         .bind("plotId", plotId)
-                        .bind("role", plotMember.plotMemberRole())
+                        .bind("role", plotMember.role())
                 )
                 .insert()::changed
         );
@@ -68,11 +76,18 @@ public class MariaDBPlotMemberDao implements PlotMemberDao {
                 .single(call()
                         .bind("plotId", plotId)
                 )
-                .map(row -> new PlotMember(
-                        row.get("user_id", StandardReader.UUID_FROM_STRING),
-                        row.getEnum("role", PlotMemberRole.class)
+                .map(row -> {
+                            var memberId = row.get("user_id", StandardReader.UUID_FROM_STRING);
+                            var role = row.getEnum("role", PlotMemberRole.class);
+                            var name = Bukkit.getOfflinePlayer(memberId).getName();
 
-                ))::all
+                            return new PlotMember(
+                                    memberId,
+                                    name,
+                                    role
+                            );
+                        }
+                )::all
         );
     }
 

@@ -34,11 +34,11 @@ public class RentTask {
                     .forEach(plot -> {
                         var price = plot.price();
                         var owner = plot.owner();
-                        var player = plugin.getServer().getPlayer(owner);
+                        var player = plugin.getServer().getPlayer(owner.uuid());
 
-                        if (!economyService.hasEnoughFunds(owner, price)) {
+                        if (!economyService.hasEnoughFunds(owner.uuid(), price)) {
                             if (player != null) {
-                                if (plotService.backup(plot, owner)) {
+                                if (plotService.backup(plot, owner.uuid())) {
                                     plotService.unClaimPlot(plot);
                                     plot.state(PlotState.UNAVAILABLE);
                                 } else {
@@ -55,7 +55,7 @@ public class RentTask {
                             }
                         }
 
-                        economyService.withdraw(owner, price);
+                        economyService.withdraw(owner.uuid(), price);
 
                         ((RentPlot) plot).lastRentPayed(LocalDateTime.now());
                         plotService.savePlot(plot);

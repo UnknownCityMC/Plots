@@ -2,8 +2,7 @@ package de.unknowncity.plots.gui.items;
 
 import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.plot.access.entity.PlotMember;
-import de.unknowncity.plots.service.PlotService;
-import org.bukkit.Bukkit;
+import de.unknowncity.plots.plot.access.type.PlotMemberRole;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.jetbrains.annotations.NotNull;
@@ -12,14 +11,12 @@ import xyz.xenondevs.invui.item.AbstractItem;
 import xyz.xenondevs.invui.item.ItemProvider;
 
 public class ManageMembersItem extends AbstractItem {
-    private final PlotService plotService;
     private final Plot plot;
     private final ItemProvider itemProvider;
     private final PlotMember member;
 
-    public ManageMembersItem(@NotNull ItemProvider itemProvider, PlotService plotService, Plot plot, PlotMember member) {
+    public ManageMembersItem(@NotNull ItemProvider itemProvider, Plot plot, PlotMember member) {
         this.itemProvider = itemProvider;
-        this.plotService = plotService;
         this.plot = plot;
         this.member = member;
     }
@@ -32,7 +29,31 @@ public class ManageMembersItem extends AbstractItem {
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull Click click) {
         if (clickType == ClickType.SHIFT_LEFT) {
-            plotService.removeMember(Bukkit.getOfflinePlayer(member.memberID()), plot);
+            plot.members().removeIf(plotMember -> plotMember.uuid().equals(member.uuid()));
+            return;
         }
+
+        var role = member.role();
+
+        if (clickType == ClickType.LEFT) {
+            role = getPreviousRole(role);
+        } else if (clickType == ClickType.RIGHT) {
+            role = getNextRole(role);
+        }
+
+        plot.changeMemberRole(member.uuid(), role);
+    }
+    public void changeMemberRole(PlotMember member, Plot plot, PlotMemberRole role) {
+    }
+
+    public PlotMemberRole getNextRole(PlotMemberRole role) {
+        var values = PlotMemberRole.values();
+        int index = role.ordinal() == values.length - 1 ? 0 : role.ordinal() + 1;
+        return values[index];
+    }
+    public PlotMemberRole getPreviousRole(PlotMemberRole role) {
+        var values = PlotMemberRole.values();
+        int index = role.ordinal() == 0 ? values.length - 1 : role.ordinal() - 1;
+        return values[index];
     }
 }

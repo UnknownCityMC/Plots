@@ -58,7 +58,7 @@ public class PlotModExpandCommand extends SubCommand {
 
             var price = regionService.expandRegionInDirectionBlockCount(protectedRegion, direction, blocks, world) * plugin.configuration().fb().price() - plot.price();
 
-            if (plot.owner() != null && !economyService.hasEnoughFunds(plot.owner(), price)) {
+            if (plot.owner() != null && !economyService.hasEnoughFunds(plot.owner().uuid(), price)) {
                 plugin.messenger().sendMessage(player, NodePath.path("command", "plotmod", "expand", "not-enough-money"), Placeholder.parsed("price", String.valueOf(price)));
                 return;
             }
@@ -68,7 +68,7 @@ public class PlotModExpandCommand extends SubCommand {
                 var newPrice = newSquareMeters * plugin.configuration().fb().price();
                 plotService.setPlotPrice(newPrice, plot);
                 if (plot.owner() != null) {
-                    economyService.withdraw(plot.owner(), price);
+                    economyService.withdraw(plot.owner().uuid(), price);
                 }
                 plugin.messenger().sendMessage(player, NodePath.path("command", "plotmod", "expand", "success"));
             } else {
