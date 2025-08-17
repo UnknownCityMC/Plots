@@ -470,7 +470,7 @@ public class PlotService extends Service<PlotsPlugin> {
     }
 
     public List<Plot> findPlotsByOwnerUUID(UUID uuid) {
-        return plotCache.values().stream().filter(plot -> plot.owner().equals(uuid)).sorted(Comparator.comparing(Plot::claimed)).toList();
+        return plotCache.values().stream().filter(plot -> plot.owner().uuid().equals(uuid)).sorted(Comparator.comparing(Plot::claimed)).toList();
     }
 
     public Optional<Plot> getPlotForSignLocation(Location location) {
