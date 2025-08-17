@@ -62,7 +62,7 @@ public class PlotAddMemberCommand extends SubCommand {
             return;
         }
 
-        if (plot.members().stream().anyMatch(plotMember -> plotMember.uuid().equals(target.getUniqueId()))) {
+        if (plot.owner().uuid().equals(target.getUniqueId()) || plot.members().stream().anyMatch(plotMember -> plotMember.uuid().equals(target.getUniqueId()))) {
             plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "already-member"), plot.tagResolvers(sender, plugin.messenger()));
             return;
         }

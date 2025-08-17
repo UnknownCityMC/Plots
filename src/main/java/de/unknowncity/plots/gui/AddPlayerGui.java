@@ -73,7 +73,9 @@ public class AddPlayerGui {
     }
 
     public static Item createItem(OfflinePlayer target, Plot plot, PaperMessenger messenger, Player player, PlotsPlugin plugin, AddPlayerGuiType type) {
-        var isPresent = type == AddPlayerGuiType.MEMBER ? plot.findPlotMember(target.getUniqueId()).isPresent() : plot.findPlotBannedPlayer(target.getUniqueId()).isPresent();
+        var isPresent = target.getUniqueId().equals(plot.owner().uuid()) || type == AddPlayerGuiType.MEMBER ?
+                plot.findPlotMember(target.getUniqueId()).isPresent() :
+                plot.findPlotBannedPlayer(target.getUniqueId()).isPresent();
 
         var member = new PlotMember(target.getUniqueId(), target.getName(), PlotMemberRole.MEMBER);
 
