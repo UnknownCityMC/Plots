@@ -57,7 +57,7 @@ public class PlotAdminLoadBackupCommand extends SubCommand {
                 return;
             }
 
-            plotService.loadBackup(plot, target);
+            plotService.loadBackupForPlayer(plot, target);
         }, () -> plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "no-suitable-region")));
     }
 }

@@ -28,5 +28,6 @@ public class PlotAdminCommand extends PaperCommand<PlotsPlugin> {
 
         new PlotAdminReloadCommand(plugin, builder).apply(commandManager);
         new PlotAdminTeleportCommand(plugin, builder).apply(commandManager);
+        new PlotAdminBackupCommand(plugin, builder).apply(commandManager);
     }
 }

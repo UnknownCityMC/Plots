@@ -4,19 +4,10 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
 import com.sk89q.worldedit.function.biome.BiomeReplace;
-import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
-import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.function.visitor.RegionVisitor;
 import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.world.biome.BiomeType;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
@@ -28,6 +19,7 @@ import de.unknowncity.plots.data.dao.mariadb.*;
 import de.unknowncity.plots.plot.BuyPlot;
 import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.plot.RentPlot;
+import de.unknowncity.plots.plot.SchematicManager;
 import de.unknowncity.plots.plot.access.PlotState;
 import de.unknowncity.plots.plot.access.entity.PlotPlayer;
 import de.unknowncity.plots.plot.flag.FlagRegistry;
@@ -37,6 +29,7 @@ import de.unknowncity.plots.plot.group.PlotGroup;
 import de.unknowncity.plots.plot.location.PlotLocation;
 import de.unknowncity.plots.plot.location.signs.PlotSign;
 import de.unknowncity.plots.plot.location.signs.SignManager;
+import de.unknowncity.plots.service.backup.BackupService;
 import de.unknowncity.plots.util.LocationUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -45,13 +38,9 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.logging.Level;
 
 public class PlotService extends Service<PlotsPlugin> {
     private final QueryConfiguration queryConfiguration;
@@ -73,11 +62,14 @@ public class PlotService extends Service<PlotsPlugin> {
     private MariaDBPlotMemberDao plotMemberDao;
     private MariaDBPlotDeniedPlayerDao plotDeniedPlayerDao;
 
+    private final SchematicManager schematicManager;
+
     public PlotService(QueryConfiguration queryConfiguration, EconomyService economyService, PlotsPlugin plugin) {
         this.flagRegistry = new FlagRegistry(plugin);
         this.queryConfiguration = queryConfiguration;
         this.economyService = economyService;
         this.plugin = plugin;
+        this.schematicManager = new SchematicManager(plugin);
 
         this.signManager = new SignManager(plugin);
     }
@@ -85,6 +77,8 @@ public class PlotService extends Service<PlotsPlugin> {
     @Override
     public void startup() {
         PlotFlags.registerAllFlags(this);
+
+        schematicManager.makeDirectories();
 
         this.plotDao = new MariaDBPlotDao(queryConfiguration);
         this.plotFlagDao = new MariaDBPlotFlagDao(queryConfiguration, flagRegistry);
@@ -94,6 +88,8 @@ public class PlotService extends Service<PlotsPlugin> {
         this.plotSignDao = new MariaDBPlotSignDao(queryConfiguration);
         this.plotMemberDao = new MariaDBPlotMemberDao(queryConfiguration);
         this.plotDeniedPlayerDao = new MariaDBPlotDeniedPlayerDao(queryConfiguration);
+
+        this.plugin.serviceRegistry().register(new BackupService(schematicManager, this));
     }
 
     public void cacheAll() {
@@ -260,7 +256,7 @@ public class PlotService extends Service<PlotsPlugin> {
         savePlot(plot);
 
         if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
-            createSchematic(plot);
+            schematicManager.createPreSaleSchematic(plot);
         }
 
         SignManager.updateSings(plot, plugin.messenger());
@@ -277,14 +273,14 @@ public class PlotService extends Service<PlotsPlugin> {
         plot.members(new ArrayList<>());
 
         if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
-            loadSchematic(plot);
+            schematicManager.pastePresaleSchematic(plot);
         }
 
         SignManager.updateSings(plot, plugin.messenger());
     }
 
     public boolean backup(Plot plot, UUID owner) {
-        return createSchematicBackup(plot, owner);
+        return schematicManager.createSchematicBackup(plot, owner);
     }
 
     public boolean hasBackup(Plot plot, UUID owner) {
@@ -293,7 +289,7 @@ public class PlotService extends Service<PlotsPlugin> {
         return file.exists();
     }
 
-    public void loadBackup(Plot plot, Player player) {
+    public void loadBackupForPlayer(Plot plot, Player player) {
         economyService.withdraw(player.getUniqueId(), plot.price());
         if (plot instanceof RentPlot rentPlot) {
             rentPlot.lastRentPayed(LocalDateTime.now());
@@ -303,9 +299,9 @@ public class PlotService extends Service<PlotsPlugin> {
         plot.owner(new PlotPlayer(player.getUniqueId(), player.getName()));
         savePlot(plot);
         if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
-            createSchematic(plot);
+            schematicManager.createPreSaleSchematic(plot);
         }
-        loadSchematicBackup(plot, player.getUniqueId());
+        schematicManager.pasteOwnedBackupSchematic(plot, player.getUniqueId());
     }
 
     public void setPlotOwner(OfflinePlayer player, Plot plot) {
@@ -411,67 +407,7 @@ public class PlotService extends Service<PlotsPlugin> {
         return plotGroupCache.get(groupName).plotsInGroup().get(id);
     }
 
-    public void createSchematic(Plot plot) {
-        createWorldEditSchematic(plot, "/schematics/");
-    }
 
-
-    public boolean createSchematicBackup(Plot plot, UUID owner) {
-        return createWorldEditSchematic(plot, "/schematics/backups/" + owner.toString() + "_");
-    }
-
-    private boolean createWorldEditSchematic(Plot plot, String path) {
-        CuboidRegion region = new CuboidRegion(plot.protectedRegion().getMinimumPoint(), plot.protectedRegion().getMaximumPoint());
-        BlockArrayClipboard clipboard = new BlockArrayClipboard(region);
-
-        ForwardExtentCopy forwardExtentCopy = new ForwardExtentCopy(
-                BukkitAdapter.adapt(plot.world()), region, clipboard, region.getMinimumPoint()
-        );
-
-        try {
-            Operations.complete(forwardExtentCopy);
-        } catch (WorldEditException e) {
-            plugin.getLogger().log(Level.SEVERE, e.getMessage());
-            return false;
-        }
-
-        File file = new File(plugin.getDataPath() + path + plot.id() + ".schem");
-        try (ClipboardWriter writer = BuiltInClipboardFormat.SPONGE_V3_SCHEMATIC.getWriter(new FileOutputStream(file))) {
-            writer.write(clipboard);
-            return true;
-        } catch (IOException e) {
-            plugin.getLogger().log(Level.SEVERE, e.getMessage());
-            return false;
-        }
-    }
-
-    public void loadSchematic(Plot plot) {
-        loadWorldEditSchematic(plot, "/schematics/");
-    }
-
-    public void loadSchematicBackup(Plot plot, UUID owner) {
-        loadWorldEditSchematic(plot, "/schematics/backups/" + owner.toString() + "_");
-    }
-
-    public void loadWorldEditSchematic(Plot plot, String path) {
-        File file = new File(plugin.getDataPath() + path + plot.id() + ".schem");
-        ClipboardFormat format = BuiltInClipboardFormat.SPONGE_V3_SCHEMATIC;
-        Clipboard clipboard;
-        try (ClipboardReader reader = format.getReader(new FileInputStream(file))) {
-            clipboard = reader.read();
-            EditSession editSession = WorldEdit.getInstance().newEditSession((BukkitAdapter.adapt(plot.world())));
-            Operation operation = new ClipboardHolder(clipboard)
-                    .createPaste(editSession)
-                    .to(clipboard.getOrigin())
-                    .ignoreAirBlocks(false)
-                    .build();
-            Operations.complete(operation);
-            editSession.close();
-        } catch (WorldEditException | IOException e) {
-            plugin.getLogger().log(Level.SEVERE, e.getMessage());
-        }
-
-    }
 
     public List<Plot> findPlotsByOwnerUUID(UUID uuid) {
         return plotCache.values().stream().filter(plot -> plot.owner().uuid().equals(uuid)).sorted(Comparator.comparing(Plot::claimed)).toList();

@@ -90,6 +90,13 @@ command:
     reload: <prefix><gray>Einstellungen und Nachrichten neu geladen! <green>✔
     no-plot: <prefix><red>An dieser Stelle befindet sich kein Plot
     no-suitable-region: <prefix><red>An dieser Stelle befindet sich keine WorldGuard Region
+    backup:
+      create:
+        starting: "<prefix><gray>Starte Plot-Backup"
+        ended: "<prefix><gray>Backup fertiggestellt <dark_gray>(<yellow><time>ms<dark_gray>)"
+      load:
+        starting: "<prefix><gray>Lade Plot-Backup"
+        ended: "<prefix><gray>Backup fertig eingespielt <dark_gray>(<yellow><time>ms<dark_gray>)"
     set-owner:
       success: <prefix><gray>Der Besitzer wurde zu <gold><new-owner> <gray>geändert
     set-group:
