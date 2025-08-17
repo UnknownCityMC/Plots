@@ -71,6 +71,7 @@ public class PlotService extends Service<PlotsPlugin> {
     private MariaDBPlotLocationDao plotLocationDao;
     private MariaDBPlotSignDao plotSignDao;
     private MariaDBPlotMemberDao plotMemberDao;
+    private MariaDBPlotDeniedPlayerDao plotDeniedPlayerDao;
 
     public PlotService(QueryConfiguration queryConfiguration, EconomyService economyService, PlotsPlugin plugin) {
         this.flagRegistry = new FlagRegistry(plugin);
@@ -92,6 +93,7 @@ public class PlotService extends Service<PlotsPlugin> {
         this.plotLocationDao = new MariaDBPlotLocationDao(queryConfiguration);
         this.plotSignDao = new MariaDBPlotSignDao(queryConfiguration);
         this.plotMemberDao = new MariaDBPlotMemberDao(queryConfiguration);
+        this.plotDeniedPlayerDao = new MariaDBPlotDeniedPlayerDao(queryConfiguration);
     }
 
     public void cacheAll() {
@@ -107,6 +109,7 @@ public class PlotService extends Service<PlotsPlugin> {
                     });
                 });
                 plotMemberDao.readAll(plot.id()).thenAccept(plot::members);
+                plotDeniedPlayerDao.readAll(plot.id()).thenAccept(plot::deniedPlayers);
                 plotLocationDao.read(plot.id()).thenAccept(plotLocation -> plotLocation.ifPresent(plot::plotHome));
                 plotSignDao.readAll(plot.id()).thenAccept(plot::signs);
                 plotInteractablesDao.readAll(plot.id()).thenAccept(plotInteractables -> {
@@ -342,6 +345,7 @@ public class PlotService extends Service<PlotsPlugin> {
             plot.flags().forEach((plotFlag, value) -> plotFlagDao.write(plot.id(), plotFlag.flagId(), plotFlag.marshall(value)));
             plot.interactables().forEach(plotInteractable -> plotInteractablesDao.write(plotInteractable, plot.id()));
             plot.members().forEach(plotMember -> plotMemberDao.write(plotMember, plot.id()));
+            plot.deniedPlayers().forEach(plotDeniedPlayer -> plotDeniedPlayerDao.write(plotDeniedPlayer, plot.id()));
             plotLocationDao.write(plot.plotHome(), plot.id());
             plotSignDao.deleteAll(plot.id());
             plotSignDao.writeAll(plot.signs(), plot.id());

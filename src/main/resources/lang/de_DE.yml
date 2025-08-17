@@ -54,7 +54,7 @@ command:
   plot:
     info:
       - <gray>▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰<white>[<aqua>Plot-Info<white>]<gray>▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰
-      - "<gray>ID: <yellow><id> <dark_gray>(<group><dark_gray>)"
+      - "<gray>ID: <yellow><id> <dark_gray>(<gray><group><dark_gray>)"
       - "<gray>Besitzer: <yellow><owner-name>"
       - "<gray>Größe: <yellow><width> <gray>x <yellow><height> <gray>x <yellow><depth>"
       - "<gray>Vertraut: <yellow><members>"
@@ -69,10 +69,23 @@ command:
       success: <prefix><gray>Du hast <gold><id> <gray>für <gold><price>$ <green>gekauft!
     unclaim:
       no-owner: <prefix><red>Das darf nur der Besitzer tun!
-      success: <prefix><gray>Du hast <gold><id> <grayfür <gold><price>$ <red>verkauft!
+      success: <prefix><gray>Du hast <gold><id> <gray>für <gold><price>$ <red>verkauft!
     plot-tp:
       not-found: <prefix><red>Teleport nicht möglich!
       success: <prefix><gray>Du wurdest erfolgreich teleportiert!
+    member:
+      no-member: "<prefix><yellow><target> <red>ist kein Mitglied dieses Grundstücks"
+      add:
+        success: "<prefix><yellow><target> <gray>wurde als <yellow><role> <gray>zum Grundstück hinzugefügt"
+      remove:
+        success: "<prefix><yellow><target> <gray>wurde vom Grundstück enfernt"
+    deny:
+      owner: "<prefix><red>Du kannst den Besitzer nicht vom Grundstück verbannen"
+      self: "<prefix><red>Du kannst dich selbst nicht vom Grundstück verbannen"
+      success: "<prefix><yellow><target> <gray>wurde vom Grundstück verbannt"
+    undeny:
+      success: "<prefix><yellow><target> <gray>wurde entsperrt"
+      not-denied: "<prefix><yellow><target> <red>ist nicht verbannt"
   plotadmin:
     reload: <prefix><gray>Einstellungen und Nachrichten neu geladen! <green>✔
     no-plot: <prefix><red>An dieser Stelle befindet sich kein Plot

@@ -67,14 +67,14 @@ CREATE TABLE IF NOT EXISTS plot_member
             ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS plot_banned_players
+CREATE TABLE IF NOT EXISTS plot_denied
 (
     plot_id VARCHAR(256) NOT NULL,
     user_id VARCHAR(36)  NOT NULL,
 
     CONSTRAINT plot_member_pk
         PRIMARY KEY (user_id, plot_id),
-    CONSTRAINT plot_banned_players_plot_plot_id_id_fk
+    CONSTRAINT plot_denied_plot_plot_id_id_fk
         FOREIGN KEY (plot_id) REFERENCES plot (id)
             ON DELETE CASCADE
 );
