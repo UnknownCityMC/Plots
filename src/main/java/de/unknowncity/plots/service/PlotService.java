@@ -272,7 +272,7 @@ public class PlotService extends Service<PlotsPlugin> {
             plot.setFlag(plotFlag, plotFlag.defaultValue());
         });
         plot.members(new ArrayList<>());
-        savePlot(plot);
+
         if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
             loadSchematic(plot);
         }

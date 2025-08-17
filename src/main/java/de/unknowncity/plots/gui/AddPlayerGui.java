@@ -96,6 +96,9 @@ public class AddPlayerGui {
                 }
                 plot.members().add(member);
                 player.playSound(player.getLocation(), "entity.experience_orb.pickup", 1, 1);
+                if (target instanceof Player targetPlayer) {
+                    plugin.messenger().sendMessage(player, NodePath.path("event", "plot", "member", "added"), plot.tagResolvers(targetPlayer, messenger));
+                }
                 messenger.sendMessage(player, NodePath.path("command", "plot", "member", "success"), Placeholder.parsed("name", target.getName()));
                 MembersGUI.open(player, plot, plugin);
             } else {
@@ -104,8 +107,11 @@ public class AddPlayerGui {
                     player.playSound(player.getLocation(), "entity.villager.no", 1, 1);
                     return;
                 }
-                plot.bannedPlayers().add(member);
+                plot.denyPlayer(target);
                 player.playSound(player.getLocation(), "entity.experience_orb.pickup", 1, 1);
+                if (target instanceof Player targetPlayer) {
+                    plugin.messenger().sendMessage(player, NodePath.path("event", "plot", "kick", "target"), plot.tagResolvers(targetPlayer, messenger));
+                }
                 messenger.sendMessage(player, NodePath.path("command", "plot", "member", "success"), Placeholder.parsed("name", target.getName()));
                 BannedPlayersGUI.open(player, plot, plugin);
             }

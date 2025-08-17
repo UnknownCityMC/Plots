@@ -19,6 +19,8 @@ import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import de.unknowncity.plots.task.RentTask;
 import fr.skytasul.glowingentities.GlowingEntities;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.incendo.cloud.caption.Caption;
@@ -58,6 +60,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
         pluginManager.registerEvents(new PlotSignLinkListener(this), this);
         pluginManager.registerEvents(new PlotCreateListener(this), this);
         pluginManager.registerEvents(new PlotSignInteractListener(this), this);
+        pluginManager.registerEvents(new PlayerJoinListener(this), this);
 
         var sessionManager = WorldGuard.getInstance().getPlatform().getSessionManager();
         sessionManager.registerHandler(new PlotEntrySessionHandler.Factory(

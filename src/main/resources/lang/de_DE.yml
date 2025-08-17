@@ -123,6 +123,8 @@ command:
       error: <prefix><red>Es gab einen Fehler...
 event:
   plot:
+    enter:
+      deny: "<prefix><red>Du darfst dieses Grundstück nicht betreten!"
     interact:
       deny: <prefix><red>Das darfst du aufgrund der Ploteinstellungen nicht tun!
 gui:

@@ -41,7 +41,7 @@ public class ManageBannedMember extends AbstractPagedGuiBoundItem {
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull Click click) {
         if (clickType == ClickType.SHIFT_LEFT) {
-            plot.bannedPlayers().remove(bannedPlayer);
+            plot.deniedPlayers().remove(bannedPlayer);
             var gui = (PagedGui<Item>) getGui();
             gui.setContent(gui.getContent().stream().filter(item -> !item.equals(this)).toList());
             player.playSound(player.getLocation(), "entity.item.break", 1, 1);

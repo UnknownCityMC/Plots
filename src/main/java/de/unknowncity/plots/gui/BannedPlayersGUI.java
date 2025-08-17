@@ -24,7 +24,7 @@ public class BannedPlayersGUI {
 
         var title = messenger.component(player, NodePath.path("gui", "banned-players", "title"));
 
-        var bannedPlayers = plot.bannedPlayers();
+        var bannedPlayers = plot.deniedPlayers();
 
         var items = bannedPlayers.stream().map(bannedPlayer -> new ManageBannedMember(plot, bannedPlayer, messenger)).toList();
 

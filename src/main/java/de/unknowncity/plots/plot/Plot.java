@@ -6,6 +6,7 @@ import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.unknowncity.astralib.common.message.lang.Language;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
+import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.access.PlotState;
 import de.unknowncity.plots.plot.access.entity.PlotMember;
 import de.unknowncity.plots.plot.access.entity.PlotPlayer;
@@ -18,10 +19,7 @@ import de.unknowncity.plots.plot.location.signs.PlotSign;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
 import org.spongepowered.configurate.NodePath;
@@ -40,7 +38,7 @@ public abstract class Plot {
     private LocalDateTime claimed;
 
     private List<PlotMember> members = new ArrayList<>();
-    private List<PlotPlayer> bannedPlayers = new ArrayList<>();
+    private List<PlotPlayer> deniedPlayers = new ArrayList<>();
     private final Map<PlotFlag<?>, Object> flags = new HashMap<>();
     private List<PlotInteractable> interactables = new ArrayList<>();
     private PlotLocation plotHome;
@@ -61,12 +59,12 @@ public abstract class Plot {
         return members;
     }
 
-    public List<PlotPlayer> bannedPlayers() {
-        return bannedPlayers;
+    public List<PlotPlayer> deniedPlayers() {
+        return deniedPlayers;
     }
 
-    public void bannedPlayers(List<PlotPlayer> bannedPlayers) {
-        this.bannedPlayers.addAll(bannedPlayers);
+    public void deniedPlayers(List<PlotPlayer> bannedPlayers) {
+        this.deniedPlayers.addAll(bannedPlayers);
     }
 
     public String id() {
@@ -190,8 +188,8 @@ public abstract class Plot {
 
                 Placeholder.component("members", members().isEmpty() ? messenger.component(player, NodePath.path("plot", "info", "no-members")) :
                         Component.text(String.join(", ", members().stream().map(PlotMember::name).toList()))),
-                Placeholder.component("banned", bannedPlayers().isEmpty() ? messenger.component(player, NodePath.path("plot", "info", "no-banned")) :
-                        Component.text(String.join(", ", bannedPlayers().stream().map(PlotPlayer::name).toList()))),
+                Placeholder.component("banned", deniedPlayers().isEmpty() ? messenger.component(player, NodePath.path("plot", "info", "no-banned")) :
+                        Component.text(String.join(", ", deniedPlayers().stream().map(PlotPlayer::name).toList()))),
                 Placeholder.component("flags", flags() != null ? flags().keySet().stream().map(plotFlag ->
                         messenger.component(player, NodePath.path("plot", "info", "flag-format"),
                                 Placeholder.component("flag-value", messenger.component(player, NodePath.path("flags", "value", flags.get(plotFlag).toString()))),
@@ -221,13 +219,31 @@ public abstract class Plot {
     }
 
     public Optional<PlotPlayer> findPlotBannedPlayer(UUID uuid) {
-        return bannedPlayers.stream().filter(bannedPlayer -> bannedPlayer.uuid().equals(uuid)).findFirst();
+        return deniedPlayers.stream().filter(bannedPlayer -> bannedPlayer.uuid().equals(uuid)).findFirst();
     }
 
     public void changeMemberRole(UUID memberId, PlotMemberRole newRole) {
         findPlotMember(memberId).ifPresent(plotMember -> {
             plotMember.role(newRole);
         });
+    }
+
+    public void denyPlayer(OfflinePlayer offlinePlayer) {
+        members.removeIf(member -> member.uuid().equals(offlinePlayer.getUniqueId()));
+        deniedPlayers.add(new PlotPlayer(offlinePlayer.getUniqueId(), offlinePlayer.getName()));
+        if (offlinePlayer instanceof Player player) {
+            if (player.hasPermission("plots.entry.bypass")) {
+                return;
+            }
+            kick(player);
+        }
+    }
+
+    public void kick(Player player) {
+        if (player.hasPermission("plots.entry.bypass")) {
+            return;
+        }
+        player.teleport(world().getSpawnLocation());
     }
 
     public int height() {
