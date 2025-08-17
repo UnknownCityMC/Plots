@@ -366,6 +366,14 @@ public class PlotService extends Service<PlotsPlugin> {
         return Optional.of(getPlot(plotId));
     }
 
+    public Optional<Plot> findPlotForRegion(ProtectedRegion region) {
+        var plotId = region.getId();
+        if (!existsPlot(plotId)) {
+            return Optional.empty();
+        }
+        return Optional.of(getPlot(plotId));
+    }
+
     public void deletePlot(String id) {
         var plot = plotCache.get(id);
         deletePlot(plot);

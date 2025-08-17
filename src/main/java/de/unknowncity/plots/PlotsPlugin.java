@@ -1,5 +1,6 @@
 package de.unknowncity.plots;
 
+import com.sk89q.worldguard.WorldGuard;
 import de.unknowncity.astralib.common.configuration.YamlAstraConfiguration;
 import de.unknowncity.astralib.common.database.StandardDataBaseProvider;
 import de.unknowncity.astralib.common.message.lang.Localization;
@@ -12,10 +13,7 @@ import de.unknowncity.plots.command.mod.PlotModCommand;
 import de.unknowncity.plots.command.user.PlotCommand;
 import de.unknowncity.plots.configurration.PlotsConfiguration;
 import de.unknowncity.plots.data.model.plot.PlotLocations;
-import de.unknowncity.plots.listener.PlotCreateListener;
-import de.unknowncity.plots.listener.PlotInteractListener;
-import de.unknowncity.plots.listener.PlotSignInteractListener;
-import de.unknowncity.plots.listener.PlotSignLinkListener;
+import de.unknowncity.plots.listener.*;
 import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
@@ -61,6 +59,11 @@ public class PlotsPlugin extends PaperAstraPlugin {
         pluginManager.registerEvents(new PlotCreateListener(this), this);
         pluginManager.registerEvents(new PlotSignInteractListener(this), this);
 
+        var sessionManager = WorldGuard.getInstance().getPlatform().getSessionManager();
+        sessionManager.registerHandler(new PlotEntrySessionHandler.Factory(
+                serviceRegistry.getRegistered(PlotService.class),
+                messenger
+        ), null);
 
         rentTask = new RentTask(this, serviceRegistry.getRegistered(PlotService.class), serviceRegistry.getRegistered(EconomyService.class));
         rentTask.start();
