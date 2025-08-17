@@ -63,6 +63,7 @@ public class InteractablesItem extends AbstractItem {
             interactable.accessModifier(getNextInteractable(interactable.accessModifier(), true));
         }
 
+        player.playSound(player.getLocation(), "ui.button.click", 1, 1);
         notifyWindows();
     }
 

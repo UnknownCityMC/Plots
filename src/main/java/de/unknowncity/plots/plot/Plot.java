@@ -179,18 +179,23 @@ public abstract class Plot {
                 Placeholder.parsed("price", String.valueOf(price())),
 
                 Placeholder.component("group", groupName() != null ? Component.text(groupName()) :
-                        messenger.component(player, NodePath.path("plot", "no-group"))),
+                        messenger.component(player, NodePath.path("plot", "info", "no-group"))),
                 Placeholder.parsed("price", String.valueOf(price())),
                 Placeholder.parsed("state", state().name()),
                 Placeholder.component("owner-id", owner() != null ? Component.text(owner().toString())
-                        : messenger.component(player, NodePath.path("plot", "no-owner"))),
+                        : messenger.component(player, NodePath.path("plot", "info", "no-owner"))),
                 Placeholder.component("owner-name", owner() != null ? Component.text(owner.name())
-                        : messenger.component(Language.GERMAN, NodePath.path("plot", "no-owner"))),
+                        : messenger.component(Language.GERMAN, NodePath.path("plot", "info", "no-owner"))),
                 Placeholder.parsed("world", worldName()),
 
-                Placeholder.component("members", !members().isEmpty() ? messenger.component(player, NodePath.path("plot", "no-members")) :
+                Placeholder.component("members", members().isEmpty() ? messenger.component(player, NodePath.path("plot", "info", "no-members")) :
                         Component.text(String.join(", ", members().stream().map(PlotMember::name).toList()))),
-                Placeholder.parsed("flags", flags() != null ? flags().toString() : ""),
+                Placeholder.component("banned", bannedPlayers().isEmpty() ? messenger.component(player, NodePath.path("plot", "info", "no-banned")) :
+                        Component.text(String.join(", ", bannedPlayers().stream().map(PlotPlayer::name).toList()))),
+                Placeholder.component("flags", flags() != null ? flags().keySet().stream().map(plotFlag ->
+                        messenger.component(player, NodePath.path("plot", "info", "flag-format"),
+                                Placeholder.component("flag-value", messenger.component(player, NodePath.path("flags", "value", flags.get(plotFlag).toString()))),
+                                Placeholder.component("flag-id", messenger.component(player, NodePath.path("flags", "name", plotFlag.flagId()))))).reduce(Component::append).orElseGet(Component::empty) : Component.empty())
         };
     }
 
@@ -221,8 +226,7 @@ public abstract class Plot {
 
     public void changeMemberRole(UUID memberId, PlotMemberRole newRole) {
         findPlotMember(memberId).ifPresent(plotMember -> {
-            members.removeIf(member -> member.uuid().equals(memberId));
-            members.add(new PlotMember(memberId, plotMember.name(), newRole));
+            plotMember.role(newRole);
         });
     }
 

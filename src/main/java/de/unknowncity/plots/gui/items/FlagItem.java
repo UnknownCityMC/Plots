@@ -32,7 +32,9 @@ public class FlagItem<T> extends AbstractItem {
     @Override
     public @NotNull ItemProvider getItemProvider(@NotNull Player player) {
         var itemBuilder = ItemBuilder.of(plotFlag.displayMaterial());
-        itemBuilder.name(plugin.messenger().component(player, NodePath.path("flags", "name", plotFlag.flagId())));
+        itemBuilder.name(plugin.messenger().component(
+                player, NodePath.path("gui", "flags", "item", "slot", "name"),
+                Placeholder.component("flag-name", plugin.messenger().component(player, NodePath.path("flags", "name", plotFlag.flagId())))));
 
         var flagDescription = plugin.messenger().component(player, NodePath.path("flags", "description", plotFlag.flagId()));
 
@@ -66,6 +68,7 @@ public class FlagItem<T> extends AbstractItem {
             plot.setFlag(plotFlag, value);
         }
 
+        player.playSound(player.getLocation(), "ui.button.click", 1, 1);
         notifyWindows();
     }
 

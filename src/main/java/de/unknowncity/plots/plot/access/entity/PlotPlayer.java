@@ -1,5 +1,8 @@
 package de.unknowncity.plots.plot.access.entity;
 
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+
 import java.util.UUID;
 
 public class PlotPlayer {
@@ -20,5 +23,12 @@ public class PlotPlayer {
 
     public String name() {
         return name;
+    }
+
+    public TagResolver[] tagResolvers() {
+        return new TagResolver[]{
+                Placeholder.unparsed("name", name),
+                Placeholder.unparsed("uuid", uuid.toString())
+        };
     }
 }

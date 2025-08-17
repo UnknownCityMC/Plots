@@ -2,8 +2,8 @@ package de.unknowncity.plots.gui.items;
 
 import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.gui.*;
+import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.util.SkullHelper;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -16,6 +16,18 @@ import xyz.xenondevs.invui.item.Item;
 public class PreparedItems {
     private static final ItemStack PLOT_INFO_SKULL = SkullHelper.getSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjU0ODUwMzFiMzdmMGQ4YTRmM2I3ODE2ZWI3MTdmMDNkZTg5YTg3ZjZhNDA2MDJhZWY1MjIyMWNkZmFmNzQ4OCJ9fX0=");
     private static final ItemStack WARP_SKULL = SkullHelper.getSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjBiZmMyNTc3ZjZlMjZjNmM2ZjczNjVjMmM0MDc2YmNjZWU2NTMxMjQ5ODkzODJjZTkzYmNhNGZjOWUzOWIifX19");
+
+    public static Item back(Player player, String gui, PlotsPlugin plugin, Runnable action) {
+        return Item.builder().setItemProvider(ItemBuilder.of(Material.BARRIER)
+                .name(plugin.messenger().component(player, NodePath.path("gui", gui, "item", "back", "name")))
+                .lore(plugin.messenger().componentList(player, NodePath.path("gui", gui, "item", "back", "lore")))
+                .item()
+        )
+                .addClickHandler(click -> {
+                    player.playSound(player.getLocation(), "ui.button.click", 1, 1);
+                    action.run();
+                }).build();
+    }
 
     public static Item plotInfo(Player player, Plot plot, PlotsPlugin plugin) {
         return Item.builder().setItemProvider(ItemBuilder.of(PLOT_INFO_SKULL)
@@ -30,7 +42,9 @@ public class PreparedItems {
                 .name(plugin.messenger().component(player, NodePath.path("gui", "main", "item", "warp", "name"), plot.tagResolvers(player, plugin.messenger())))
                 .lore(plugin.messenger().componentList(player, NodePath.path("gui", "main", "item", "warp", "lore"), plot.tagResolvers(player, plugin.messenger())))
                 .item()
-        ).build();
+        ).addClickHandler(click -> {
+            player.playSound(player.getLocation(), "ui.button.click", 1, 1);
+        }).build();
     }
 
 
@@ -42,7 +56,10 @@ public class PreparedItems {
                         ).lore(plugin.messenger().componentList(player, NodePath.path("gui", "main", "item", "biome", "lore"),
                                 Placeholder.component("current-biome", Component.translatable(currentBiome.translationKey())))
                         ).item()
-                ).addClickHandler(click -> BiomeChangeGUI.open(player, plot, plugin))
+                ).addClickHandler(click -> {
+                    BiomeChangeGUI.open(player, plot, plugin);
+                    player.playSound(player.getLocation(), "ui.button.click", 1, 1);
+                })
                 .build();
     }
 
@@ -50,14 +67,20 @@ public class PreparedItems {
         return Item.builder().setItemProvider(ItemBuilder.of(Material.SKELETON_SKULL)
                         .name(plugin.messenger().component(player, NodePath.path("gui", "main", "item", "members", "name")))
                         .item()
-                ).addClickHandler(click -> MembersGUI.open(player, plot, plugin))
+                ).addClickHandler(click -> {
+                    MembersGUI.open(player, plot, plugin);
+                    player.playSound(player.getLocation(), "ui.button.click", 1, 1);
+                })
                 .build();
     }
 
     public static Item bannedPlayers(Player player, Plot plot, PlotsPlugin plugin) {
         return Item.builder().setItemProvider(ItemBuilder.of(Material.WITHER_SKELETON_SKULL).name(
                         plugin.messenger().component(player, NodePath.path("gui", "main", "item", "banned", "name"))
-                ).item()).addClickHandler(click -> BannedPlayersGUI.open(player, plot, plugin))
+                ).item()).addClickHandler(click -> {
+                    BannedPlayersGUI.open(player, plot, plugin);
+                    player.playSound(player.getLocation(), "ui.button.click", 1, 1);
+                })
                 .build();
     }
 
@@ -65,7 +88,10 @@ public class PreparedItems {
 
         return Item.builder().setItemProvider(ItemBuilder.of(Material.WRITABLE_BOOK).name(
                         plugin.messenger().component(player, NodePath.path("gui", "main", "item", "flags", "name"))
-                ).item()).addClickHandler(click -> FlagsGUI.open(player, plot, plugin))
+                ).item()).addClickHandler(click -> {
+                    FlagsGUI.open(player, plot, plugin);
+                    player.playSound(player.getLocation(), "ui.button.click", 1, 1);
+                })
                 .build();
     }
 
@@ -73,7 +99,34 @@ public class PreparedItems {
         return Item.builder().setItemProvider(ItemBuilder.of(Material.SMITHING_TABLE).name(
                         plugin.messenger().component(player, NodePath.path("gui", "main", "item", "interactable", "name"))
                 ).item())
-                .addClickHandler(click -> InteractablesGUI.open(player, plot, plugin))
+                .addClickHandler(click -> {
+                    InteractablesGUI.open(player, plot, plugin);
+                    player.playSound(player.getLocation(), "ui.button.click", 1, 1);
+                })
+                .build();
+    }
+
+    public static Item addMember(Player player, Plot plot, PlotsPlugin plugin) {
+        return Item.builder().setItemProvider(ItemBuilder.of(Material.ENDER_EYE).name(
+                        plugin.messenger().component(player, NodePath.path("gui", "members", "item", "add", "name"))
+                ).lore(
+                        plugin.messenger().componentList(player, NodePath.path("gui", "members", "item", "add", "lore"))
+                ).item()).addClickHandler(click -> {
+                    AddPlayerGui.open(player, plot, plugin, AddPlayerGui.AddPlayerGuiType.MEMBER);
+                    player.playSound(player.getLocation(), "ui.button.click", 1, 1);
+                })
+                .build();
+    }
+
+    public static Item addBannedPlayer(Player player, Plot plot, PlotsPlugin plugin) {
+        return Item.builder().setItemProvider(ItemBuilder.of(Material.ENDER_EYE).name(
+                        plugin.messenger().component(player, NodePath.path("gui", "banned-players", "item", "add", "name"))
+                ).lore(
+                        plugin.messenger().componentList(player, NodePath.path("gui", "banned-players", "item", "add", "lore"))
+                ).item()).addClickHandler(click -> {
+                    AddPlayerGui.open(player, plot, plugin, AddPlayerGui.AddPlayerGuiType.BANNED_PLAYER);
+                    player.playSound(player.getLocation(), "ui.button.click", 1, 1);
+                })
                 .build();
     }
 }

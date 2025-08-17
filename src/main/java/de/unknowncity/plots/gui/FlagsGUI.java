@@ -2,10 +2,7 @@ package de.unknowncity.plots.gui;
 
 import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.gui.items.DefaultTabItem;
-import de.unknowncity.plots.gui.items.FlagItem;
-import de.unknowncity.plots.gui.items.NextPageItem;
-import de.unknowncity.plots.gui.items.PrevPageItem;
+import de.unknowncity.plots.gui.items.*;
 import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.plot.flag.PlotFlag;
 import de.unknowncity.plots.service.PlotService;
@@ -16,13 +13,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.spongepowered.configurate.NodePath;
 import xyz.xenondevs.invui.gui.*;
-import xyz.xenondevs.invui.item.AbstractItem;
-import xyz.xenondevs.invui.item.Item;
 import xyz.xenondevs.invui.window.Window;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class FlagsGUI {
 
@@ -31,11 +25,6 @@ public class FlagsGUI {
         var plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
 
         var title = messenger.component(player, NodePath.path("gui", "flags", "title"));
-
-        var backItem = Item.builder().setItemProvider(ItemBuilder.of(Material.BARRIER).name(
-                        messenger.component(player, NodePath.path("gui", "flags", "item", "back", "name"))
-                ).item()).addClickHandler(click -> PlotMainGUI.open(player, plot, plugin))
-                .build();
 
         var flagCategories = plotService.flagRegistry().flagCategories();
 
@@ -130,7 +119,7 @@ public class FlagsGUI {
                         "B # . . . . . . #",
                         "# # . . . . . . X")
                         .addIngredient('#', PlotMainGUI.BORDER_ITEM)
-                        .addIngredient('X', backItem)
+                        .addIngredient('X', PreparedItems.back(player, "flags", plugin, () -> PlotMainGUI.open(player, plot, plugin)))
                         .addIngredient('P', playerTab)
                         .addIngredient('E', entityTab)
                         .addIngredient('V', vehicleTab)
@@ -156,7 +145,7 @@ public class FlagsGUI {
             var flagName = plugin.messenger().component(player, NodePath.path("flags", "name", plotFlag.flagId()));
             var flagDescription = plugin.messenger().component(player, NodePath.path("flags", "description", plotFlag.flagId()));
 
-            var loreLine = plugin.messenger().component(player, NodePath.path("gui", "flags", "item", "tab", "lore", "slot"),
+            var loreLine = plugin.messenger().component(player, NodePath.path("gui", "flags", "item", "tab", "lore"),
                     Placeholder.component("flag-info", flagInfo),
                     Placeholder.component("flag-description", flagDescription),
                     Placeholder.component("flag-name", flagName)

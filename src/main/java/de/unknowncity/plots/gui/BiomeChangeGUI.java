@@ -3,6 +3,7 @@ package de.unknowncity.plots.gui;
 import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.gui.items.BiomeChangeItem;
+import de.unknowncity.plots.gui.items.PreparedItems;
 import de.unknowncity.plots.gui.util.PagedGUI;
 import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.service.PlotService;
@@ -64,17 +65,12 @@ public class BiomeChangeGUI {
 
         var title = messenger.component(player, NodePath.path("gui", "biome", "title"));
 
-        var backItem = Item.builder().setItemProvider(ItemBuilder.of(Material.BARRIER).name(
-                        messenger.component(player, NodePath.path("gui", "biome", "item", "back", "name"))
-                ).item())
-                .addClickHandler(click -> PlotMainGUI.open(player, plot, plugin))
-                .build();
 
         var items = biomeBlockMap.keySet().stream().map(biome -> new BiomeChangeItem(Item.simple(ItemBuilder.of(getItemForBiome(biome)).name(
                 messenger.component(player, NodePath.path("gui", "biome", "item", "biome", "name"), Placeholder.component("biome", Component.translatable(biome.translationKey())))
         ).item()).getItemProvider(player), plot, biome, plugin)).collect(Collectors.toList());
 
-        var gui = PagedGUI.createAndOpenPagedGUI(messenger, title, backItem, items, player);
+        var gui = PagedGUI.createAndOpenPagedGUI(messenger, title, PreparedItems.back(player, "biome", plugin, () -> PlotMainGUI.open(player, plot, plugin)), items, player);
         gui.addCloseHandler((reason) -> plugin.serviceRegistry().getRegistered(PlotService.class).savePlot(plot));
         gui.open();
     }

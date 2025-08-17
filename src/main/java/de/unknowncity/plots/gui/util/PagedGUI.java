@@ -26,7 +26,7 @@ public class PagedGUI {
                                 "# . . . . . . . #",
                                 "# . . . . . . . #",
                                 "# . . . . . . . #",
-                                "B # < # # # > # #"
+                                "# # < # # # > # B"
                         ).addIngredient('#', PlotMainGUI.BORDER_ITEM)
                                 .addIngredient('B', backItem)
                                 .addIngredient('<', new PrevPageItem(ItemStack.of(Material.PAPER), messenger))

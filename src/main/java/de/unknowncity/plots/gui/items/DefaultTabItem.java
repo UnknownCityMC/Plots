@@ -26,5 +26,6 @@ public class DefaultTabItem extends AbstractTabGuiBoundItem {
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull Click click) {
         this.getGui().setTab(tabIndex);
+        player.playSound(player.getLocation(), "ui.button.click", 1, 1);
     }
 }

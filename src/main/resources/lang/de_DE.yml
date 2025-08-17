@@ -1,9 +1,35 @@
 ---
 prefix: "<white>[<aqua>Plots<white>] "
 plot:
-  no-owner: "<green>Nicht verkauft"
-  no-members: "<gray>*<i>Niemand*"
-  no-banned: "<gray>*<i>Niemand*"
+  info:
+    no-group: "*<i>Keine Gruppe</i>*"
+    no-owner: "<green>Nicht verkauft"
+    no-members: "<gray>*<i>Niemand*"
+    no-banned: "<gray>*<i>Niemand*"
+    flag-format: "<newline>  - <gray><flag-id><yellow>: <yellow><flag-value>"
+member-role:
+  name:
+    CO_OWNER: "Co-Besitzer"
+    MEMBER: "Mitglied"
+    TEMP_MEMBER: "Temporäres Mitglied"
+flags:
+  value:
+    OWNER: "Besitzer"
+    CO_OWNER: "Co-Besitzer"
+    MEMBER: "Mitglied"
+    TEMP_MEMBER: "Helfer"
+    NOBODY: "Niemand"
+    EVERYBODY: "Alle"
+    ALLOW: "<green>Aktiv"
+    DENY: "<red>Inaktiv"
+  name:
+    block-break: "Blöcke zerstören"
+    block-place: "Blöcke platzieren"
+    item-drop: "Gegenstände fallenlassen"
+    item-pickup: "Gegenstände aufsammeln"
+    ice-melt: "Eis schmilzt"
+    ice-form: "Eis entsteht"
+    leaf-decay: "Blätter verschwinden"
 task:
   rent:
     success: <prefix><gray>Du hast die Miete <gold><price>$<gray> für <gold><id> <gray> <green>gezahlt!
@@ -15,8 +41,8 @@ sign:
     line-3: ""
     line-4: ""
   sold:
-    line-1: <red>Nicht verfügbar
-    line-2: <white><owner>
+    line-1: <red>Verkauft
+    line-2: <yellow><owner-name>
     line-3: ""
     line-4: ""
   unavailable:
@@ -28,8 +54,8 @@ command:
   plot:
     info:
       - <gray>▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰<white>[<aqua>Plot-Info<white>]<gray>▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰
-      - "<gray>ID: <yellow><id>"
-      - "<gray>Besitzer: <yellow><owner>"
+      - "<gray>ID: <yellow><id> <dark_gray>(<group><dark_gray>)"
+      - "<gray>Besitzer: <yellow><owner-name>"
       - "<gray>Größe: <yellow><width> <gray>x <yellow><height> <gray>x <yellow><depth>"
       - "<gray>Vertraut: <yellow><members>"
       - "<gray>Verboten: <yellow><banned>"
@@ -130,17 +156,109 @@ gui:
   access-modifier-format:
     active: <!i><gray>▶ <green><access-modifier>
     inactive: <!i><gray>▸ <dark_gray><access-modifier>
-  friends:
+  members:
     title: <!i><#1d71ad>Plot <black>| <dark_gray>Vertraute Spieler
+    format:
+      active: "<!i><gray>⯈ <green><role>"
+      inactive: "<!i><gray>▸ <dark_gray><role>"
+    item:
+      member:
+        name: "<!i><green><name>"
+        lore:
+          - ""
+          - "<!i><gray>Rolle: <yellow><role>"
+          - "<!i>"
+          - "<!i><gray>Bedienung"
+          - "<!i><gray>▸ <yellow>↑ <white>🖰 <gray>[<gold><key:key.mouse.right><gray>]"
+          - "<!i><gray>▸ <yellow>↓ <white>🖰 <gray>[<gold><key:key.mouse.left><gray>]"
+          - "<!i><gray>▸ <red>Entfernen <gray>[<gold><key:key.keyboard.left.shift><gray>] <gray>+ <white>🖰 <gray>[<gold><key:key.mouse.left><gray>]"
+          - "<!i>"
+      add:
+        name: "<green><!i>Füge ein Mitglied hinzu"
+        lore:
+          - ""
+          - "<gray><!i>Klicke um nach Spielern"
+          - "<gray><!i>zu suchen und sie dem Plot"
+          - "<gray><!i>hinzuzufügen"
+      back:
+        name: "<!i><red>Zurück"
+        lore:
+          - "<!i><gray>Klick um zurück zur"
+          - "<!i><gray>zum Hauptmenü zu gelangen"
+  member-add:
+    title: "%nexo_shift_10%<!i><#1d71ad>Plot <black>| <dark_gray>Spieler vertrauen"
+    item:
+      not-found:
+        name: "<!i><red>Ungüliger Spieler"
+        lore: "<!i><gray>Dieser Spieler wurde nicht gefunden!"
+      player:
+        name: "<!i><yellow><name> <gray>hinzufügen?"
+        lore:
+          - ""
+          - "<!i><gray>Klicke um den Spieler zum"
+          - "<!i><gray>Plot mit der Rolle <yellow>Mitglied"
+          - "<!i><gray>hinzuzufügen!"
+        lore-already-present:
+          - ""
+          - "<!i><red>Dieser Spieler ist bereits Mitglied"
+          - "<!i><gray>Verwalte ihn über die Mitglieder-Übersicht"
+      back:
+        name: "<!i><red>Zurück"
+        lore:
+          - "<!i><gray>Klick um zurück zur"
+          - "<!i><gray>Mitgliederübersicht zu gelangen"
+  banned-players:
+    title: <!i><#1d71ad>Plot <black>| <dark_gray>Verbannte Spieler
+    item:
+      back:
+        name: "<!i><red>Zurück"
+        lore:
+          - "<!i><gray>Klick um zurück zur"
+          - "<!i><gray>zum Hauptmenü zu gelangen"
+      add:
+        name: "<green><!i>Verbanne einen Spieler"
+        lore:
+          - ""
+          - "<gray><!i>Klicke um nach Spielern"
+          - "<gray><!i>zu suchen und vom Plot"
+          - "<gray><!i>zu verbannen"
+      banned-player:
+        name: "<!i><red><name>"
+        lore:
+          - "<!i><gray>Bedienung"
+          - "<!i><gray>▸ <red>Entfernen <gray>[<gold><key:key.keyboard.left.shift><gray>] <gray>+ <white>🖰 <gray>[<gold><key:key.mouse.left><gray>]"
+          - "<!i>"
+  banned-players-add:
+    title: "%nexo_shift_-52%<!i><#1d71ad>Plot <black>| <dark_gray>Spieler verbannen"
+    item:
+      not-found:
+        name: "<!i><red>Ungüliger Spieler"
+        lore: "<!i><gray>Dieser Spieler wurde nicht gefunden!"
+      player:
+        name: "<!i><yellow><name> <red>verbannen?"
+        lore:
+          - ""
+          - "<!i><gray>Klicke um den Spieler von"
+          - "<!i><gray>diesem Grundstück"
+          - "<!i><gray>zu <red>verbannen!"
+        lore-already-present:
+          - ""
+          - "<!i><red>Dieser Spieler ist bereits verbannt"
+          - "<!i><gray>Verwalte ihn über die Verbannte-Spieler-Übersicht"
+      back:
+        name: "<!i><red>Zurück"
+        lore:
+          - "<!i><gray>Klick um zurück zur"
+          - "<!i><gray>Verbannte-Spieler-Übersicht zu gelangen"
+
   main:
     title: <!i><#1d71ad>Plot <black>| <dark_gray>Einstellungen
     item:
       plot-info:
         name: "<!i><gold>Plot-Info <gray>(<yellow><id><gray>)"
         lore:
-          - "<!i><gray>Besitzer: <yellow><owner>"
+          - "<!i><gray>Besitzer: <yellow><owner-name>"
           - "<!i><gray>Größe: <yellow><width> <gray>x <yellow><height> <gray>x <yellow><depth>"
-          - "<!i><gray>Position: <yellow><world> <gray>- <yellow><location>"
       biome:
         name: "<!i><gold>Biom ändern"
         lore:
@@ -166,9 +284,15 @@ gui:
         name: "<!i><gold>Flags anpassen"
   interactables:
     title: <!i><#1d71ad>Plot <black>| <dark_gray>Blockinteraktionen
+    format:
+      active: "<!i><gray>⯈ <green><access-modifier>"
+      inactive: "<!i><gray>▸ <dark_gray><access-modifier>"
     item:
       back:
-        name: <!i><red>Zurück
+        name: "<!i><red>Zurück"
+        lore:
+          - "<!i><gray>Klick um zurück zur"
+          - "<!i><gray>zum Hauptmenü zu gelangen"
       slot:
         access-modifier:
           OWNER: "Besitzer"
@@ -189,7 +313,10 @@ gui:
     title: <!i><#1d71ad>Plot <black>| <dark_gray>Biome
     item:
       back:
-        name: <!i><red>Zurück
+        name: "<!i><red>Zurück"
+        lore:
+          - "<!i><gray>Klick um zurück zur"
+          - "<!i><gray>zum Hauptmenü zu gelangen"
       biome:
         name: "<!i><aqua><biome>"
   flags:
@@ -198,9 +325,16 @@ gui:
       active: <!i><gray>▶ <green><value>
       inactive: <!i><gray>▸ <dark_gray><value>
     item:
-      slot:
+      back:
+        name: "<!i><red>Zurück"
         lore:
-          - <!i><gray>Ändere wer dieses Item / diesen Block benutzen
+          - "<!i><gray>Klick um zurück zur"
+          - "<!i><gray>zum Hauptmenü zu gelangen"
+      tab:
+        lore: "<!i><flag-name>"
+      slot:
+        name: "<!i><yellow><flag-name>"
+        lore:
           - <!i>
           - <!i><gray>Bedienung
           - <!i><gray>▸ <yellow>↑ <white>🖰 <gray>[<gold>Right Button<gray>]
@@ -222,6 +356,3 @@ gui:
         name: "<!i><aqua>Block Flags <gray>(<yellow><flag-amount><gray> Flags)"
         lore:
           - "<!i><gray>Folgen Flags sind enthalten:"
-exception:
-  argument-parse:
-    player: "<red>Kein Spieler gefunden"

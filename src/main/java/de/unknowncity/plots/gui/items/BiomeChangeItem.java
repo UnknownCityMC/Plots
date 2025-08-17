@@ -34,5 +34,6 @@ public class BiomeChangeItem extends AbstractItem {
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull Click click) {
         plotService.setBiome(plot, BukkitAdapter.adapt(biome));
+        player.playSound(player.getLocation(), "ui.button.click", 1, 1);
     }
 }

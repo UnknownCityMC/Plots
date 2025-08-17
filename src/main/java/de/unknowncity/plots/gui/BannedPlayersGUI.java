@@ -2,16 +2,19 @@ package de.unknowncity.plots.gui;
 
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.gui.items.ManageBannedMember;
-import de.unknowncity.plots.gui.util.PagedGUI;
+import de.unknowncity.plots.gui.items.NextPageItem;
+import de.unknowncity.plots.gui.items.PreparedItems;
+import de.unknowncity.plots.gui.items.PrevPageItem;
 import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.service.PlotService;
-import de.unknowncity.plots.util.SkullHelper;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.spongepowered.configurate.NodePath;
-import xyz.xenondevs.invui.item.Item;
-import xyz.xenondevs.invui.item.ItemBuilder;
+import xyz.xenondevs.invui.gui.Markers;
+import xyz.xenondevs.invui.gui.PagedGui;
+import xyz.xenondevs.invui.gui.Structure;
+import xyz.xenondevs.invui.window.Window;
 
 public class BannedPlayersGUI {
 
@@ -21,26 +24,31 @@ public class BannedPlayersGUI {
 
         var title = messenger.component(player, NodePath.path("gui", "banned-players", "title"));
 
-        var backItem = Item.builder().setItemProvider(new ItemBuilder(Material.BARRIER).setName(
-                        messenger.component(player, NodePath.path("gui", "banned-players", "item", "back", "name"))
-                )).addClickHandler(click -> PlotMainGUI.open(player, plot, plugin))
-                .build();
-
         var bannedPlayers = plot.bannedPlayers();
 
-        var items = bannedPlayers.stream().map(bannedPlayer -> {
+        var items = bannedPlayers.stream().map(bannedPlayer -> new ManageBannedMember(plot, bannedPlayer, messenger)).toList();
 
-            var skull = SkullHelper.getSkull(bannedPlayer.uuid());
+        var gui = PagedGui.ofItems(
+                new Structure(
+                        "# # # # # # # # #",
+                        "# . . . . . . . #",
+                        "# . . . . . . . #",
+                        "# . . . . . . . #",
+                        "# . . . . . . . #",
+                        "# # < # + # > # B"
+                ).addIngredient('#', PlotMainGUI.BORDER_ITEM)
+                        .addIngredient('B', PreparedItems.back(player, "banned-players", plugin, () -> PlotMainGUI.open(player, plot, plugin)))
+                        .addIngredient('<', new PrevPageItem(ItemStack.of(Material.PAPER), messenger))
+                        .addIngredient('>', new NextPageItem(ItemStack.of(Material.PAPER), messenger))
+                        .addIngredient('+', PreparedItems.addBannedPlayer(player, plot, plugin))
+                        .addIngredient('.', Markers.CONTENT_LIST_SLOT_HORIZONTAL),
+                items
+        );
 
-            var itemBuilder = new ItemBuilder(skull)
-                    .setName(messenger.component(player, NodePath.path("gui", "banned-players", "item", "member", "name"), Placeholder.parsed("name", bannedPlayer.name())))
-                    .addLoreLines(messenger.component(player, NodePath.path("gui", "banned-players", "item", "member", "lore"), Placeholder.parsed("name", bannedPlayer.name())));
+        gui.setBackground(PlotMainGUI.FILLER_ITEM.getItemProvider(player));
 
-            return new ManageBannedMember(itemBuilder, plot, bannedPlayer);
-        }).toList();
-
-        var gui = PagedGUI.createAndOpenPagedGUI(messenger, title, backItem, items, player);
-        gui.addCloseHandler((reason -> plotService.savePlot(plot)));
-        gui.open();
+        var window = Window.builder().setUpperGui(gui).setTitle(title).build(player);
+        window.addCloseHandler((reason -> plotService.savePlot(plot)));
+        window.open();
     }
 }
