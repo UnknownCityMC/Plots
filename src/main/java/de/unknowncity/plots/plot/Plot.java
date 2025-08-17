@@ -228,6 +228,26 @@ public abstract class Plot {
         });
     }
 
+    public boolean isMemberOrOwner(UUID uuid) {
+        return findPlotMember(uuid).isPresent() || owner().uuid().equals(uuid);
+    }
+
+    public boolean isOwner(UUID uuid) {
+        return owner().uuid().equals(uuid);
+    }
+
+    public boolean isMember(UUID uuid) {
+        return findPlotMember(uuid).isPresent();
+    }
+
+    public boolean isDenied(UUID uuid) {
+        return findPlotBannedPlayer(uuid).isPresent();
+    }
+
+    public void trustPlayer(PlotMember plotMember) {
+        members.add(plotMember);
+    }
+
     public void denyPlayer(OfflinePlayer offlinePlayer) {
         members.removeIf(member -> member.uuid().equals(offlinePlayer.getUniqueId()));
         deniedPlayers.add(new PlotPlayer(offlinePlayer.getUniqueId(), offlinePlayer.getName()));

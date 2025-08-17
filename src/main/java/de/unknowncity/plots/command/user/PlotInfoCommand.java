@@ -2,6 +2,8 @@ package de.unknowncity.plots.command.user;
 
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
+import de.unknowncity.plots.plot.PlotUtil;
+import de.unknowncity.plots.plot.access.PlotState;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import org.bukkit.command.CommandSender;
@@ -31,24 +33,12 @@ public class PlotInfoCommand extends SubCommand {
 
     private void handleInfo(@NonNull CommandContext<Player> context) {
         var sender = context.sender();
-        var possibleRegion = regionService.getSuitableRegion(sender.getLocation());
+        var plotOptional = PlotUtil.checkForAndGetPlotIfPresent(sender, regionService, plotService, plugin);
 
-        if (possibleRegion.isEmpty()) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot"));
-            return;
-        }
-
-        var plotId = possibleRegion.get().getId();
-
-        if (!plotService.existsPlot(plotId)) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot"));
-            return;
-        }
-
-        var plot = plotService.getPlot(plotId);
-
-        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "info"),
-                plot.tagResolvers(sender, plugin.messenger())
-        );
+        plotOptional.ifPresent(plot -> {
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "info"),
+                    plot.tagResolvers(sender, plugin.messenger())
+            );
+        });
     }
 }

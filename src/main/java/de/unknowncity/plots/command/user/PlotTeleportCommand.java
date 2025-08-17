@@ -10,7 +10,11 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
+import org.incendo.cloud.suggestion.Suggestion;
 import org.spongepowered.configurate.NodePath;
+
+import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 
 import static de.unknowncity.plots.command.argument.UcPlayerParser.ucPlayerParser;
 import static org.incendo.cloud.parser.standard.IntegerParser.integerParser;
@@ -24,11 +28,22 @@ public class PlotTeleportCommand extends SubCommand {
 
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
-        commandManager.command(builder.literal("teleport", "tp", "home", "h")
+        commandManager.command(builder.literal("home")
                 .permission("plots.command.plot.teleport")
                 .senderType(Player.class)
                 .required("player", ucPlayerParser())
-                .optional("id", integerParser(1))
+                .optional("id", integerParser(1), (context, input) -> {
+                    return CompletableFuture.supplyAsync(() -> {
+                        var player = (OfflinePlayer) context.get("player");
+                        var plots = plotService.findPlotsByOwnerUUID(player.getUniqueId()).size();
+
+                        var suggestions = new ArrayList<Suggestion>();
+                        for (int i = 1; i <= plots; i++) {
+                            suggestions.add(Suggestion.suggestion(String.valueOf(i)));
+                        }
+                        return suggestions;
+                    });
+                })
                 .handler(this::handleTeleportPlayer)
                 .build()
         );

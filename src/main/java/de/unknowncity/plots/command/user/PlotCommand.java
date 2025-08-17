@@ -3,6 +3,7 @@ package de.unknowncity.plots.command.user;
 import de.unknowncity.astralib.paper.api.command.PaperCommand;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.gui.PlotMainGUI;
+import de.unknowncity.plots.plot.PlotUtil;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import org.bukkit.command.CommandSender;
@@ -26,29 +27,12 @@ public class PlotCommand extends PaperCommand<PlotsPlugin> {
                 .senderType(Player.class)
                 .handler(commandContext -> {
                     var sender = commandContext.sender();
-                    var possibleRegion = regionService.getSuitableRegion(sender.getLocation());
-
-                    if (possibleRegion.isEmpty()) {
-                        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot"));
-                        return;
-                    }
-
-                    var plotId = possibleRegion.get().getId();
-
-                    if (!plotService.existsPlot(plotId)) {
-                        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot"));
-                        return;
-                    }
-
-                    var plot = plotService.getPlot(plotId);
-
-                    if (!plot.owner().uuid().equals(sender.getUniqueId()) && !sender.hasPermission("ucplots.command.plotadmin")) {
-                        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-owner"));
-                        return;
-                    }
-
-                    PlotMainGUI.open(sender, plot, plugin);
-                }));
+                    var possiblePlot = PlotUtil.checkPlotConditionsAndGetPlotIfPresent(sender, regionService, plotService, plugin);
+                    possiblePlot.ifPresent(plot -> {
+                        PlotMainGUI.open(sender, plot, plugin);
+                    });
+                })
+        );
 
         new PlotClaimCommand(plugin, builder).apply(commandManager);
         new PlotUnClaimCommand(plugin, builder).apply(commandManager);
@@ -57,5 +41,7 @@ public class PlotCommand extends PaperCommand<PlotsPlugin> {
         new PlotRemoveMemberCommand(plugin, builder).apply(commandManager);
         new PlotChangeRoleCommand(plugin, builder).apply(commandManager);
         new PlotTeleportCommand(plugin, builder).apply(commandManager);
+        new PlotDenyCommand(plugin, builder).apply(commandManager);
+        new PlotUnDenyCommand(plugin, builder).apply(commandManager);
     }
 }

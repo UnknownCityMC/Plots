@@ -2,6 +2,7 @@ package de.unknowncity.plots.command.user;
 
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
+import de.unknowncity.plots.plot.PlotUtil;
 import de.unknowncity.plots.plot.access.PlotState;
 import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
@@ -34,32 +35,16 @@ public class PlotUnClaimCommand extends SubCommand {
 
     private void handleUnClaim(@NonNull CommandContext<Player> context) {
         var sender = context.sender();
-        var possibleRegion = regionService.getSuitableRegion(sender.getLocation());
+        var plotOptional = PlotUtil.checkPlotConditionsAndGetPlotIfPresent(sender, regionService, plotService, plugin);
 
-        if (possibleRegion.isEmpty()) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot"));
-            return;
-        }
+        plotOptional.ifPresent(plot -> {
+            if (plot.state() != PlotState.SOLD) {
+                plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "unclaim", "unavailable"));
+                return;
+            }
 
-        var plotId = possibleRegion.get().getId();
-
-        if (!plotService.existsPlot(plotId)) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot"));
-            return;
-        }
-
-        var plot = plotService.getPlot(plotId);
-        if (plot.state() != PlotState.SOLD) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "unclaim", "unavailable"));
-            return;
-        }
-
-        if (!plot.owner().uuid().equals(sender.getUniqueId())) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "unclaim", "no-owner"), plot.tagResolvers(sender, plugin.messenger()));
-            return;
-        }
-
-        plotService.unClaimPlot(plot);
-        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "unclaim", "success"), plot.tagResolvers(sender, plugin.messenger()));
+            plotService.unClaimPlot(plot);
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "unclaim", "success"), plot.tagResolvers(sender, plugin.messenger()));
+        });
     }
 }

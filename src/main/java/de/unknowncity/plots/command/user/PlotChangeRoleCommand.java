@@ -2,6 +2,7 @@ package de.unknowncity.plots.command.user;
 
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
+import de.unknowncity.plots.plot.PlotUtil;
 import de.unknowncity.plots.plot.access.type.PlotMemberRole;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
@@ -41,34 +42,18 @@ public class PlotChangeRoleCommand extends SubCommand {
         var target = (OfflinePlayer) context.get("target");
         var role = (PlotMemberRole) context.get("role");
 
-        var possibleRegion = regionService.getSuitableRegion(sender.getLocation());
+        var plotOptional = PlotUtil.checkPlotConditionsAndGetPlotIfPresent(sender, regionService, plotService, plugin);
 
-        if (possibleRegion.isEmpty()) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot"));
-            return;
-        }
+        plotOptional.ifPresent(plot -> {
+            if (plot.members().stream().noneMatch(plotMember -> plotMember.uuid().equals(target.getUniqueId()))) {
+                plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-member"), plot.tagResolvers(sender, plugin.messenger()));
+                return;
+            }
 
-        var plotId = possibleRegion.get().getId();
+            plot.changeMemberRole(target.getUniqueId(), role);
+            plotService.savePlot(plot);
 
-        if (!plotService.existsPlot(plotId)) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot"));
-            return;
-        }
-
-        var plot = plotService.getPlot(plotId);
-        if (!plot.owner().uuid().equals(sender.getUniqueId())) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-owner"), plot.tagResolvers(sender, plugin.messenger()));
-            return;
-        }
-
-        if (plot.members().stream().noneMatch(plotMember -> plotMember.uuid().equals(target.getUniqueId()))) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-member"), plot.tagResolvers(sender, plugin.messenger()));
-            return;
-        }
-
-        plot.changeMemberRole(target.getUniqueId(), role);
-        plotService.savePlot(plot);
-
-        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "success"), plot.tagResolvers(sender, plugin.messenger()));
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "success"), plot.tagResolvers(sender, plugin.messenger()));
+        });
     }
 }

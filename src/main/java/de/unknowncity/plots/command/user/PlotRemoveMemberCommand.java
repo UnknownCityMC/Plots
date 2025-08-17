@@ -2,6 +2,7 @@ package de.unknowncity.plots.command.user;
 
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
+import de.unknowncity.plots.plot.PlotUtil;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import org.bukkit.OfflinePlayer;
@@ -37,33 +38,17 @@ public class PlotRemoveMemberCommand extends SubCommand {
         var sender = context.sender();
         var target = (OfflinePlayer) context.get("target");
 
-        var possibleRegion = regionService.getSuitableRegion(sender.getLocation());
+        var plotOptional = PlotUtil.checkPlotConditionsAndGetPlotIfPresent(sender, regionService, plotService, plugin);
 
-        if (possibleRegion.isEmpty()) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot"));
-            return;
-        }
+        plotOptional.ifPresent(plot -> {
+            if (plot.members().stream().noneMatch(plotMember -> plotMember.uuid().equals(target.getUniqueId()))) {
+                plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-member"), plot.tagResolvers(sender, plugin.messenger()));
+                return;
+            }
 
-        var plotId = possibleRegion.get().getId();
-
-        if (!plotService.existsPlot(plotId)) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot"));
-            return;
-        }
-
-        var plot = plotService.getPlot(plotId);
-        if (!plot.owner().uuid().equals(sender.getUniqueId())) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-owner"), plot.tagResolvers(sender, plugin.messenger()));
-            return;
-        }
-
-        if (plot.members().stream().noneMatch(plotMember -> plotMember.uuid().equals(target.getUniqueId()))) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-member"), plot.tagResolvers(sender, plugin.messenger()));
-            return;
-        }
-
-        plot.members().removeIf(plotMember -> plotMember.uuid().equals(target.getUniqueId()));
-        plotService.savePlot(plot);
-        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "remove", "success"), plot.tagResolvers(sender, plugin.messenger()));
+            plot.members().removeIf(plotMember -> plotMember.uuid().equals(target.getUniqueId()));
+            plotService.savePlot(plot);
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "remove", "success"), plot.tagResolvers(sender, plugin.messenger()));
+        });
     }
 }

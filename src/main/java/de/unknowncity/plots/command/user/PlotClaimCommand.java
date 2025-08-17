@@ -2,6 +2,7 @@ package de.unknowncity.plots.command.user;
 
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
+import de.unknowncity.plots.plot.PlotUtil;
 import de.unknowncity.plots.plot.access.PlotState;
 import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
@@ -34,32 +35,22 @@ public class PlotClaimCommand extends SubCommand {
 
     private void handleClaim(@NonNull CommandContext<Player> context) {
         var sender = context.sender();
-        var possibleRegion = regionService.getSuitableRegion(sender.getLocation());
 
-        if (possibleRegion.isEmpty()) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot"));
-            return;
-        }
+        var plotOptional = PlotUtil.checkForAndGetPlotIfPresent(sender, regionService, plotService, plugin);
 
-        var plotId = possibleRegion.get().getId();
+        plotOptional.ifPresent(plot -> {
+            if (plot.state() != PlotState.AVAILABLE) {
+                plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "unavailable"), plot.tagResolvers(sender, plugin.messenger()));
+                return;
+            }
 
-        if (!plotService.existsPlot(plotId)) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot"));
-            return;
-        }
+            if (!economyService.hasEnoughFunds(sender.getUniqueId(), plot.price())) {
+                plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "not-enough-money"), plot.tagResolvers(sender, plugin.messenger()));
+                return;
+            }
 
-        var plot = plotService.getPlot(plotId);
-        if (plot.state() != PlotState.AVAILABLE) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "unavailable"), plot.tagResolvers(sender, plugin.messenger()));
-            return;
-        }
-
-        if (!economyService.hasEnoughFunds(sender.getUniqueId(), plot.price())) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "not-enough-money"), plot.tagResolvers(sender, plugin.messenger()));
-            return;
-        }
-
-        plotService.claimPlot(sender, plot);
-        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "success"), plot.tagResolvers(sender, plugin.messenger()));
+            plotService.claimPlot(sender, plot);
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "success"), plot.tagResolvers(sender, plugin.messenger()));
+        });
     }
 }

@@ -37,17 +37,17 @@ task:
 sign:
   available:
     line-1: <green>Verfügbar
-    line-2: "<gray>Preis: <white><price>$"
+    line-2: "<yellow><id>"
     line-3: ""
-    line-4: ""
+    line-4: "<gray>Preis: <white><price>$"
   sold:
     line-1: <red>Verkauft
-    line-2: <yellow><owner-name>
+    line-2: "<yellow><id>"
     line-3: ""
-    line-4: ""
+    line-4: "<white><owner-name>"
   unavailable:
     line-1: <red> Nicht verfügbar
-    line-2: ""
+    line-2: "<yellow><id>"
     line-3: ""
     line-4: ""
 command:
