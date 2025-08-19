@@ -12,7 +12,7 @@ jackson = "2.19.2"
 adventure = "4.24.0"
 papi = "2.11.6"
 
-glowing-entities = "1.4.6"
+glowing-entities = "1.4.7"
 
 coinsengine = "2.5.0"
 invui = "2.0.0-alpha.17"
