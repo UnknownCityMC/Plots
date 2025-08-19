@@ -27,7 +27,7 @@ public class PlotCommand extends PaperCommand<PlotsPlugin> {
                 .senderType(Player.class)
                 .handler(commandContext -> {
                     var sender = commandContext.sender();
-                    var possiblePlot = PlotUtil.checkPlotConditionsAndGetPlotIfPresent(sender, regionService, plotService, plugin);
+                    var possiblePlot = PlotUtil.checkPlotSoldAndGetPlotIfPresent(sender, regionService, plotService, plugin);
                     possiblePlot.ifPresent(plot -> {
                         PlotMainGUI.open(sender, plot, plugin);
                     });
