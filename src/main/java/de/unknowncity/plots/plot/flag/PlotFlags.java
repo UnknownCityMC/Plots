@@ -5,6 +5,7 @@ import de.unknowncity.plots.plot.flag.type.player.BlockBreakFlag;
 import de.unknowncity.plots.plot.flag.type.player.BlockPlaceFlag;
 import de.unknowncity.plots.plot.flag.type.player.ItemDropFlag;
 import de.unknowncity.plots.plot.flag.type.player.ItemPickupFlag;
+import de.unknowncity.plots.plot.flag.type.vehicle.RideFlag;
 import de.unknowncity.plots.service.PlotService;
 
 public class PlotFlags {
@@ -18,6 +19,9 @@ public class PlotFlags {
         flagRegistry.registerToCat(PlotFlag.Category.BLOCK, new LeafDecayFlag());
         flagRegistry.registerToCat(PlotFlag.Category.BLOCK, new SnowFallFlag());
         flagRegistry.registerToCat(PlotFlag.Category.BLOCK, new SnowMeltFlag());
+
+        // Vehicle Flags
+        flagRegistry.registerToCat(PlotFlag.Category.VEHICLE, new RideFlag());
 
         // Player flags (mostly PlotAccessModifier flags)
         flagRegistry.registerToCat(PlotFlag.Category.PLAYER, new BlockPlaceFlag(plotService));
