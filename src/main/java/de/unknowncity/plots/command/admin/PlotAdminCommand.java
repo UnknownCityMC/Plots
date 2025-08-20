@@ -23,7 +23,7 @@ public class PlotAdminCommand extends PaperCommand<PlotsPlugin> {
         new PlotAdminSetGroupCommand(plugin, builder).apply(commandManager);
 
         new PlotAdminSignLinkCommand(plugin, builder).apply(commandManager);
-        new PlotAdminListPlotsCommand(plugin, "plotadmin listplots").applyCommand(builder.literal("listplots"), commandManager);
+        new PlotAdminListPlotsCommand(plugin, builder).apply(commandManager);
         new PlotAdminLoadBackupCommand(plugin, builder).apply(commandManager);
 
         new PlotAdminReloadCommand(plugin, builder).apply(commandManager);
