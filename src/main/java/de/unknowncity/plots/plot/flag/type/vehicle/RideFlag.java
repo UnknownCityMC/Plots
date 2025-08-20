@@ -1,30 +1,39 @@
 package de.unknowncity.plots.plot.flag.type.vehicle;
 
-import com.sk89q.worldguard.protection.flags.Flags;
-import com.sk89q.worldguard.protection.flags.StateFlag;
-import de.unknowncity.plots.plot.flag.WorldGuardFlag;
+import de.unknowncity.plots.plot.access.PlotAccessUtil;
+import de.unknowncity.plots.plot.access.type.PlotAccessModifier;
+import de.unknowncity.plots.plot.flag.PlotAccessModifierFlag;
+import de.unknowncity.plots.service.PlotService;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.vehicle.VehicleEnterEvent;
+import org.spongepowered.configurate.NodePath;
 
-import java.util.Arrays;
-import java.util.List;
+public class RideFlag extends PlotAccessModifierFlag implements Listener {
 
-public class RideFlag extends WorldGuardFlag<StateFlag.State> {
-    public RideFlag() {
-        super("ride", StateFlag.State.ALLOW, Material.SADDLE, Flags.RIDE);
+    public RideFlag(PlotService plotService) {
+        super("ride", PlotAccessModifier.EVERYBODY, Material.SADDLE, plotService);
     }
 
-    @Override
-    public StateFlag.State unmarshall(String input) {
-        return StateFlag.State.valueOf(input);
-    }
+    @EventHandler
+    public void onPlayerInteractAtEntity(VehicleEnterEvent event) {
+        if (!(event.getEntered() instanceof Player player)) {
+            return;
+        }
 
-    @Override
-    public String marshall(Object input) {
-        return input.toString();
-    }
+        if (player.hasPermission("ucplots.interact.bypass")) {
+            return;
+        }
 
-    @Override
-    public List<StateFlag.State> possibleValues() {
-        return Arrays.stream(StateFlag.State.values()).toList();
+        plotService.findPlotAt(player.getLocation()).ifPresent(plot -> {
+            if (PlotAccessUtil.hasAccess(player, plot.getFlag(this), plot)) {
+                return;
+            }
+
+            event.setCancelled(true);
+            plotService.plugin().messenger().sendMessage(player, NodePath.path("event", "plot", "deny", flagId));
+        });
     }
 }

@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.spongepowered.configurate.NodePath;
 
 public class BlockPlaceFlag extends PlotAccessModifierFlag implements Listener {
@@ -17,7 +18,7 @@ public class BlockPlaceFlag extends PlotAccessModifierFlag implements Listener {
     }
 
     @EventHandler
-    public void onBlockPlace(BlockBreakEvent event) {
+    public void onBlockPlace(BlockPlaceEvent event) {
         var player = event.getPlayer();
 
         if (player.hasPermission("ucplots.interact.bypass")) {

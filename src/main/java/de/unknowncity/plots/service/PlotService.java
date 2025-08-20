@@ -101,8 +101,14 @@ public class PlotService extends Service<PlotsPlugin> {
         plotDao.readAll().whenComplete((plots, throwable) -> {
             plots.forEach(plot -> {
                 plotFlagDao.readAll(plot.id()).thenAccept(plotFlagWrappers -> {
+                    var updatedflags = new ArrayList<>(flagRegistry.getAllRegistered());
                     plotFlagWrappers.forEach(plotFlagWrapper -> {
+                        updatedflags.removeIf(flag -> flag.flagId().equals(plotFlagWrapper.flag().flagId()));
                         plot.setFlag(plotFlagWrapper.flag(), plotFlagWrapper.flagValue());
+                    });
+
+                    updatedflags.forEach(plotFlag -> {
+                        plot.setFlag(plotFlag, plotFlag.defaultValue());
                     });
                 });
                 plotMemberDao.readAll(plot.id()).thenAccept(plot::members);
