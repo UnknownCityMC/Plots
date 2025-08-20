@@ -1,6 +1,7 @@
 package de.unknowncity.plots.plot;
 
 import de.unknowncity.plots.PlotsPlugin;
+import de.unknowncity.plots.plot.access.PlotState;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import org.bukkit.entity.Player;
@@ -18,6 +19,28 @@ public class PlotUtil {
         }
 
         var plot = plotOptional.get();
+
+        if (!plot.owner().uuid().equals(sender.getUniqueId()) && !sender.hasPermission("ucplots.command.plotadmin")) {
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-owner"));
+            return Optional.empty();
+        }
+
+        return Optional.of(plot);
+    }
+
+    public static Optional<Plot> checkPlotSoldAndGetPlotIfPresent(Player sender, RegionService regionService, PlotService plotService, PlotsPlugin plugin) {
+        var plotOptional = checkForAndGetPlotIfPresent(sender, regionService, plotService, plugin);
+
+        if (plotOptional.isEmpty()) {
+            return plotOptional;
+        }
+
+        var plot = plotOptional.get();
+
+        if (plot.state() != PlotState.SOLD) {
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "not-sold"));
+            return Optional.empty();
+        }
 
         if (!plot.owner().uuid().equals(sender.getUniqueId()) && !sender.hasPermission("ucplots.command.plotadmin")) {
             plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-owner"));

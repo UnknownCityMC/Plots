@@ -24,6 +24,13 @@ public class BlockBreakFlag extends PlotAccessModifierFlag implements Listener {
             return;
         }
 
+        plotService.findPlotAt(event.getBlock().getLocation()).ifPresent(plot -> {
+            if (PlotAccessUtil.hasAccess(player, plot.getFlag(this), plot)) {
+                return;
+            }
 
+            event.setCancelled(true);
+            plotService.plugin().messenger().sendMessage(player, NodePath.path("event", "plot", "deny", flagId));
+        });
     }
 }

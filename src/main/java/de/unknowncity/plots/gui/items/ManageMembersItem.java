@@ -16,6 +16,7 @@ import xyz.xenondevs.invui.gui.PagedGui;
 import xyz.xenondevs.invui.item.AbstractPagedGuiBoundItem;
 import xyz.xenondevs.invui.item.Item;
 import xyz.xenondevs.invui.item.ItemProvider;
+import xyz.xenondevs.invui.item.ItemWrapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,8 +36,11 @@ public class ManageMembersItem extends AbstractPagedGuiBoundItem {
     public @NotNull ItemProvider getItemProvider(@NotNull Player player) {
         var skull = SkullHelper.getSkull(member.uuid());
 
-        var lore = new ArrayList<>(messenger.componentList(player, NodePath.path("gui", "members", "item", "member", "lore"), member.tagResolversWithRole(player, messenger)));
+        var lore = new ArrayList<>(messenger.componentList(player, NodePath.path("gui", "members", "item", "member", "lore"),
+                member.tagResolversWithRole(player, messenger)));
 
+        var name = messenger.component(player, NodePath.path("gui", "members", "item", "member", "name"),
+                member.tagResolversWithRole(player, messenger));
 
         lore.addAll(Arrays.stream(PlotMemberRole.values()).map(memberRole -> {
             var accessModifierName = messenger.component(player, NodePath.path("member-role", "name", memberRole.name()));
@@ -50,13 +54,12 @@ public class ManageMembersItem extends AbstractPagedGuiBoundItem {
             }
         }).toList());
 
-        return Item.simple(
-                ItemBuilder.of(skull)
-                        .name(
-                                messenger.component(player, NodePath.path("gui", "members", "item", "member", "name"),
-                                        member.tagResolversWithRole(player, messenger)))
-                        .lore(lore)
-                        .item()).getItemProvider(player);
+        var builder = ItemBuilder.of(skull)
+                .name(name)
+                .lore(lore)
+                .item();
+
+        return new ItemWrapper(builder);
     }
 
     @Override
@@ -93,6 +96,7 @@ public class ManageMembersItem extends AbstractPagedGuiBoundItem {
         int index = role.ordinal() == values.length - 1 ? 0 : role.ordinal() + 1;
         return values[index];
     }
+
     public PlotMemberRole getPreviousRole(PlotMemberRole role) {
         var values = PlotMemberRole.values();
         int index = role.ordinal() == 0 ? values.length - 1 : role.ordinal() - 1;

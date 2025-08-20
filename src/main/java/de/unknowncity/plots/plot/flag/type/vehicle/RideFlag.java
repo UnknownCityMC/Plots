@@ -1,4 +1,4 @@
-package de.unknowncity.plots.plot.flag.type.entity;
+package de.unknowncity.plots.plot.flag.type.vehicle;
 
 import de.unknowncity.plots.plot.access.PlotAccessUtil;
 import de.unknowncity.plots.plot.access.type.PlotAccessModifier;
@@ -8,22 +8,26 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.spongepowered.configurate.NodePath;
 
-public class EntityKillableFlag extends PlotAccessModifierFlag implements Listener {
+public class RideFlag extends PlotAccessModifierFlag implements Listener {
 
-    public EntityKillableFlag(PlotService plotService) {
-        super("entity-killable", PlotAccessModifier.MEMBER, Material.IRON_SWORD, plotService);
+    public RideFlag(PlotService plotService) {
+        super("ride", PlotAccessModifier.EVERYBODY, Material.SADDLE, plotService);
     }
 
     @EventHandler
-    public void onEntityDamage(EntityDamageByEntityEvent event) {
-        if (!(event.getDamager() instanceof Player player)) {
+    public void onPlayerInteractAtEntity(VehicleEnterEvent event) {
+        if (!(event.getEntered() instanceof Player player)) {
             return;
         }
 
-        plotService.findPlotAt(event.getEntity().getLocation()).ifPresent(plot -> {
+        if (player.hasPermission("ucplots.interact.bypass")) {
+            return;
+        }
+
+        plotService.findPlotAt(player.getLocation()).ifPresent(plot -> {
             if (PlotAccessUtil.hasAccess(player, plot.getFlag(this), plot)) {
                 return;
             }

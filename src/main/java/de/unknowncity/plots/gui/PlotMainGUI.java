@@ -31,19 +31,19 @@ public class PlotMainGUI {
                         "# B . . . . . W #",
                         "# . M D . I F . #",
                         "# # # # # # # # #"
-                ).addIngredient('#', BORDER_ITEM)
-                        .addIngredient('.', FILLER_ITEM)
+                )
                         .addIngredient('P', PreparedItems.plotInfo(player, plot, plugin))
                         .addIngredient('W', PreparedItems.warp(player, plot, plugin))
                         .addIngredient('B', PreparedItems.biome(player, plot, plugin))
-                        .addIngredient('M', PreparedItems.friends(player, plot, plugin))
+                        .addIngredient('M', PreparedItems.members(player, plot, plugin))
                         .addIngredient('I', PreparedItems.interactables(player, plot, plugin))
                         .addIngredient('F', PreparedItems.flags(player, plot, plugin))
                         .addIngredient('D', PreparedItems.bannedPlayers(player, plot, plugin))
         );
 
-        Window.builder().setUpperGui(gui).setTitle(title).addCloseHandler(
+        var window = Window.builder().setUpperGui(gui).setTitle(title).addCloseHandler(
                 reason -> CompletableFuture.runAsync(() -> plugin.serviceRegistry().getRegistered(PlotService.class).savePlot(plot))
-        ).open(player);
+        );
+        window.open(player);
     }
 }

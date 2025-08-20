@@ -6,6 +6,7 @@ import de.unknowncity.plots.plot.flag.PlotAccessModifierFlag;
 import de.unknowncity.plots.service.PlotService;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDropItemEvent;
 import org.spongepowered.configurate.NodePath;
@@ -16,6 +17,7 @@ public class ItemDropFlag extends PlotAccessModifierFlag implements Listener {
         super("item-drop", PlotAccessModifier.EVERYBODY, Material.ENDER_EYE, plotService);
     }
 
+    @EventHandler
     public void onItemDrop(EntityDropItemEvent event) {
         if (!((event.getEntity() instanceof Player player))) {
             return;

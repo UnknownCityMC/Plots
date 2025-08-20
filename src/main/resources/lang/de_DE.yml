@@ -62,7 +62,8 @@ command:
       - "<gray>Flags: <yellow><flags>"
       - "<gray>Position: <yellow><world> <gray>- <yellow><location>"
       - <gray>▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰<white>[<aqua>Plot-Info<white>]<gray>▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰
-    no-plot: <prefix><red>An dieser Stelle befindet sich kein Plot
+    no-plot: <prefix><red>An dieser Stelle befindet sich kein Grundstück
+    not-sold: "<prefix><red>Das Grundstück ist derzeit nicht verkauft"
     claim:
       not-enough-money: <prefix><red>Du hast nicht genug Geld
       unavailable: <prefix><red>Diese Plot ist schon verkauft oder nicht verfügbar

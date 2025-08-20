@@ -7,6 +7,7 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.function.biome.BiomeReplace;
 import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.function.visitor.RegionVisitor;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.biome.BiomeType;
 import com.sk89q.worldguard.protection.flags.Flags;
@@ -100,8 +101,14 @@ public class PlotService extends Service<PlotsPlugin> {
         plotDao.readAll().whenComplete((plots, throwable) -> {
             plots.forEach(plot -> {
                 plotFlagDao.readAll(plot.id()).thenAccept(plotFlagWrappers -> {
+                    var updatedflags = new ArrayList<>(flagRegistry.getAllRegistered());
                     plotFlagWrappers.forEach(plotFlagWrapper -> {
+                        updatedflags.removeIf(flag -> flag.flagId().equals(plotFlagWrapper.flag().flagId()));
                         plot.setFlag(plotFlagWrapper.flag(), plotFlagWrapper.flagValue());
+                    });
+
+                    updatedflags.forEach(plotFlag -> {
+                        plot.setFlag(plotFlag, plotFlag.defaultValue());
                     });
                 });
                 plotMemberDao.readAll(plot.id()).thenAccept(plot::members);
@@ -223,9 +230,14 @@ public class PlotService extends Service<PlotsPlugin> {
 
     public void setBiome(Plot plot, BiomeType biome) {
         var world = plot.world();
+        final var biomeExtend = 3;
 
         try (EditSession editSession = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(world))) {
             var region = new CuboidRegion(plot.protectedRegion().getMinimumPoint(), plot.protectedRegion().getMaximumPoint());
+            region.expand(new BlockVector3(biomeExtend, 0, 0));
+            region.expand(new BlockVector3(-biomeExtend, 0, 0));
+            region.expand(new BlockVector3(0, 0, biomeExtend));
+            region.expand(new BlockVector3(0, 0, -biomeExtend));
 
             var replace = new BiomeReplace(editSession, biome);
             var visitor = new RegionVisitor(region, replace);

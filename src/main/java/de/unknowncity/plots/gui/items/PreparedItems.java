@@ -5,9 +5,11 @@ import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.gui.*;
 import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.util.SkullHelper;
+import io.papermc.paper.registry.keys.BiomeKeys;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.spongepowered.configurate.NodePath;
@@ -17,116 +19,168 @@ public class PreparedItems {
     private static final ItemStack PLOT_INFO_SKULL = SkullHelper.getSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjU0ODUwMzFiMzdmMGQ4YTRmM2I3ODE2ZWI3MTdmMDNkZTg5YTg3ZjZhNDA2MDJhZWY1MjIyMWNkZmFmNzQ4OCJ9fX0=");
     private static final ItemStack WARP_SKULL = SkullHelper.getSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjBiZmMyNTc3ZjZlMjZjNmM2ZjczNjVjMmM0MDc2YmNjZWU2NTMxMjQ5ODkzODJjZTkzYmNhNGZjOWUzOWIifX19");
 
-    public static Item back(Player player, String gui, PlotsPlugin plugin, Runnable action) {
-        return Item.builder().setItemProvider(ItemBuilder.of(Material.BARRIER)
-                .name(plugin.messenger().component(player, NodePath.path("gui", gui, "item", "back", "name")))
-                .lore(plugin.messenger().componentList(player, NodePath.path("gui", gui, "item", "back", "lore")))
-                .item()
-        )
-                .addClickHandler(click -> {
-                    player.playSound(player.getLocation(), "ui.button.click", 1, 1);
-                    action.run();
-                }).build();
+    public static Item back(Player player, PlotsPlugin plugin, Runnable action) {
+        var name = plugin.messenger().component(player, NodePath.path("gui", "item", "back", "name"));
+        var lore = plugin.messenger().componentList(player, NodePath.path("gui", "item", "back", "lore"));
+
+        var item = ItemBuilder.of(Material.WITHER_SKELETON_SKULL)
+                .name(name)
+                .lore(lore)
+                .itemModel(NamespacedKey.fromString(plugin.configuration().gui().buttonModelReturn()))
+                .item();
+
+        return Item.builder().setItemProvider(item).addClickHandler(click -> {
+            player.playSound(player.getLocation(), "ui.button.click", 1, 1);
+            action.run();
+        }).build();
     }
 
     public static Item plotInfo(Player player, Plot plot, PlotsPlugin plugin) {
-        return Item.builder().setItemProvider(ItemBuilder.of(PLOT_INFO_SKULL)
-                .name(plugin.messenger().component(player, NodePath.path("gui", "main", "item", "plot-info", "name"), plot.tagResolvers(player, plugin.messenger())))
-                .lore(plugin.messenger().componentList(player, NodePath.path("gui", "main", "item", "plot-info", "lore"), plot.tagResolvers(player, plugin.messenger())))
-                .item()
-        ).build();
+        var name = plugin.messenger().component(player, NodePath.path("gui", "main", "item", "info", "name"),
+                plot.tagResolvers(player, plugin.messenger()));
+        var lore = plugin.messenger().componentList(player, NodePath.path("gui", "main", "item", "info", "lore"),
+                plot.tagResolvers(player, plugin.messenger()));
+
+        var item = ItemBuilder.of(Material.WITHER_SKELETON_SKULL)
+                .name(name)
+                .lore(lore)
+                .item();
+
+        return Item.simple(item);
     }
 
     public static Item warp(Player player, Plot plot, PlotsPlugin plugin) {
-        return Item.builder().setItemProvider(ItemBuilder.of(WARP_SKULL)
-                .name(plugin.messenger().component(player, NodePath.path("gui", "main", "item", "warp", "name"), plot.tagResolvers(player, plugin.messenger())))
-                .lore(plugin.messenger().componentList(player, NodePath.path("gui", "main", "item", "warp", "lore"), plot.tagResolvers(player, plugin.messenger())))
-                .item()
-        ).addClickHandler(click -> {
+        var name = plugin.messenger().component(player, NodePath.path("gui", "main", "item", "warp", "name"));
+        var lore = plugin.messenger().componentList(player, NodePath.path("gui", "main", "item", "warp", "lore"));
+
+        var item = ItemBuilder.of(WARP_SKULL)
+                .name(name)
+                .lore(lore)
+                .item();
+
+
+        return Item.builder().setItemProvider(item).addClickHandler(click -> {
+            // WarpGui.open(player, plot, plugin);
             player.playSound(player.getLocation(), "ui.button.click", 1, 1);
         }).build();
     }
 
 
     public static Item biome(Player player, Plot plot, PlotsPlugin plugin) {
-        var currentBiome = plot.biome();
-        return Item.builder().setItemProvider(ItemBuilder.of(Material.CHERRY_SAPLING)
-                        .name(plugin.messenger().component(player, NodePath.path("gui", "main", "item", "biome", "name"),
-                                Placeholder.component("current-biome", Component.translatable(currentBiome.translationKey())))
-                        ).lore(plugin.messenger().componentList(player, NodePath.path("gui", "main", "item", "biome", "lore"),
-                                Placeholder.component("current-biome", Component.translatable(currentBiome.translationKey())))
-                        ).item()
-                ).addClickHandler(click -> {
-                    BiomeChangeGUI.open(player, plot, plugin);
-                    player.playSound(player.getLocation(), "ui.button.click", 1, 1);
-                })
-                .build();
+        var name = plugin.messenger().component(player, NodePath.path("gui", "main", "item", "biome", "name"));
+        var lore = plugin.messenger().componentList(player, NodePath.path("gui", "main", "item", "biome", "lore"), Placeholder.component(
+                "current-biome", Component.translatable(plot.biome().translationKey())
+        ));
+
+        var item = ItemBuilder.of(Material.CHERRY_SAPLING)
+                .name(name)
+                .lore(lore)
+                .item();
+
+
+        return Item.builder().setItemProvider(item).addClickHandler(click -> {
+            BiomeChangeGUI.open(player, plot, plugin);
+            player.playSound(player.getLocation(), "ui.button.click", 1, 1);
+        }).build();
     }
 
-    public static Item friends(Player player, Plot plot, PlotsPlugin plugin) {
-        return Item.builder().setItemProvider(ItemBuilder.of(Material.SKELETON_SKULL)
-                        .name(plugin.messenger().component(player, NodePath.path("gui", "main", "item", "members", "name")))
-                        .item()
-                ).addClickHandler(click -> {
-                    MembersGUI.open(player, plot, plugin);
-                    player.playSound(player.getLocation(), "ui.button.click", 1, 1);
-                })
-                .build();
+    public static Item members(Player player, Plot plot, PlotsPlugin plugin) {
+        var name = plugin.messenger().component(player, NodePath.path("gui", "main", "item", "members", "name"),
+                plot.tagResolvers(player, plugin.messenger()));
+        var lore = plugin.messenger().componentList(player, NodePath.path("gui", "main", "item", "members", "lore"),
+                plot.tagResolvers(player, plugin.messenger()));
+
+        var item = ItemBuilder.of(Material.SKELETON_SKULL)
+                .name(name)
+                .lore(lore)
+                .item();
+
+
+        return Item.builder().setItemProvider(item).addClickHandler(click -> {
+            MembersGUI.open(player, plot, plugin);
+            player.playSound(player.getLocation(), "ui.button.click", 1, 1);
+        }).build();
     }
 
     public static Item bannedPlayers(Player player, Plot plot, PlotsPlugin plugin) {
-        return Item.builder().setItemProvider(ItemBuilder.of(Material.WITHER_SKELETON_SKULL).name(
-                        plugin.messenger().component(player, NodePath.path("gui", "main", "item", "banned", "name"))
-                ).item()).addClickHandler(click -> {
-                    BannedPlayersGUI.open(player, plot, plugin);
-                    player.playSound(player.getLocation(), "ui.button.click", 1, 1);
-                })
-                .build();
+        var name = plugin.messenger().component(player, NodePath.path("gui", "main", "item", "banned", "name"));
+        var lore = plugin.messenger().componentList(player, NodePath.path("gui", "main", "item", "banned", "lore"));
+
+        var item = ItemBuilder.of(Material.WITHER_SKELETON_SKULL)
+                .name(name)
+                .lore(lore)
+                .item();
+
+
+        return Item.builder().setItemProvider(item).addClickHandler(click -> {
+            BannedPlayersGUI.open(player, plot, plugin);
+            player.playSound(player.getLocation(), "ui.button.click", 1, 1);
+        }).build();
     }
 
     public static Item flags(Player player, Plot plot, PlotsPlugin plugin) {
+        var name = plugin.messenger().component(player, NodePath.path("gui", "main", "item", "flags", "name"));
+        var lore = plugin.messenger().componentList(player, NodePath.path("gui", "main", "item", "flags", "lore"));
 
-        return Item.builder().setItemProvider(ItemBuilder.of(Material.WRITABLE_BOOK).name(
-                        plugin.messenger().component(player, NodePath.path("gui", "main", "item", "flags", "name"))
-                ).item()).addClickHandler(click -> {
-                    FlagsGUI.open(player, plot, plugin);
-                    player.playSound(player.getLocation(), "ui.button.click", 1, 1);
-                })
-                .build();
+        var item = ItemBuilder.of(Material.WRITTEN_BOOK)
+                .name(name)
+                .lore(lore)
+                .item();
+
+
+        return Item.builder().setItemProvider(item).addClickHandler(click -> {
+            FlagsGUI.open(player, plot, plugin);
+            player.playSound(player.getLocation(), "ui.button.click", 1, 1);
+        }).build();
     }
 
     public static Item interactables(Player player, Plot plot, PlotsPlugin plugin) {
-        return Item.builder().setItemProvider(ItemBuilder.of(Material.SMITHING_TABLE).name(
-                        plugin.messenger().component(player, NodePath.path("gui", "main", "item", "interactable", "name"))
-                ).item())
-                .addClickHandler(click -> {
-                    InteractablesGUI.open(player, plot, plugin);
-                    player.playSound(player.getLocation(), "ui.button.click", 1, 1);
-                })
-                .build();
+        var name = plugin.messenger().component(player, NodePath.path("gui", "main", "item", "interactable", "name"));
+        var lore = plugin.messenger().componentList(player, NodePath.path("gui", "main", "item", "interactable", "lore"));
+
+        var item = ItemBuilder.of(Material.SMITHING_TABLE)
+                .name(name)
+                .lore(lore)
+                .item();
+
+
+        return Item.builder().setItemProvider(item).addClickHandler(click -> {
+            InteractablesGUI.open(player, plot, plugin);
+            player.playSound(player.getLocation(), "ui.button.click", 1, 1);
+        }).build();
     }
 
     public static Item addMember(Player player, Plot plot, PlotsPlugin plugin) {
-        return Item.builder().setItemProvider(ItemBuilder.of(Material.ENDER_EYE).name(
-                        plugin.messenger().component(player, NodePath.path("gui", "members", "item", "add", "name"))
-                ).lore(
-                        plugin.messenger().componentList(player, NodePath.path("gui", "members", "item", "add", "lore"))
-                ).item()).addClickHandler(click -> {
-                    AddPlayerGui.open(player, plot, plugin, AddPlayerGui.AddPlayerGuiType.MEMBER);
-                    player.playSound(player.getLocation(), "ui.button.click", 1, 1);
-                })
-                .build();
+        var name = plugin.messenger().component(player, NodePath.path("gui", "members", "item", "add", "name"));
+        var lore = plugin.messenger().componentList(player, NodePath.path("gui", "members", "item", "add", "lore"));
+
+        var item = ItemBuilder.of(Material.ENDER_EYE)
+                .name(name)
+                .lore(lore)
+                .itemModel(NamespacedKey.fromString(plugin.configuration().gui().buttonModelPlus()))
+                .item();
+
+
+        return Item.builder().setItemProvider(item).addClickHandler(click -> {
+            AddPlayerGui.open(player, plot, plugin, AddPlayerGui.AddPlayerGuiType.MEMBER);
+            player.playSound(player.getLocation(), "ui.button.click", 1, 1);
+        }).build();
     }
 
     public static Item addBannedPlayer(Player player, Plot plot, PlotsPlugin plugin) {
-        return Item.builder().setItemProvider(ItemBuilder.of(Material.ENDER_EYE).name(
-                        plugin.messenger().component(player, NodePath.path("gui", "banned-players", "item", "add", "name"))
-                ).lore(
-                        plugin.messenger().componentList(player, NodePath.path("gui", "banned-players", "item", "add", "lore"))
-                ).item()).addClickHandler(click -> {
-                    AddPlayerGui.open(player, plot, plugin, AddPlayerGui.AddPlayerGuiType.BANNED_PLAYER);
-                    player.playSound(player.getLocation(), "ui.button.click", 1, 1);
-                })
-                .build();
+        var name = plugin.messenger().component(player, NodePath.path("gui", "banned-players", "item", "add", "name"));
+        var lore = plugin.messenger().componentList(player, NodePath.path("gui", "banned-players", "item", "add", "lore"));
+
+        var item = ItemBuilder.of(Material.ENDER_EYE)
+                .name(name)
+                .lore(lore)
+                .itemModel(NamespacedKey.fromString(plugin.configuration().gui().buttonModelPlus()))
+                .item();
+
+
+        return Item.builder().setItemProvider(item).addClickHandler(click -> {
+            AddPlayerGui.open(player, plot, plugin, AddPlayerGui.AddPlayerGuiType.BANNED_PLAYER);
+            player.playSound(player.getLocation(), "ui.button.click", 1, 1);
+        }).build();
     }
 }

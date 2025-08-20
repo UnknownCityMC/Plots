@@ -1,4 +1,4 @@
-package de.unknowncity.plots.configurration;
+package de.unknowncity.plots.configuration;
 
 
 import de.unknowncity.astralib.common.configuration.YamlAstraConfiguration;
@@ -18,6 +18,9 @@ public class PlotsConfiguration extends YamlAstraConfiguration {
     @JsonProperty
     private final FreebuildSettings fb = new FreebuildSettings();
 
+    @JsonProperty
+    private final GuiSettings gui = new GuiSettings();
+
     public PlotsConfiguration() {
 
     }
@@ -32,5 +35,9 @@ public class PlotsConfiguration extends YamlAstraConfiguration {
 
     public FreebuildSettings fb() {
         return fb;
+    }
+
+    public GuiSettings gui() {
+        return gui;
     }
 }

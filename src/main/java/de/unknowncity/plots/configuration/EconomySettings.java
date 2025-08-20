@@ -1,4 +1,4 @@
-package de.unknowncity.plots.configurration;
+package de.unknowncity.plots.configuration;
 
 import de.unknowncity.astralib.libs.com.fasterxml.jackson.annotation.JsonProperty;
 

@@ -36,16 +36,14 @@ public class MembersGUI {
                         "# . . . . . . . #",
                         "# . . . . . . . #",
                         "# # < # + # > # B"
-                ).addIngredient('#', PlotMainGUI.BORDER_ITEM)
-                        .addIngredient('B', PreparedItems.back(player, "members", plugin, () -> PlotMainGUI.open(player, plot, plugin)))
-                        .addIngredient('<', new PrevPageItem(ItemStack.of(Material.PAPER), messenger))
-                        .addIngredient('>', new NextPageItem(ItemStack.of(Material.PAPER), messenger))
+                )
+                        .addIngredient('B', PreparedItems.back(player, plugin, () -> PlotMainGUI.open(player, plot, plugin)))
+                        .addIngredient('<', new PrevPageItem(ItemStack.of(Material.PAPER), messenger, plugin.configuration().gui()))
+                        .addIngredient('>', new NextPageItem(ItemStack.of(Material.PAPER), messenger, plugin.configuration().gui()))
                         .addIngredient('+', PreparedItems.addMember(player, plot, plugin))
                         .addIngredient('.', Markers.CONTENT_LIST_SLOT_HORIZONTAL),
                 items
         );
-
-        gui.setBackground(PlotMainGUI.FILLER_ITEM.getItemProvider(player));
 
         var window = Window.builder().setUpperGui(gui).setTitle(title).build(player);
 
