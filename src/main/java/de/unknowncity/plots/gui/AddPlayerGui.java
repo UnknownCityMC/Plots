@@ -21,7 +21,7 @@ import xyz.xenondevs.invui.item.Item;
 import xyz.xenondevs.invui.window.AnvilWindow;
 
 public class AddPlayerGui {
-    public static enum AddPlayerGuiType {
+    public enum AddPlayerGuiType {
         MEMBER,
         BANNED_PLAYER;
     }
@@ -47,8 +47,8 @@ public class AddPlayerGui {
                 new Structure(
                         ". P B"
                 )
-                        .addIngredient('B', type == AddPlayerGuiType.MEMBER ? PreparedItems.back(player, "members", plugin, () -> MembersGUI.open(player, plot, plugin)) :
-                                PreparedItems.back(player, "banned-players", plugin, () -> BannedPlayersGUI.open(player, plot, plugin)))
+                        .addIngredient('B', type == AddPlayerGuiType.MEMBER ? PreparedItems.back(player, plugin, () -> MembersGUI.open(player, plot, plugin)) :
+                                PreparedItems.back(player, plugin, () -> BannedPlayersGUI.open(player, plot, plugin)))
                         .addIngredient('P', playerNotFoundItem)
         );
 

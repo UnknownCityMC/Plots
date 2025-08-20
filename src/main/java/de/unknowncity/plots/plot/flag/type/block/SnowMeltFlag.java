@@ -10,7 +10,7 @@ import java.util.List;
 
 public class SnowMeltFlag extends WorldGuardFlag<StateFlag.State> {
     public SnowMeltFlag() {
-        super("snow-melt", StateFlag.State.DENY, Material.POWDER_SNOW, Flags.SNOW_MELT);
+        super("snow-melt", StateFlag.State.DENY, Material.POWDER_SNOW_BUCKET, Flags.SNOW_MELT);
     }
 
     @Override

@@ -56,9 +56,8 @@ public class FlagsGUI {
                 ". . . . . .",
                 "# < # # > #"
         )
-                .addIngredient('<', new PrevPageItem(ItemStack.of(Material.PAPER), messenger))
-                .addIngredient('>', new NextPageItem(ItemStack.of(Material.PAPER), messenger))
-                .addIngredient('#', PlotMainGUI.BORDER_ITEM)
+                .addIngredient('<', new PrevPageItem(ItemStack.of(Material.PAPER), messenger, plugin.configuration().gui()))
+                .addIngredient('>', new NextPageItem(ItemStack.of(Material.PAPER), messenger, plugin.configuration().gui()))
                 .addIngredient('.', Markers.CONTENT_LIST_SLOT_HORIZONTAL);
 
         guis.add(PagedGui.ofItems(innerStructure, playerFLagItems));
@@ -118,8 +117,7 @@ public class FlagsGUI {
                         "V # . . . . . . #",
                         "B # . . . . . . #",
                         "# # . . . . . . X")
-                        .addIngredient('#', PlotMainGUI.BORDER_ITEM)
-                        .addIngredient('X', PreparedItems.back(player, "flags", plugin, () -> PlotMainGUI.open(player, plot, plugin)))
+                        .addIngredient('X', PreparedItems.back(player, plugin, () -> PlotMainGUI.open(player, plot, plugin)))
                         .addIngredient('P', playerTab)
                         .addIngredient('E', entityTab)
                         .addIngredient('V', vehicleTab)

@@ -2,7 +2,7 @@ package de.unknowncity.plots.service;
 
 import de.unknowncity.astralib.common.service.Service;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.configurration.EconomySettings;
+import de.unknowncity.plots.configuration.EconomySettings;
 import su.nightexpress.coinsengine.api.CoinsEngineAPI;
 import su.nightexpress.coinsengine.api.currency.Currency;
 

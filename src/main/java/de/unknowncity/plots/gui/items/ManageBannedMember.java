@@ -15,6 +15,7 @@ import xyz.xenondevs.invui.gui.PagedGui;
 import xyz.xenondevs.invui.item.AbstractPagedGuiBoundItem;
 import xyz.xenondevs.invui.item.Item;
 import xyz.xenondevs.invui.item.ItemProvider;
+import xyz.xenondevs.invui.item.ItemWrapper;
 
 public class ManageBannedMember extends AbstractPagedGuiBoundItem {
     private final PaperMessenger messenger;
@@ -31,11 +32,18 @@ public class ManageBannedMember extends AbstractPagedGuiBoundItem {
     public @NotNull ItemProvider getItemProvider(@NotNull Player player) {
         var skull = SkullHelper.getSkull(bannedPlayer.uuid());
 
-        return Item.simple(
-                ItemBuilder.of(skull)
-                        .name(messenger.component(player, NodePath.path("gui", "banned-players", "item", "banned-player", "name"), Placeholder.parsed("name", bannedPlayer.name())))
-                        .lore(messenger.componentList(player, NodePath.path("gui", "banned-players", "item", "banned-player", "lore"), Placeholder.parsed("name", bannedPlayer.name()))).item()
-        ).getItemProvider(player);
+        var name = messenger.component(player, NodePath.path("gui", "banned-players", "item", "banned-player", "name"),
+                Placeholder.parsed("name", bannedPlayer.name()));
+
+        var lore = messenger.componentList(player, NodePath.path("gui", "banned-players", "item", "banned-player", "lore"),
+                Placeholder.parsed("name", bannedPlayer.name()));
+
+        var builder = ItemBuilder.of(skull)
+                .name(name)
+                .lore(lore)
+                .item();
+
+        return new ItemWrapper(builder);
     }
 
     @Override
