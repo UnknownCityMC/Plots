@@ -1,7 +1,6 @@
 package de.unknowncity.plots.data.dao.mariadb;
 
 import de.chojo.sadu.mapper.reader.StandardReader;
-import de.chojo.sadu.mapper.wrapper.Row;
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.chojo.sadu.queries.call.adapter.UUIDAdapter;
 import de.unknowncity.plots.data.dao.PlotDao;
@@ -16,10 +15,9 @@ import org.intellij.lang.annotations.Language;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import static de.chojo.sadu.queries.api.call.Call.*;
+import static de.chojo.sadu.queries.api.call.Call.call;
 
 public class MariaDBPlotDao implements PlotDao {
     private final QueryConfiguration queryConfiguration;
@@ -86,7 +84,7 @@ public class MariaDBPlotDao implements PlotDao {
         return CompletableFuture.supplyAsync(queryConfiguration.query(queryString)
                 .single(call()
                         .bind("plotId", plot.id())
-                        .bind("ownerId", plot.owner() == null ? UUID.fromString("00000000-0000-0000-0000-000000000000") : plot.owner().uuid(), UUIDAdapter.AS_STRING)
+                        .bind("ownerId", plot.owner() == null ? null : plot.owner().uuid(), UUIDAdapter.AS_STRING)
                         .bind("regionId", plot.regionId())
                         .bind("groupName", plot.groupName())
                         .bind("world", plot.worldName())
