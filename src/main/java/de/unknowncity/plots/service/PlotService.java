@@ -193,8 +193,7 @@ public class PlotService extends Service<PlotsPlugin> {
         }
         var plot = new BuyPlot(plotId, null, plotGroupName,  region.getId(), price, world.getName(), PlotState.AVAILABLE, null);
 
-        createPlot(region, plot, plotGroupName);
-        return true;
+        return createPlot(region, plot, plotGroupName);
     }
 
     public boolean createRentPlotFromRegion(ProtectedRegion region, World world, double price, String plotGroupName, Duration rentInterval) {
@@ -204,11 +203,10 @@ public class PlotService extends Service<PlotsPlugin> {
         }
         var plot = new RentPlot(plotId, null, plotGroupName, region.getId(), price, world.getName(), PlotState.AVAILABLE, null, null, rentInterval.toMinutes());
 
-        createPlot(region, plot, plotGroupName);
-        return true;
+        return createPlot(region, plot, plotGroupName);
     }
 
-    private void createPlot(ProtectedRegion region, Plot plot, String plotGroupName) {
+    private boolean createPlot(ProtectedRegion region, Plot plot, String plotGroupName) {
         addPlotToPlotGroup(plot, plotGroupName);
 
         region.setFlag(Flags.INTERACT, StateFlag.State.ALLOW);
@@ -221,11 +219,14 @@ public class PlotService extends Service<PlotsPlugin> {
             var location = optLocation.get();
             var plotHome = new PlotLocation(plot.id(), true, location.x(), location.y(), location.z(), 0, 0);
             plot.plotHome(plotHome);
+        } else {
+            return false;
         }
 
         plot.interactables(PlotInteractable.defaults());
 
         savePlot(plot);
+        return true;
     }
 
     public void setBiome(Plot plot, BiomeType biome) {

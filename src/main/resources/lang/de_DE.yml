@@ -36,18 +36,18 @@ task:
     not-enough-money: <prefix><red>Du hast nicht genug Geld für deine Miete gehabt... (<id>)
 sign:
   available:
-    line-1: <green>Verfügbar
-    line-2: "<yellow><id>"
+    line-1: <white>[<green>Verfügbar<white>]
+    line-2: "<gray><id>"
     line-3: ""
-    line-4: "<gray>Preis: <white><price>$"
+    line-4: "<gray>Preis: <yellow><price>$"
   sold:
-    line-1: <red>Verkauft
-    line-2: "<yellow><id>"
+    line-1: "<white>[<red>Verkauft<white>]"
+    line-2: "<gray><id>"
     line-3: ""
     line-4: "<white><owner-name>"
   unavailable:
-    line-1: <red> Nicht verfügbar
-    line-2: "<yellow><id>"
+    line-1: "<white>[<red>Nicht verfügbar<white>]"
+    line-2: "<gray><id>"
     line-3: ""
     line-4: ""
 command:
@@ -59,7 +59,6 @@ command:
       - "<gray>Größe: <yellow><width> <gray>x <yellow><height> <gray>x <yellow><depth>"
       - "<gray>Vertraut: <yellow><members>"
       - "<gray>Verboten: <yellow><banned>"
-      - "<gray>Flags: <yellow><flags>"
       - "<gray>Position: <yellow><world> <gray>- <yellow><location>"
       - <gray>▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰<white>[<aqua>Plot-Info<white>]<gray>▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰
     no-plot: <prefix><red>An dieser Stelle befindet sich kein Grundstück
@@ -118,7 +117,7 @@ command:
     create:
       success: <prefix><gray>Plot erfolgreich erstellt!
       already-exists: <prefix><red>Plot existiert bereits!
-      error: <prefix><red>Es gab einen Fehler...
+      error: <prefix><red>Es gab einen Fehler... Wahrscheinlich wurde das Plothome nicht korrekt gesetzt! Bitte überprüfe die Datenbank und tu das manuell
     member:
       not-sold: <prefix><red>Dieses Plot gehört niemanden!
       success: <prefix><gray>Mitglied erfolgreich hinzugefügt!
@@ -147,7 +146,17 @@ event:
     enter:
       deny: "<prefix><red>Du darfst dieses Grundstück nicht betreten!"
     interact:
-      deny: <prefix><red>Das darfst du aufgrund der Ploteinstellungen nicht tun!
+      deny: "<prefix><red>Das darfst du aufgrund der Ploteinstellungen nicht tun!"
+menu:
+  invalid-page: "<prefix><red>Diese Seite gibt es in diesem Menü nicht"
+  prev-button: "<white>[ <yellow>« <white>]"
+  prev-button-no-prev: "====="
+  next-button: "<white>[ <yellow>» <white>]"
+  next-button-no-next: "====="
+  plotlist:
+    header: "<gray>===============[<aqua>Plots<gray>==============="
+    entry: "<yellow><index><gray>: <aqua><id> <white><click:run_command:plotadmin teleport <id>>[<green>TP<white>]</click>"
+    footer: "<gray><prev><gray>==========[<aqua>Plots<gray>==========<next>"
 gui:
   item:
     next-page:
@@ -180,7 +189,7 @@ gui:
     active: <!i><gray>▶ <green><access-modifier>
     inactive: <!i><gray>▸ <dark_gray><access-modifier>
   members:
-    title: <!i><#1d71ad>Plot <black>| <dark_gray>Vertraute Spieler
+    title: "%nexo_shift_-20%<white>%nexo_gui-bg-paged-6%%nexo_shift_-175%<!i><#1d71ad>Plot <gray>| <white>Vertraute Spieler"
     format:
       active: "<!i><gray>⯈ <green><role>"
       inactive: "<!i><gray>▸ <dark_gray><role>"
@@ -209,7 +218,7 @@ gui:
           - "<!i><gray>Klick um zurück zur"
           - "<!i><gray>zum Hauptmenü zu gelangen"
   member-add:
-    title: "%nexo_shift_10%<!i><#1d71ad>Plot <black>| <dark_gray>Spieler vertrauen"
+    title: "%nexo_shift_-72%<white>%nexo_gui-bg-blank-anvil%%nexo_shift_-175%<!i><#1d71ad>Plot <gray>| <white>Spieler vertrauen"
     item:
       not-found:
         name: "<!i><red>Ungüliger Spieler"
@@ -231,7 +240,7 @@ gui:
           - "<!i><gray>Klick um zurück zur"
           - "<!i><gray>Mitgliederübersicht zu gelangen"
   banned-players:
-    title: <!i><#1d71ad>Plot <black>| <dark_gray>Verbannte Spieler
+    title: "%nexo_shift_-20%<white>%nexo_gui-bg-paged-6%%nexo_shift_-175%<!i><#1d71ad>Plot <gray>| <white>Verbannte Spieler"
     item:
       back:
         name: "<!i><red>Zurück"
@@ -252,7 +261,7 @@ gui:
           - "<!i><gray>▸ <red>Entfernen <gray>[<gold><key:key.keyboard.left.shift><gray>] <gray>+ <white>🖰 <gray>[<gold><key:key.mouse.left><gray>]"
           - "<!i>"
   banned-players-add:
-    title: "%nexo_shift_-52%<!i><#1d71ad>Plot <black>| <dark_gray>Spieler verbannen"
+    title: "%nexo_shift_-72%<white>%nexo_gui-bg-blank-anvil%%nexo_shift_-175%<!i><#1d71ad>Plot <gray>| <white>Spieler verbannen"
     item:
       not-found:
         name: "<!i><red>Ungüliger Spieler"
@@ -275,9 +284,9 @@ gui:
           - "<!i><gray>Verbannte-Spieler-Übersicht zu gelangen"
 
   main:
-    title: <!i><#1d71ad>Plot <black>| <dark_gray>Einstellungen
+    title: "%nexo_shift_-20%<white>%nexo_gui-bg-blank-5%%nexo_shift_-175%<!i><#1d71ad>Plot <gray>| <white>Einstellungen"
     item:
-      plot-info:
+      info:
         name: "<!i><gold>Plot-Info <gray>(<yellow><id><gray>)"
         lore:
           - "<!i><gray>Besitzer: <yellow><owner-name>"
@@ -306,7 +315,7 @@ gui:
       flags:
         name: "<!i><gold>Flags anpassen"
   interactables:
-    title: <!i><#1d71ad>Plot <black>| <dark_gray>Blockinteraktionen
+    title: "%nexo_shift_-20%<white>%nexo_gui-bg-paged-6%%nexo_shift_-175%<!i><#1d71ad>Plot <gray>| <white>Blockinteraktionen"
     format:
       active: "<!i><gray>⯈ <green><access-modifier>"
       inactive: "<!i><gray>▸ <dark_gray><access-modifier>"
@@ -333,7 +342,7 @@ gui:
           - <!i><gray>▸ <yellow>↓ <white>🖰 <gray>[<gold>Left Button<gray>]
           - <!i>
   biome:
-    title: <!i><#1d71ad>Plot <black>| <dark_gray>Biome
+    title: "%nexo_shift_-20%<white>%nexo_gui-bg-paged-6%%nexo_shift_-175%<!i><#1d71ad>Plot <gray>| <white>Biome"
     item:
       back:
         name: "<!i><red>Zurück"
@@ -343,7 +352,7 @@ gui:
       biome:
         name: "<!i><aqua><biome>"
   flags:
-    title: <!i><#1d71ad>Plot <black>| <dark_gray>Flags
+    title: "%nexo_shift_-20%<white>%nexo_gui-bg-flags%%nexo_shift_-175%<!i><#1d71ad>Plot <gray>| <white>Flags"
     format:
       active: <!i><gray>▶ <green><value>
       inactive: <!i><gray>▸ <dark_gray><value>
