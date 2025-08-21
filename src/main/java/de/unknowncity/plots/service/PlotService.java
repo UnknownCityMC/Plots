@@ -277,18 +277,7 @@ public class PlotService extends Service<PlotsPlugin> {
     public void unClaimPlot(Plot plot) {
         economyService.deposit(plot.owner().uuid(), plot.price());
 
-        plot.state(PlotState.AVAILABLE);
-        plot.owner(null);
-        flagRegistry.getAllRegistered().forEach(plotFlag -> {
-            plot.setFlag(plotFlag, plotFlag.defaultValue());
-        });
-        plot.members(new ArrayList<>());
-
-        if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
-            schematicManager.pastePresaleSchematic(plot);
-        }
-
-        SignManager.updateSings(plot, plugin.messenger());
+        resetPlot(plot);
     }
 
     public boolean backup(Plot plot, UUID owner) {
@@ -359,6 +348,8 @@ public class PlotService extends Service<PlotsPlugin> {
             plotSignDao.writeAll(plot.signs(), plot.id());
             plotCache.put(plot.id(), plot);
         });
+
+        SignManager.updateSings(plot, plugin.messenger());
     }
 
     public Optional<Plot> findPlotAt(Location location) {
@@ -422,7 +413,12 @@ public class PlotService extends Service<PlotsPlugin> {
 
 
     public List<Plot> findPlotsByOwnerUUID(UUID uuid) {
-        return plotCache.values().stream().filter(plot -> plot.owner().uuid().equals(uuid)).sorted(Comparator.comparing(Plot::claimed)).toList();
+        return plotCache.values().stream().filter(plot -> plot.owner() != null && plot.owner().uuid()
+                .equals(uuid)).sorted(Comparator.comparing(Plot::claimed)).toList();
+    }
+
+    public List<Plot> findAvailablePlots() {
+        return plotCache.values().stream().filter(plot -> plot.state().equals(PlotState.AVAILABLE)).toList();
     }
 
     public Optional<Plot> getPlotForSignLocation(Location location) {
@@ -457,5 +453,22 @@ public class PlotService extends Service<PlotsPlugin> {
 
     public SignManager signManager() {
         return signManager;
+    }
+
+    public void resetPlot(Plot plot) {
+        plot.state(PlotState.AVAILABLE);
+        plot.owner(null);
+        flagRegistry.getAllRegistered().forEach(plotFlag -> {
+            plot.setFlag(plotFlag, plotFlag.defaultValue());
+        });
+        plot.members().clear();
+        plot.deniedPlayers().clear();
+        savePlot(plot);
+
+        if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
+            schematicManager.pastePresaleSchematic(plot);
+        }
+
+        SignManager.updateSings(plot, plugin.messenger());
     }
 }

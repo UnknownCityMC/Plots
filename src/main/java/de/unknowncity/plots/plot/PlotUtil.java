@@ -11,45 +11,6 @@ import java.util.Optional;
 
 public class PlotUtil {
 
-    public static Optional<Plot> checkPlotConditionsAndGetPlotIfPresent(Player sender, RegionService regionService, PlotService plotService, PlotsPlugin plugin) {
-        var plotOptional = checkForAndGetPlotIfPresent(sender, regionService, plotService, plugin);
-
-        if (plotOptional.isEmpty()) {
-            return plotOptional;
-        }
-
-        var plot = plotOptional.get();
-
-        if (!plot.owner().uuid().equals(sender.getUniqueId()) && !sender.hasPermission("ucplots.command.plotadmin")) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-owner"));
-            return Optional.empty();
-        }
-
-        return Optional.of(plot);
-    }
-
-    public static Optional<Plot> checkPlotSoldAndGetPlotIfPresent(Player sender, RegionService regionService, PlotService plotService, PlotsPlugin plugin) {
-        var plotOptional = checkForAndGetPlotIfPresent(sender, regionService, plotService, plugin);
-
-        if (plotOptional.isEmpty()) {
-            return plotOptional;
-        }
-
-        var plot = plotOptional.get();
-
-        if (plot.state() != PlotState.SOLD) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "not-sold"));
-            return Optional.empty();
-        }
-
-        if (!plot.owner().uuid().equals(sender.getUniqueId()) && !sender.hasPermission("ucplots.command.plotadmin")) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-owner"));
-            return Optional.empty();
-        }
-
-        return Optional.of(plot);
-    }
-
     public static Optional<Plot> checkForAndGetPlotIfPresent(Player sender, RegionService regionService, PlotService plotService, PlotsPlugin plugin) {
         var possibleRegion = regionService.getSuitableRegion(sender.getLocation());
 
@@ -65,6 +26,38 @@ public class PlotUtil {
             return Optional.empty();
         }
 
+        var plot = plotService.getPlot(plotId);
+        return Optional.of(plot);
+    }
+
+    public static boolean checkPlotOwner(Player player, Plot plot, PlotsPlugin plugin) {
+        if (!plot.owner().uuid().equals(player.getUniqueId()) && !player.hasPermission("ucplots.command.plotadmin")) {
+            plugin.messenger().sendMessage(player, NodePath.path("command", "plot", "no-owner"));
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean checkPlotSold(Player player, Plot plot, PlotsPlugin plugin) {
+        if (plot.state() != PlotState.SOLD) {
+            plugin.messenger().sendMessage(player, NodePath.path("command", "plot", "not-sold"));
+            return false;
+        }
+        return true;
+    }
+
+    public static Optional<Plot> getPlotIfPresent(Player player, PlotsPlugin plugin) {
+        var regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
+        var plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
+
+        var possibleRegion = regionService.getSuitableRegion(player.getLocation());
+        if (possibleRegion.isEmpty()) {
+            return Optional.empty();
+        }
+        var plotId = possibleRegion.get().getId();
+        if (!plotService.existsPlot(plotId)) {
+            return Optional.empty();
+        }
         var plot = plotService.getPlot(plotId);
         return Optional.of(plot);
     }

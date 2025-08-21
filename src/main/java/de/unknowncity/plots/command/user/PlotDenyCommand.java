@@ -41,12 +41,8 @@ public class PlotDenyCommand extends SubCommand {
         var sender = context.sender();
         var target = (OfflinePlayer) context.get("target");
 
-        var possiblePlot = PlotUtil.checkPlotConditionsAndGetPlotIfPresent(sender, regionService, plotService, plugin);
-
-        possiblePlot.ifPresent(plot -> {
-            if (plot.isDenied(target.getUniqueId())) {
-                plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "deny", "already-deny"),
-                        AstraArrays.merge(plot.tagResolvers(sender, plugin.messenger()), new TagResolver[]{Placeholder.unparsed("target", target.getName())}));
+        PlotUtil.getPlotIfPresent(sender, plugin).ifPresent(plot -> {
+            if (!PlotUtil.checkPlotOwner(sender, plot, plugin)) {
                 return;
             }
 

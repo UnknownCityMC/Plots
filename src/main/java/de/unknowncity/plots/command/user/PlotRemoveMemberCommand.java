@@ -38,9 +38,11 @@ public class PlotRemoveMemberCommand extends SubCommand {
         var sender = context.sender();
         var target = (OfflinePlayer) context.get("target");
 
-        var plotOptional = PlotUtil.checkPlotConditionsAndGetPlotIfPresent(sender, regionService, plotService, plugin);
+        PlotUtil.getPlotIfPresent(sender, plugin).ifPresent(plot -> {
+            if (!PlotUtil.checkPlotOwner(sender, plot, plugin)) {
+                return;
+            }
 
-        plotOptional.ifPresent(plot -> {
             if (plot.members().stream().noneMatch(plotMember -> plotMember.uuid().equals(target.getUniqueId()))) {
                 plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-member"), plot.tagResolvers(sender, plugin.messenger()));
                 return;

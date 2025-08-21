@@ -43,10 +43,12 @@ public class PlotAddMemberCommand extends SubCommand {
         var target = (OfflinePlayer) context.get("target");
         var role = (PlotMemberRole) context.get("role");
 
-        var plotOptional = PlotUtil.checkPlotConditionsAndGetPlotIfPresent(sender, regionService, plotService, plugin);
+        PlotUtil.getPlotIfPresent(sender, plugin).ifPresent(plot -> {
+            if (!PlotUtil.checkPlotOwner(sender, plot, plugin)) {
+                return;
+            }
 
-        plotOptional.ifPresent(plot -> {
-            if (plot.owner().uuid().equals(target.getUniqueId()) || plot.members().stream().anyMatch(plotMember -> plotMember.uuid().equals(target.getUniqueId()))) {
+            if (plot.isMemberOrOwner(target.getUniqueId())) {
                 plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "already-member"), plot.tagResolvers(sender, plugin.messenger()));
                 return;
             }

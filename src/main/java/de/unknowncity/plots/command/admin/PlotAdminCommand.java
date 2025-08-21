@@ -19,7 +19,9 @@ public class PlotAdminCommand extends PaperCommand<PlotsPlugin> {
         new PlotAdminGroupDeleteCommand(plugin, builder).apply(commandManager);
         new PlotAdminCreateCommand(plugin, builder).apply(commandManager);
         new PlotAdminDeleteCommand(plugin, builder).apply(commandManager);
+        new PlotAdminResetCommand(plugin, builder).apply(commandManager);
         new PlotAdminSetOwnerCommand(plugin, builder).apply(commandManager);
+        new PlotAdminSetStatusCommand(plugin, builder).apply(commandManager);
         new PlotAdminSetGroupCommand(plugin, builder).apply(commandManager);
 
         new PlotAdminSignLinkCommand(plugin, builder).apply(commandManager);
@@ -28,6 +30,7 @@ public class PlotAdminCommand extends PaperCommand<PlotsPlugin> {
 
         new PlotAdminReloadCommand(plugin, builder).apply(commandManager);
         new PlotAdminTeleportCommand(plugin, builder).apply(commandManager);
+
         new PlotAdminBackupCommand(plugin, builder).apply(commandManager);
     }
 }

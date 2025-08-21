@@ -15,18 +15,20 @@ import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
 import org.spongepowered.configurate.NodePath;
 
-public class PlotClaimCommand extends SubCommand {
+import java.util.concurrent.ThreadLocalRandom;
+
+public class PlotAutoCommand extends SubCommand {
     private final RegionService regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
     private final PlotService plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
     private final EconomyService economyService = plugin.serviceRegistry().getRegistered(EconomyService.class);
 
-    public PlotClaimCommand(PlotsPlugin plugin, Command.Builder<CommandSender> builder) {
+    public PlotAutoCommand(PlotsPlugin plugin, Command.Builder<CommandSender> builder) {
         super(plugin, builder);
     }
 
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
-        commandManager.command(builder.literal("claim")
+        commandManager.command(builder.literal("auto")
                 .permission("plots.command.plot.claim")
                 .senderType(Player.class)
                 .handler(this::handleClaim)
@@ -36,19 +38,23 @@ public class PlotClaimCommand extends SubCommand {
     private void handleClaim(@NonNull CommandContext<Player> context) {
         var sender = context.sender();
 
-        PlotUtil.getPlotIfPresent(sender, plugin).ifPresent(plot -> {
-            if (plot.state() != PlotState.AVAILABLE) {
-                plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "unavailable"), plot.tagResolvers(sender, plugin.messenger()));
+        var ownedPlots = plotService.findPlotsByOwnerUUID(sender.getUniqueId());
+
+        if (ownedPlots.isEmpty()) {
+            var availablePlots = plotService.findAvailablePlots();
+            var randomPlot = availablePlots.get(ThreadLocalRandom.current().nextInt(availablePlots.size()));
+            if (!plugin.serviceRegistry().getRegistered(EconomyService.class).hasEnoughFunds(sender.getUniqueId(), randomPlot.price())) {
+                plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "not-enough-money"));
                 return;
             }
 
-            if (!economyService.hasEnoughFunds(sender.getUniqueId(), plot.price())) {
-                plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "not-enough-money"), plot.tagResolvers(sender, plugin.messenger()));
-                return;
-            }
-
-            plotService.claimPlot(sender, plot);
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "success"), plot.tagResolvers(sender, plugin.messenger()));
-        });
+            plotService.claimPlot(sender, randomPlot);
+            sender.teleport(randomPlot.plotHome().getLocation(randomPlot.world()));
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "success"),
+                    randomPlot.tagResolvers(sender, plugin.messenger()));
+        } else {
+            var plot = ownedPlots.getFirst();
+            sender.teleport(plot.plotHome().getLocation(plot.world()));
+        }
     }
 }

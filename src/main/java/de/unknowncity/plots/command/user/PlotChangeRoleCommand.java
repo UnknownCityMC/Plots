@@ -42,12 +42,13 @@ public class PlotChangeRoleCommand extends SubCommand {
         var target = (OfflinePlayer) context.get("target");
         var role = (PlotMemberRole) context.get("role");
 
-        var plotOptional = PlotUtil.checkPlotConditionsAndGetPlotIfPresent(sender, regionService, plotService, plugin);
-
-        plotOptional.ifPresent(plot -> {
-            if (plot.members().stream().noneMatch(plotMember -> plotMember.uuid().equals(target.getUniqueId()))) {
-                plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-member"), plot.tagResolvers(sender, plugin.messenger()));
+        PlotUtil.getPlotIfPresent(sender, plugin).ifPresent(plot -> {
+            if (!PlotUtil.checkPlotOwner(sender, plot, plugin)) {
                 return;
+            }
+
+            if (plot.isMember(target.getUniqueId())) {
+                plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "already-member"), plot.tagResolvers(sender, plugin.messenger()));
             }
 
             plot.changeMemberRole(target.getUniqueId(), role);

@@ -8,7 +8,9 @@ import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.context.CommandContext;
 import org.spongepowered.configurate.NodePath;
 
 public class PlotCommand extends PaperCommand<PlotsPlugin> {
@@ -25,13 +27,7 @@ public class PlotCommand extends PaperCommand<PlotsPlugin> {
 
         commandManager.command(builder
                 .senderType(Player.class)
-                .handler(commandContext -> {
-                    var sender = commandContext.sender();
-                    var possiblePlot = PlotUtil.checkPlotSoldAndGetPlotIfPresent(sender, regionService, plotService, plugin);
-                    possiblePlot.ifPresent(plot -> {
-                        PlotMainGUI.open(sender, plot, plugin);
-                    });
-                })
+                .handler(this::handle)
         );
 
         new PlotClaimCommand(plugin, builder).apply(commandManager);
@@ -43,5 +39,22 @@ public class PlotCommand extends PaperCommand<PlotsPlugin> {
         new PlotTeleportCommand(plugin, builder).apply(commandManager);
         new PlotDenyCommand(plugin, builder).apply(commandManager);
         new PlotUnDenyCommand(plugin, builder).apply(commandManager);
+        new PlotAutoCommand(plugin, builder).apply(commandManager);
+    }
+
+    private void handle(@NonNull CommandContext<Player> context) {
+        var sender = context.sender();
+
+        PlotUtil.getPlotIfPresent(sender, plugin).ifPresent(plot -> {
+            if (!PlotUtil.checkPlotSold(sender, plot, plugin)) {
+                return;
+            }
+
+            if (!plot.isOwner(sender.getUniqueId())) {
+                return;
+            }
+
+            PlotMainGUI.open(sender, plot, plugin);
+        });
     }
 }
