@@ -55,7 +55,7 @@ public class PlotAddMemberCommand extends SubCommand {
 
             plot.members().add(new PlotMember(target.getUniqueId(), target.getName(), role));
             plotService.savePlot(plot);
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "success"), plot.tagResolvers(sender, plugin.messenger()));
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "add", "success"), plot.tagResolvers(sender, plugin.messenger()));
         });
     }
 }

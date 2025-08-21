@@ -101,7 +101,7 @@ public class AddPlayerGui {
                 if (target instanceof Player targetPlayer) {
                     plugin.messenger().sendMessage(player, NodePath.path("event", "plot", "member", "added"), plot.tagResolvers(targetPlayer, messenger));
                 }
-                messenger.sendMessage(player, NodePath.path("command", "plot", "member", "success"), Placeholder.parsed("name", target.getName()));
+                messenger.sendMessage(player, NodePath.path("command", "plot", "member", "add", "success"), Placeholder.parsed("name", target.getName()));
                 MembersGUI.open(player, plot, plugin);
             } else {
                 if (isPresent) {
@@ -114,7 +114,7 @@ public class AddPlayerGui {
                 if (target instanceof Player targetPlayer) {
                     plugin.messenger().sendMessage(player, NodePath.path("event", "plot", "kick", "target"), plot.tagResolvers(targetPlayer, messenger));
                 }
-                messenger.sendMessage(player, NodePath.path("command", "plot", "member", "success"), Placeholder.parsed("name", target.getName()));
+                messenger.sendMessage(player, NodePath.path("command", "plot", "deny", "add", "success"), Placeholder.parsed("name", target.getName()));
                 BannedPlayersGUI.open(player, plot, plugin);
             }
         }).build();

@@ -47,14 +47,15 @@ public class PlotChangeRoleCommand extends SubCommand {
                 return;
             }
 
-            if (plot.isMember(target.getUniqueId())) {
-                plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "already-member"), plot.tagResolvers(sender, plugin.messenger()));
+            if (!plot.isMember(target.getUniqueId())) {
+                plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-member"), plot.tagResolvers(sender, plugin.messenger()));
+                return;
             }
 
             plot.changeMemberRole(target.getUniqueId(), role);
             plotService.savePlot(plot);
 
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "success"), plot.tagResolvers(sender, plugin.messenger()));
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "changerole", "success"), plot.tagResolvers(sender, plugin.messenger()));
         });
     }
 }
