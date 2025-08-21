@@ -39,13 +39,13 @@ public class PlotAdminTeleportCommand extends SubCommand {
         var id = context.getOrDefault("plotId", "");
 
         if (!plotService.existsPlot(id)) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plo", "plot-tp", "not-found"));
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "plot-tp", "not-found"));
             return;
         }
 
         var plot = plotService.getPlot(id);
         
         sender.teleport(plot.plotHome().getLocation(plot.world()));
-        plugin.messenger().sendMessage(sender, NodePath.path("command", "plo", "plot-tp", "success"));
+        plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "plot-tp", "success"));
     }
 }

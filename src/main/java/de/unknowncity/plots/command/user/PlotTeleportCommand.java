@@ -57,7 +57,7 @@ public class PlotTeleportCommand extends SubCommand {
         var plots = plotService.findPlotsByOwnerUUID(targetPlayer.getUniqueId());
 
         if (plots.size() < id) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plo", "plot-tp", "not-found"));
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "plot-tp", "not-found"));
             return;
         }
 
@@ -69,7 +69,7 @@ public class PlotTeleportCommand extends SubCommand {
                         sender.hasPermission("plots.command.plot.teleport.others")
         ) {
             sender.teleport(plot.plotHome().getLocation(plot.world()));
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plo", "plot-tp", "success"));
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "plot-tp", "success"));
         }
     }
 }
