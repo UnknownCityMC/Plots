@@ -2,6 +2,8 @@
 prefix: "<white>[<aqua>Plots<white>] "
 plot:
   info:
+    home-private: "<red>Privat"
+    home-public: "<green>Öffentlich"
     no-group: "*<i>Keine Gruppe</i>*"
     no-owner: "<green>Nicht verkauft"
     no-members: "<gray>*<i>Niemand*"
@@ -73,6 +75,7 @@ command:
     plot-tp:
       not-found: <prefix><red>Teleport nicht möglich!
       success: <prefix><gray>Du wurdest erfolgreich teleportiert!
+      private: "<prefix><red>Dieses Plothome dieses Spielers ist auf <green>Privat <red>gestellt"
     member:
       no-member: "<prefix><yellow><target> <red>ist kein Mitglied dieses Grundstücks"
       add:
@@ -86,6 +89,11 @@ command:
     undeny:
       success: "<prefix><yellow><target> <gray>wurde entsperrt"
       not-denied: "<prefix><yellow><target> <red>ist nicht verbannt"
+    home:
+      setvisibility:
+        success: "<prefix><gray>Du hast die Sichtbarkeit deines Plothomes auf <gray><home-visibility> <gray>geändert!"
+      setlocation:
+        success: "<prefix><gray>Du hast dein Plothome verschoben!"
   plotadmin:
     reload: <prefix><gray>Einstellungen und Nachrichten neu geladen! <green>✔
     no-plot: <prefix><red>An dieser Stelle befindet sich kein Plot

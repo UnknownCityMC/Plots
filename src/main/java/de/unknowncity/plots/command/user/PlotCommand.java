@@ -11,7 +11,6 @@ import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
-import org.spongepowered.configurate.NodePath;
 
 public class PlotCommand extends PaperCommand<PlotsPlugin> {
     private final RegionService regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
@@ -36,10 +35,13 @@ public class PlotCommand extends PaperCommand<PlotsPlugin> {
         new PlotAddMemberCommand(plugin, builder).apply(commandManager);
         new PlotRemoveMemberCommand(plugin, builder).apply(commandManager);
         new PlotChangeRoleCommand(plugin, builder).apply(commandManager);
-        new PlotTeleportCommand(plugin, builder).apply(commandManager);
+        new PlotHomeCommand(plugin, builder).apply(commandManager);
         new PlotDenyCommand(plugin, builder).apply(commandManager);
         new PlotUnDenyCommand(plugin, builder).apply(commandManager);
         new PlotAutoCommand(plugin, builder).apply(commandManager);
+
+        new PlotHomeSetCommand(plugin, builder).apply(commandManager);
+        new PlotHomeVisibilityCommand(plugin, builder).apply(commandManager);
     }
 
     private void handle(@NonNull CommandContext<Player> context) {

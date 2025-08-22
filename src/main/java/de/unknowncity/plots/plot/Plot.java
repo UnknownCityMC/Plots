@@ -6,7 +6,6 @@ import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.unknowncity.astralib.common.message.lang.Language;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
-import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.access.PlotState;
 import de.unknowncity.plots.plot.access.entity.PlotMember;
 import de.unknowncity.plots.plot.access.entity.PlotPlayer;
@@ -173,7 +172,9 @@ public abstract class Plot {
                 Placeholder.parsed("height", String.valueOf(height())),
                 Placeholder.parsed("width", String.valueOf(width())),
                 Placeholder.parsed("depth", String.valueOf(depth())),
-
+                Placeholder.component("home-visibility", plotHome.isPublic() ?
+                        messenger.component(player, NodePath.path("plot", "info", "home-public")) :
+                        messenger.component(player, NodePath.path("plot", "info", "home-private"))),
                 Placeholder.parsed("price", String.valueOf(price())),
 
                 Placeholder.component("group", groupName() != null ? Component.text(groupName()) :

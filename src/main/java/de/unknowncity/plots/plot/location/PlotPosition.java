@@ -3,7 +3,7 @@ package de.unknowncity.plots.plot.location;
 import org.bukkit.Location;
 import org.bukkit.World;
 
-public class PlotPosition {
+public class PlotPosition implements Cloneable {
     private final double x;
     private final double y;
     private final double z;
@@ -36,6 +36,10 @@ public class PlotPosition {
 
     public float pitch() {
         return pitch;
+    }
+
+    public static PlotPosition fromLocation(Location loc) {
+        return new PlotPosition(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
     }
 
     public Location getLocation(World world) {

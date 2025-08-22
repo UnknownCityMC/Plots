@@ -19,10 +19,10 @@ import java.util.concurrent.CompletableFuture;
 import static de.unknowncity.plots.command.argument.UcPlayerParser.ucPlayerParser;
 import static org.incendo.cloud.parser.standard.IntegerParser.integerParser;
 
-public class PlotTeleportCommand extends SubCommand {
+public class PlotHomeCommand extends SubCommand {
     private final PlotService plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
 
-    public PlotTeleportCommand(PlotsPlugin plugin, Command.Builder<CommandSender> builder) {
+    public PlotHomeCommand(PlotsPlugin plugin, Command.Builder<CommandSender> builder) {
         super(plugin, builder);
     }
 
@@ -31,7 +31,7 @@ public class PlotTeleportCommand extends SubCommand {
         commandManager.command(builder.literal("home")
                 .permission("plots.command.plot.teleport")
                 .senderType(Player.class)
-                .required("player", ucPlayerParser())
+                .optional("player", ucPlayerParser())
                 .optional("id", integerParser(1), (context, input) -> {
                     return CompletableFuture.supplyAsync(() -> {
                         var player = (OfflinePlayer) context.get("player");
@@ -70,6 +70,8 @@ public class PlotTeleportCommand extends SubCommand {
         ) {
             sender.teleport(plot.plotHome().getLocation(plot.world()));
             plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "plot-tp", "success"));
+        } else {
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "plot-tp", "private"));
         }
     }
 }

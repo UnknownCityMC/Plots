@@ -12,6 +12,14 @@ public class PlotLocation extends PlotPosition {
         this.isPublic = isPublic;
     }
 
+    public PlotLocation(String name, boolean isPublic, Location loc) {
+        this(name, isPublic, loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
+    }
+
+    public static PlotLocation fromLocation(String name, boolean isPublic, Location loc) {
+        return new PlotLocation(name, isPublic, loc);
+    }
+
     public String name() {
         return name;
     }
