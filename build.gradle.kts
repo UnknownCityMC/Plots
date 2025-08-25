@@ -1,4 +1,7 @@
+import com.jcraft.jsch.ChannelSftp
+import com.jcraft.jsch.JSch
 import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
+
 
 plugins {
     id("java")
@@ -48,6 +51,16 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("com.github.mwiede:jsch:2.27.3")
+    }
+}
+
 bukkit {
 
     name = "UC-Plots"
@@ -77,7 +90,7 @@ java {
 
 tasks {
     shadowJar {
-        fun relocateDependency(from : String) = relocate(from, "$shadeBasePath$from")
+        fun relocateDependency(from: String) = relocate(from, "$shadeBasePath$from")
 
         relocateDependency("xyz.xenondevs.invui")
     }
@@ -107,6 +120,34 @@ tasks {
         }
         from(shadowJar)
         destinationDir = File(path.toString())
+    }
+
+    register("uploadJarToFTP") {
+        dependsOn(shadowJar)
+        doLast {
+            val jarFile = getByName("shadowJar").outputs.files.singleFile
+
+            val host = System.getenv("FTP_SERVER")!!
+            val port = System.getenv("FTP_PORT")?.toInt() ?: 22
+            val user = System.getenv("FTP_USER")!!
+            val password = System.getenv("FTP_PASSWORD")!!
+
+            val jsch = JSch()
+            val session = jsch.getSession(user, host, port).apply {
+                setPassword(password)
+                setConfig("StrictHostKeyChecking", "no")
+                connect()
+            }
+
+            val channel = session.openChannel("sftp") as ChannelSftp
+            channel.connect()
+            channel.cd("/plugins")
+            channel.put(jarFile.absolutePath, jarFile.name)
+            println("Upload successful!")
+
+            channel.disconnect()
+            session.disconnect()
+        }
     }
 
     compileJava {
