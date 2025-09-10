@@ -21,9 +21,6 @@ import java.util.concurrent.CompletableFuture;
 
 public class UcPlayerParser<C> implements ArgumentParser<C, OfflinePlayer> {
 
-    public UcPlayerParser() {
-    }
-
     public static <C> ParserDescriptor<C, OfflinePlayer> ucPlayerParser() {
         return ParserDescriptor.of(new UcPlayerParser<>(), OfflinePlayer.class);
     }
@@ -57,7 +54,7 @@ public class UcPlayerParser<C> implements ArgumentParser<C, OfflinePlayer> {
                     UcPlayerParser.class,
                     context,
                     Caption.of("argument.parse.failure.player"),
-                    CaptionVariable.of("shop", input)
+                    CaptionVariable.of("player", input)
             );
         }
     }

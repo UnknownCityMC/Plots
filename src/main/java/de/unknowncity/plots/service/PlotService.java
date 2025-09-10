@@ -38,6 +38,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -310,24 +311,20 @@ public class PlotService extends Service<PlotsPlugin> {
         plot.state(PlotState.SOLD);
         plot.owner(new PlotPlayer(player.getUniqueId(), player.getName()));
         savePlot(plot);
-        SignManager.updateSings(plot, plugin.messenger());
     }
 
     public void setPlotPrice(double price, Plot plot) {
         plot.price(price);
         savePlot(plot);
-        SignManager.updateSings(plot, plugin.messenger());
     }
 
     public void setPlotGroup(String groupName, Plot plot) {
-        plot.state(PlotState.SOLD);
         if (plot.groupName() != null && !plot.groupName().isEmpty()) {
             plotGroupCache.get(plot.groupName()).plotsInGroup().remove(plot.id());
         }
         plot.groupName(groupName);
         plotGroupCache.get(groupName).plotsInGroup().put(plot.id(), plot);
         savePlot(plot);
-        SignManager.updateSings(plot, plugin.messenger());
     }
 
     public void createPlotGroup(String name) {
@@ -414,12 +411,23 @@ public class PlotService extends Service<PlotsPlugin> {
 
 
     public List<Plot> findPlotsByOwnerUUID(UUID uuid) {
-        return plotCache.values().stream().filter(plot -> plot.owner() != null && plot.owner().uuid()
-                .equals(uuid)).sorted(Comparator.comparing(Plot::claimed)).toList();
+        return plotCache.values().stream()
+                .filter(plot -> plot.owner() != null && plot.owner().uuid().equals(uuid))
+                .sorted(Comparator.comparing(Plot::claimed))
+                .toList();
     }
 
-    public List<Plot> findAvailablePlots() {
-        return plotCache.values().stream().filter(plot -> plot.state().equals(PlotState.AVAILABLE)).toList();
+    public List<Plot> findPlotsByOwnerUUIDForGroup(UUID uuid, String groupName) {
+        return findPlotsByOwnerUUID(uuid).stream()
+                .filter(plot -> plot.groupName() != null && plot.groupName().equals(groupName))
+                .toList();
+    }
+
+    public List<Plot> findAvailablePlots(@Nullable String groupName) {
+        return plotCache.values().stream()
+                .filter(plot -> plot.state().equals(PlotState.AVAILABLE))
+                .filter(plot -> groupName == null || plot.groupName().equals(groupName))
+                .toList();
     }
 
     public Optional<Plot> getPlotForSignLocation(Location location) {

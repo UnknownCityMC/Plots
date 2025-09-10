@@ -21,6 +21,9 @@ public class PlotsConfiguration extends YamlAstraConfiguration {
     @JsonProperty
     private final GuiSettings gui = new GuiSettings();
 
+    @JsonProperty
+    private final String starterPlotGroup = "starter";
+
     public PlotsConfiguration() {
 
     }
@@ -39,5 +42,9 @@ public class PlotsConfiguration extends YamlAstraConfiguration {
 
     public GuiSettings gui() {
         return gui;
+    }
+
+    public String starterPlotGroup() {
+        return starterPlotGroup;
     }
 }

@@ -2,8 +2,11 @@ package de.unknowncity.plots.plot;
 
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.access.PlotState;
+import de.unknowncity.plots.plot.group.PlotGroup;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
+import de.unknowncity.plots.util.PermissionUtil;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
 import org.spongepowered.configurate.NodePath;
 
@@ -60,5 +63,20 @@ public class PlotUtil {
         }
         var plot = plotService.getPlot(plotId);
         return Optional.of(plot);
+    }
+
+
+    public static boolean checkPlotGroupLimit(Player player, String groupName, PlotsPlugin plugin) {
+        var plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
+        var plotLimit = PermissionUtil.getPermValueInt(PlotGroup.permission(groupName), player);
+
+        if (plotService.findPlotsByOwnerUUIDForGroup(player.getUniqueId(), groupName).size() >= plotLimit) {
+            plugin.messenger().sendMessage(player, NodePath.path("command", "plot", "claim", "limit-reached"),
+                    Placeholder.unparsed("group", String.valueOf(groupName)),
+                    Placeholder.unparsed("limit", String.valueOf(plotLimit))
+            );
+            return false;
+        }
+        return true;
     }
 }

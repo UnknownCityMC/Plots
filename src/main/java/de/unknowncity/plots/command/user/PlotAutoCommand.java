@@ -39,9 +39,15 @@ public class PlotAutoCommand extends SubCommand {
         var sender = context.sender();
 
         var ownedPlots = plotService.findPlotsByOwnerUUID(sender.getUniqueId());
+        var groupName = plugin.configuration().starterPlotGroup();
 
         if (ownedPlots.isEmpty()) {
-            var availablePlots = plotService.findAvailablePlots();
+            if (!PlotUtil.checkPlotGroupLimit(sender, groupName, plugin)) {
+                return;
+            }
+
+            var availablePlots = plotService.findAvailablePlots(groupName);
+
             var randomPlot = availablePlots.get(ThreadLocalRandom.current().nextInt(availablePlots.size()));
             if (!plugin.serviceRegistry().getRegistered(EconomyService.class).hasEnoughFunds(sender.getUniqueId(), randomPlot.price())) {
                 plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "not-enough-money"));

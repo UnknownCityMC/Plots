@@ -37,6 +37,12 @@ public class PlotClaimCommand extends SubCommand {
         var sender = context.sender();
 
         PlotUtil.getPlotIfPresent(sender, plugin).ifPresent(plot -> {
+            var groupName = plot.groupName();
+
+            if (!PlotUtil.checkPlotGroupLimit(sender, groupName, plugin)) {
+                return;
+            }
+
             if (plot.state() != PlotState.AVAILABLE) {
                 plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "unavailable"), plot.tagResolvers(sender, plugin.messenger()));
                 return;
