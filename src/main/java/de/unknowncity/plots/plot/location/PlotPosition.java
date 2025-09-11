@@ -4,13 +4,15 @@ import org.bukkit.Location;
 import org.bukkit.World;
 
 public class PlotPosition implements Cloneable {
+    private final String plotId;
     private final double x;
     private final double y;
     private final double z;
     private final float yaw;
     private final float pitch;
 
-    public PlotPosition(double x, double y, double z, float yaw, float pitch) {
+    public PlotPosition(String plotId, double x, double y, double z, float yaw, float pitch) {
+        this.plotId = plotId;
         this.x = x;
         this.y = y;
         this.z = z;
@@ -38,8 +40,12 @@ public class PlotPosition implements Cloneable {
         return pitch;
     }
 
-    public static PlotPosition fromLocation(Location loc) {
-        return new PlotPosition(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
+    public String plotId() {
+        return plotId;
+    }
+
+    public static PlotPosition fromLocation(String plotId, Location loc) {
+        return new PlotPosition(plotId, loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
     }
 
     public Location getLocation(World world) {

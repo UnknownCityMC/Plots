@@ -1,10 +1,9 @@
-package de.unknowncity.plots.plot;
+package de.unknowncity.plots.plot.model;
 
 import de.unknowncity.plots.plot.access.PlotState;
-import de.unknowncity.plots.plot.access.entity.PlotPlayer;
+import de.unknowncity.plots.plot.economy.PlotPaymentType;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 public class RentPlot extends Plot {
     private LocalDateTime lastRentPayed;
@@ -18,19 +17,26 @@ public class RentPlot extends Plot {
         this.rentIntervalInMin = rentIntervalInMin;
     }
 
-    public LocalDateTime lastRentPayed() {
-        return lastRentPayed;
-    }
-
-    public long rentIntervalInMin() {
-        return rentIntervalInMin;
-    }
-
     public void lastRentPayed(LocalDateTime lastRentPayed) {
         this.lastRentPayed = lastRentPayed;
     }
 
     public void rentIntervalInMin(long rentIntervalInMin) {
         this.rentIntervalInMin = rentIntervalInMin;
+    }
+
+    @Override
+    public LocalDateTime lastRentPayed() {
+        return lastRentPayed;
+    }
+
+    @Override
+    public long rentIntervalInMin() {
+        return rentIntervalInMin;
+    }
+
+    @Override
+    public PlotPaymentType paymentType() {
+        return PlotPaymentType.RENT;
     }
 }

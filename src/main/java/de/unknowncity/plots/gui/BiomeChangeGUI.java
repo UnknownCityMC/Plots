@@ -6,7 +6,7 @@ import de.unknowncity.plots.gui.items.BiomeChangeItem;
 import de.unknowncity.plots.gui.items.NextPageItem;
 import de.unknowncity.plots.gui.items.PreparedItems;
 import de.unknowncity.plots.gui.items.PrevPageItem;
-import de.unknowncity.plots.plot.Plot;
+import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.service.PlotService;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;

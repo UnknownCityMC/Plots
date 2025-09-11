@@ -33,7 +33,7 @@ public class PlotAdminListPlotsCommand extends SubCommand {
     private void handle(@NonNull CommandContext<Player> context) {
         var page = context.getOrDefault("page", 1);
 
-        var entries = plotService.plotCache().values().stream().map(PlotPagedEntry::new).toList();
+        var entries = plotService.plotCache().asMap().values().stream().map(PlotPagedEntry::new).toList();
         var menu = new PagedChatMenu("plotlist", 10, plugin, entries);
 
         menu.displayPage(context.sender(), page);

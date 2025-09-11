@@ -28,7 +28,8 @@ public class PlotAdminTeleportCommand extends SubCommand {
         commandManager.command(builder.literal("teleport")
                 .permission("plots.command.plotadmin")
                 .senderType(Player.class)
-                .optional("plotId", stringParser(), (sender, input) -> CompletableFuture.completedFuture(plotService.plotCache().keySet().stream().map(Suggestion::suggestion).toList()))
+                .optional("plotId", stringParser(), (sender, input) ->
+                        CompletableFuture.completedFuture(plotService.plotCache().asMap().keySet().stream().map(Suggestion::suggestion).toList()))
                 .handler(this::handleTeleportId)
                 .build()
         );

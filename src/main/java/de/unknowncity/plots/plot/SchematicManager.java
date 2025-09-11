@@ -16,6 +16,7 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import de.unknowncity.astralib.common.structure.KeyValue;
 import de.unknowncity.plots.PlotsPlugin;
+import de.unknowncity.plots.plot.model.Plot;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

@@ -1,6 +1,6 @@
 package de.unknowncity.plots.plot.location.signs;
 
-import de.unknowncity.plots.plot.Plot;
+import de.unknowncity.plots.plot.model.Plot;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;

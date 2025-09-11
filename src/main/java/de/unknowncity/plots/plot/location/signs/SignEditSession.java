@@ -1,7 +1,7 @@
 package de.unknowncity.plots.plot.location.signs;
 
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.plot.Plot;
+import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.service.PlotService;
 import org.bukkit.Location;
 
@@ -50,7 +50,7 @@ public class SignEditSession {
     }
 
     public boolean addSign(Location location) {
-        var sign = new PlotSign(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+        var sign = new PlotSign("", location.getBlockX(), location.getBlockY(), location.getBlockZ());
 
         if (plot.signs().stream().anyMatch(sign::equals)) {
             return false;
@@ -66,7 +66,7 @@ public class SignEditSession {
     }
 
     public boolean removeSign(Location location) {
-        var ignored = new PlotSign(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+        var ignored = new PlotSign("", location.getBlockX(), location.getBlockY(), location.getBlockZ());
         if (plot.signs().stream().anyMatch(plotSign -> plotSign.equals(ignored))) {
             setOutline(plot, ignored, false);
             clearSign(location);

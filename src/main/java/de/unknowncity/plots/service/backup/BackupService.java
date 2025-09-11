@@ -2,7 +2,7 @@ package de.unknowncity.plots.service.backup;
 
 import de.unknowncity.astralib.common.service.Service;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.plot.Plot;
+import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.plot.SchematicManager;
 import de.unknowncity.plots.service.PlotService;
 import net.kyori.adventure.bossbar.BossBar;
@@ -28,7 +28,7 @@ public class BackupService extends Service<PlotsPlugin> {
         var viewers = Bukkit.getOnlinePlayers().stream().filter(player ->
                 player.hasPermission("plots.backup.view-progress")).toList();
         var finishedPlots = 0;
-        var plots = plotService.plotCache().values();
+        var plots = plotService.plotCache().asMap().values();
         var bossbar = BossBar.bossBar(getProgressNameCreate(finishedPlots, plots.size()), (float) finishedPlots / plots.size(), BossBar.Color.RED, BossBar.Overlay.PROGRESS );
         viewers.forEach(player -> player.showBossBar(bossbar));
 
@@ -55,7 +55,7 @@ public class BackupService extends Service<PlotsPlugin> {
         var viewers = Bukkit.getOnlinePlayers().stream().filter(player ->
                 player.hasPermission("plots.backup.view-progress")).toList();
         AtomicInteger finishedPlots = new AtomicInteger();
-        var plots = plotService.plotCache().values();
+        var plots = plotService.plotCache().asMap().values();
         var bossbar = BossBar.bossBar(getProgressNameLoad(finishedPlots.get(), plots.size()), (float) finishedPlots.get() / plots.size(), BossBar.Color.RED, BossBar.Overlay.PROGRESS );
         viewers.forEach(player -> player.showBossBar(bossbar));
 

@@ -5,7 +5,7 @@ import de.unknowncity.plots.gui.items.InteractablesItem;
 import de.unknowncity.plots.gui.items.NextPageItem;
 import de.unknowncity.plots.gui.items.PreparedItems;
 import de.unknowncity.plots.gui.items.PrevPageItem;
-import de.unknowncity.plots.plot.Plot;
+import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
 import de.unknowncity.plots.service.PlotService;
 import org.bukkit.Material;
@@ -29,7 +29,7 @@ public class InteractablesGUI {
 
         var title = messenger.component(player, NodePath.path("gui", "interactables", "title"));
 
-        List<Item> items = PlotInteractable.allValidTypes().stream()
+        List<Item> items = PlotInteractable.VALID_TYPES.stream()
                 .map(material -> {
                     var plotInteractable = plot.getInteractable(material);
                     return new InteractablesItem(player, plotInteractable, plugin);

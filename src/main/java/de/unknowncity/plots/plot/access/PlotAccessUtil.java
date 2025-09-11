@@ -1,6 +1,6 @@
 package de.unknowncity.plots.plot.access;
 
-import de.unknowncity.plots.plot.Plot;
+import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.plot.access.type.PlotAccessModifier;
 import org.bukkit.entity.Player;
 
