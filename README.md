@@ -16,4 +16,4 @@
 - Decide who can interact for every block individually.
 - Change the plot biome and soon the weather.
 - Limit how many plots a player can buy based on groups.
-- Charge mony for plots via CoinsEngine.
+- Charge money for plots via CoinsEngine.
