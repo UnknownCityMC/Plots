@@ -236,10 +236,10 @@ public class PlotService extends Service<PlotsPlugin> {
 
         try (EditSession editSession = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(world))) {
             var region = new CuboidRegion(plot.protectedRegion().getMinimumPoint(), plot.protectedRegion().getMaximumPoint());
-            region.expand(new BlockVector3(biomeExtend, 0, 0));
-            region.expand(new BlockVector3(-biomeExtend, 0, 0));
-            region.expand(new BlockVector3(0, 0, biomeExtend));
-            region.expand(new BlockVector3(0, 0, -biomeExtend));
+            region.expand(BlockVector3.at(biomeExtend, 0, 0));
+            region.expand(BlockVector3.at(-biomeExtend, 0, 0));
+            region.expand(BlockVector3.at(0, 0, biomeExtend));
+            region.expand(BlockVector3.at(0, 0, -biomeExtend));
 
             var replace = new BiomeReplace(editSession, biome);
             var visitor = new RegionVisitor(region, replace);

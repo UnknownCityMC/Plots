@@ -9,11 +9,12 @@ import de.unknowncity.astralib.paper.api.hook.defaulthooks.PlaceholderApiHook;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
 import de.unknowncity.astralib.paper.api.plugin.PaperAstraPlugin;
 import de.unknowncity.plots.command.admin.PlotAdminCommand;
-import de.unknowncity.plots.command.mod.PlotModCommand;
+import de.unknowncity.plots.command.land.LandCommand;
 import de.unknowncity.plots.command.user.PlotCommand;
 import de.unknowncity.plots.configuration.PlotsConfiguration;
 import de.unknowncity.plots.data.model.plot.PlotLocations;
 import de.unknowncity.plots.listener.*;
+import de.unknowncity.plots.plot.freebuild.LandEditSessionHandler;
 import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
@@ -43,6 +44,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
     private RentTask rentTask;
     public HashMap<UUID, PlotLocations> createPlotPlayers = new HashMap<>();
     private GlowingEntities glowingEntities;
+    private LandEditSessionHandler landEditSessionHandler;
 
     @Override
     public void onPluginEnable() {
@@ -56,7 +58,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
         var pluginManager = getServer().getPluginManager();
         pluginManager.registerEvents(new PlotInteractListener(this), this);
         pluginManager.registerEvents(new PlotSignLinkListener(this), this);
-        pluginManager.registerEvents(new PlotCreateListener(this), this);
+        pluginManager.registerEvents(new LandEditListener(this), this);
         pluginManager.registerEvents(new PlotSignInteractListener(this), this);
         pluginManager.registerEvents(new PlayerJoinListener(this), this);
 
@@ -69,7 +71,10 @@ public class PlotsPlugin extends PaperAstraPlugin {
         rentTask = new RentTask(this, serviceRegistry.getRegistered(PlotService.class), serviceRegistry.getRegistered(EconomyService.class));
         rentTask.start();
 
-        commandManager.captionRegistry().registerProvider(CaptionProvider.forCaption(Caption.of("argument.parse.failure.player"), sender -> messenger.getStringOrNotAvailable((Player) sender, NodePath.path("exception", "argument-parse", "player"))));
+        commandManager.captionRegistry().registerProvider(CaptionProvider.forCaption(Caption.of("argument.parse.failure.player"),
+                sender -> messenger.getStringOrNotAvailable((Player) sender, NodePath.path("exception", "argument-parse", "player"))));
+
+        landEditSessionHandler = new LandEditSessionHandler(this);
     }
 
     public void onPluginReload() {
@@ -113,7 +118,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
 
 
         new PlotCommand(this).apply(commandManager);
-        new PlotModCommand(this).apply(commandManager);
+        new LandCommand(this).apply(commandManager);
         new PlotAdminCommand(this).apply(commandManager);
     }
 
@@ -175,4 +180,9 @@ public class PlotsPlugin extends PaperAstraPlugin {
     public GlowingEntities glowingEntities() {
         return glowingEntities;
     }
+
+    public LandEditSessionHandler landEditSessionHandler() {
+        return landEditSessionHandler;
+    }
+
 }

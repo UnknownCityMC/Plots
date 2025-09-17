@@ -13,6 +13,7 @@ import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.data.model.plot.PlotExpandDirection;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.event.block.BlockCanBuildEvent;
 
 import java.util.*;
 
@@ -106,10 +107,7 @@ public class RegionService extends Service<PlotsPlugin> {
         RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
         RegionManager regionManager = container.get(BukkitAdapter.adapt(world));
 
-        BlockVector3 bv1 = new BlockVector3(loc1.x(), loc1.y(), loc1.z());
-        BlockVector3 bv2 = new BlockVector3(loc2.x(), loc2.y(), loc2.z());
-
-        ProtectedRegion region = new ProtectedCuboidRegion(regionName, bv1, bv2);
+        ProtectedRegion region = new ProtectedCuboidRegion(regionName, loc1, loc2);
 
         regionManager.addRegion(region);
         try {
@@ -144,17 +142,18 @@ public class RegionService extends Service<PlotsPlugin> {
             return false;
         }
 
+
         ProtectedRegion newRegion = new ProtectedCuboidRegion(region.getId(), newMin, newMax);
+        newRegion.setFlags(region.getFlags());
         RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
         RegionManager regionManager = container.get(BukkitAdapter.adapt(world));
         regionManager.addRegion(newRegion);
-
         return true;
     }
 
-    public int expandRegionInDirectionBlockCount(ProtectedRegion region, PlotExpandDirection direction, int blocks, World world) {
-        BlockVector3 newMin = region.getMinimumPoint();
-        BlockVector3 newMax = region.getMaximumPoint();
+    public int calculateExpandArea(ProtectedRegion region, PlotExpandDirection direction, int blocks, World world) {
+        var newMin = region.getMinimumPoint();
+        var newMax = region.getMaximumPoint();
 
         switch (direction) {
             case NORTH:
@@ -171,18 +170,23 @@ public class RegionService extends Service<PlotsPlugin> {
                 break;
         }
 
-        ProtectedRegion newRegion = new ProtectedCuboidRegion(region.getId(), newMin, newMax);
-
-        return calculateAreaSquareMeters(newRegion);
+        return calculateAreaSquareMeters(newMin, newMax);
     }
 
     public int calculateAreaSquareMeters(ProtectedRegion region) {
         return calculateAreaSquareMeters(region.getMinimumPoint(), region.getMaximumPoint());
     }
 
-    private int calculateAreaSquareMeters(BlockVector3 min, BlockVector3 max) {
+    public int calculateAreaSquareMeters(BlockVector3 min, BlockVector3 max) {
         int lengthX = Math.abs(max.x() - min.x());
         int lengthZ = Math.abs(max.z() - min.z());
+
+        return lengthX * lengthZ;
+    }
+
+    public int calculateAreaSquareMeters(Location min, Location max) {
+        int lengthX = Math.abs(max.getBlockX() - min.getBlockX());
+        int lengthZ = Math.abs(max.getBlockZ() - min.getBlockZ());
 
         return lengthX * lengthZ;
     }
