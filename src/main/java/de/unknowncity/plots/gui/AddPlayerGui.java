@@ -4,8 +4,8 @@ import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.gui.items.PreparedItems;
-import de.unknowncity.plots.plot.Plot;
-import de.unknowncity.plots.plot.access.entity.PlotMember;
+import de.unknowncity.plots.plot.model.Plot;
+import de.unknowncity.plots.plot.model.PlotMember;
 import de.unknowncity.plots.plot.access.type.PlotMemberRole;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.util.SkullHelper;
@@ -77,7 +77,7 @@ public class AddPlayerGui {
                 plot.findPlotMember(target.getUniqueId()).isPresent() :
                 plot.findPlotBannedPlayer(target.getUniqueId()).isPresent();
 
-        var member = new PlotMember(target.getUniqueId(), target.getName(), PlotMemberRole.MEMBER);
+        var member = new PlotMember(plot.id(), target.getUniqueId(), target.getName(), PlotMemberRole.MEMBER);
 
         return Item.builder().setItemProvider(
                 ItemBuilder.of(SkullHelper.getSkull(target.getUniqueId()))

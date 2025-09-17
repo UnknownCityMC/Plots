@@ -1,6 +1,5 @@
 package de.unknowncity.plots.command.argument;
 
-import de.unknowncity.plots.plot.Plot;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.checkerframework.checker.nullness.qual.NonNull;

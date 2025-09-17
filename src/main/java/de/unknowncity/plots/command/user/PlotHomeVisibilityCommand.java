@@ -58,7 +58,7 @@ public class PlotHomeVisibilityCommand extends SubCommand {
 
             var location = sender.getLocation();
             var oldHome = plot.plotHome();
-            var newHome = PlotLocation.fromLocation(oldHome.name(), visibility == PlotHomeVisibility.PUBLIC, location);
+            var newHome = PlotLocation.fromLocation(plot.id(), oldHome.name(), visibility == PlotHomeVisibility.PUBLIC, location);
             plot.plotHome(newHome);
             plotService.savePlot(plot);
 

@@ -1,23 +1,25 @@
 package de.unknowncity.plots.plot.location;
 
+import de.chojo.sadu.mapper.annotation.MappingProvider;
+import de.chojo.sadu.mapper.rowmapper.RowMapping;
 import org.bukkit.Location;
 
 public class PlotLocation extends PlotPosition {
     private final String name;
     private final boolean isPublic;
 
-    public PlotLocation(String name, boolean isPublic, double x, double y, double z, float yaw, float pitch) {
-        super(x, y, z, yaw, pitch);
+    public PlotLocation(String plotId, String name, boolean isPublic, double x, double y, double z, float yaw, float pitch) {
+        super(plotId, x, y, z, yaw, pitch);
         this.name = name;
         this.isPublic = isPublic;
     }
 
-    public PlotLocation(String name, boolean isPublic, Location loc) {
-        this(name, isPublic, loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
+    public PlotLocation(String plotId, String name, boolean isPublic, Location loc) {
+        this(plotId, name, isPublic, loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
     }
 
-    public static PlotLocation fromLocation(String name, boolean isPublic, Location loc) {
-        return new PlotLocation(name, isPublic, loc);
+    public static PlotLocation fromLocation(String plotId, String name, boolean isPublic, Location loc) {
+        return new PlotLocation(plotId, name, isPublic, loc);
     }
 
     public String name() {
@@ -26,5 +28,19 @@ public class PlotLocation extends PlotPosition {
 
     public boolean isPublic() {
         return isPublic;
+    }
+
+    @MappingProvider({"plot_id", "name", "public", "x", "y", "z", "yaw", "pitch"})
+    public static RowMapping<PlotLocation> map() {
+        return row -> new PlotLocation(
+                row.getString("plot_id"),
+                row.getString("name"),
+                row.getBoolean("public"),
+                row.getDouble("x"),
+                row.getDouble("y"),
+                row.getDouble("z"),
+                row.getFloat("yaw"),
+                row.getFloat("pitch")
+        );
     }
 }

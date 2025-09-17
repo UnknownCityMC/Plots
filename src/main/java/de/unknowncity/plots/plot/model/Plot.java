@@ -1,15 +1,17 @@
-package de.unknowncity.plots.plot;
+package de.unknowncity.plots.plot.model;
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import de.chojo.sadu.mapper.annotation.MappingProvider;
+import de.chojo.sadu.mapper.reader.StandardReader;
+import de.chojo.sadu.mapper.rowmapper.RowMapping;
 import de.unknowncity.astralib.common.message.lang.Language;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
 import de.unknowncity.plots.plot.access.PlotState;
-import de.unknowncity.plots.plot.access.entity.PlotMember;
-import de.unknowncity.plots.plot.access.entity.PlotPlayer;
 import de.unknowncity.plots.plot.access.type.PlotMemberRole;
+import de.unknowncity.plots.plot.economy.PlotPaymentType;
 import de.unknowncity.plots.plot.flag.PlotFlag;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
 import de.unknowncity.plots.plot.flag.WorldGuardFlag;
@@ -53,6 +55,12 @@ public abstract class Plot {
         this.state = state;
         this.claimed = claimed;
     }
+
+    public abstract LocalDateTime lastRentPayed();
+
+    public abstract long rentIntervalInMin();
+
+    public abstract PlotPaymentType paymentType();
 
     public List<PlotMember> members() {
         return members;
@@ -251,7 +259,7 @@ public abstract class Plot {
 
     public void denyPlayer(OfflinePlayer offlinePlayer) {
         members.removeIf(member -> member.uuid().equals(offlinePlayer.getUniqueId()));
-        deniedPlayers.add(new PlotPlayer(offlinePlayer.getUniqueId(), offlinePlayer.getName()));
+        deniedPlayers.add(new PlotPlayer(plotId, offlinePlayer.getUniqueId(), offlinePlayer.getName()));
         if (offlinePlayer instanceof Player player) {
             if (player.hasPermission("plots.entry.bypass")) {
                 return;
@@ -277,5 +285,47 @@ public abstract class Plot {
 
     public int depth() {
         return protectedRegion().getMaximumPoint().x() - protectedRegion().getMinimumPoint().x() + 1;
+    }
+
+    @MappingProvider({"payment_type", "plot_id", "owner_id", "group_name", "region_id", "price", "world", "state", "claimed", "last_rent_paid", "rent_interval"})
+    public static RowMapping<Plot> map() {
+        return row -> {
+            var plotId = row.getString("plot_id");
+
+            var paymentType = row.getEnum("payment_type", PlotPaymentType.class);
+
+            var ownerId = row.get("owner_id", StandardReader.UUID_FROM_STRING);
+            var owner = ownerId != null ? new PlotPlayer(
+                    plotId,
+                    ownerId,
+                    Bukkit.getOfflinePlayer(ownerId).getName()
+            ) : null;
+
+            if (paymentType == PlotPaymentType.BUY) {
+                return new BuyPlot(
+                        plotId,
+                        owner,
+                        row.getString("group_name"),
+                        row.getString("region_id"),
+                        row.getDouble("price"),
+                        row.getString("world"),
+                        row.getEnum("state", PlotState.class),
+                        row.get("claimed", StandardReader.LOCAL_DATE_TIME)
+                );
+            } else {
+                return new RentPlot(
+                        plotId,
+                        owner,
+                        row.getString("group_name"),
+                        row.getString("region_id"),
+                        row.getDouble("price"),
+                        row.getString("world"),
+                        row.getEnum("state", PlotState.class),
+                        row.get("claimed", StandardReader.LOCAL_DATE_TIME),
+                        row.get("last_rent_paid", StandardReader.LOCAL_DATE_TIME),
+                        row.getLong("rent_interval")
+                );
+            }
+        };
     }
 }

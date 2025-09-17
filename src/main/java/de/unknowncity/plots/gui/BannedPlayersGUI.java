@@ -5,7 +5,7 @@ import de.unknowncity.plots.gui.items.ManageBannedMember;
 import de.unknowncity.plots.gui.items.NextPageItem;
 import de.unknowncity.plots.gui.items.PreparedItems;
 import de.unknowncity.plots.gui.items.PrevPageItem;
-import de.unknowncity.plots.plot.Plot;
+import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.service.PlotService;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

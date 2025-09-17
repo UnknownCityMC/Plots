@@ -48,7 +48,7 @@ public class PlotHomeSetCommand extends SubCommand {
 
             var location = sender.getLocation();
             var oldHome = plot.plotHome();
-            var newHome = new PlotLocation(oldHome.name(), oldHome.isPublic(), location.x(), location.y(), location.z(), location.getYaw(), location.getPitch());
+            var newHome = new PlotLocation(plot.id(), oldHome.name(), oldHome.isPublic(), location.x(), location.y(), location.z(), location.getYaw(), location.getPitch());
             plot.plotHome(newHome);
 
             plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "home", "setlocation", "success"), plot.tagResolvers(sender, plugin.messenger()));

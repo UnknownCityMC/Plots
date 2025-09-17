@@ -1,6 +1,6 @@
 package de.unknowncity.plots.plot.group;
 
-import de.unknowncity.plots.plot.Plot;
+import de.unknowncity.plots.plot.model.Plot;
 
 import java.util.HashMap;
 

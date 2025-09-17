@@ -1,4 +1,4 @@
-package de.unknowncity.plots.plot.access.entity;
+package de.unknowncity.plots.plot.model;
 
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
 import de.unknowncity.plots.plot.access.type.PlotMemberRole;
@@ -13,8 +13,8 @@ import java.util.UUID;
 public class PlotMember extends PlotPlayer {
     private PlotMemberRole role;
 
-    public PlotMember(UUID uuid, String name, PlotMemberRole role) {
-        super(uuid, name);
+    public PlotMember(String plotId, UUID uuid, String name, PlotMemberRole role) {
+        super(plotId, uuid, name);
         this.role = role;
     }
 

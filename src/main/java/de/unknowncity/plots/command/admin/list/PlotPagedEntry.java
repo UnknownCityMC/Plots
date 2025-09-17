@@ -1,7 +1,7 @@
 package de.unknowncity.plots.command.admin.list;
 
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
-import de.unknowncity.plots.plot.Plot;
+import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.util.chat.PagedEntry;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.entity.Player;

@@ -1,7 +1,7 @@
 package de.unknowncity.plots.task;
 
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.plot.RentPlot;
+import de.unknowncity.plots.plot.model.RentPlot;
 import de.unknowncity.plots.plot.access.PlotState;
 import de.unknowncity.plots.plot.location.signs.SignManager;
 import de.unknowncity.plots.service.EconomyService;
@@ -29,8 +29,8 @@ public class RentTask {
 
     public void start() {
         this.task = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, () -> {
-            plotService.plotCache().values().stream()
-                    .filter(plot -> plot.state() == PlotState.SOLD && plot instanceof RentPlot && ((RentPlot) plot).lastRentPayed().plusMinutes(((RentPlot) plot).rentIntervalInMin()).isAfter(LocalDateTime.now()))
+            plotService.plotCache().asMap().values().stream()
+                    .filter(plot -> plot.state() == PlotState.SOLD && plot instanceof RentPlot && plot.lastRentPayed().plusMinutes(((RentPlot) plot).rentIntervalInMin()).isAfter(LocalDateTime.now()))
                     .forEach(plot -> {
                         var price = plot.price();
                         var owner = plot.owner();

@@ -2,8 +2,8 @@ package de.unknowncity.plots.gui.items;
 
 import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
-import de.unknowncity.plots.plot.Plot;
-import de.unknowncity.plots.plot.access.entity.PlotPlayer;
+import de.unknowncity.plots.plot.model.Plot;
+import de.unknowncity.plots.plot.model.PlotPlayer;
 import de.unknowncity.plots.util.SkullHelper;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;

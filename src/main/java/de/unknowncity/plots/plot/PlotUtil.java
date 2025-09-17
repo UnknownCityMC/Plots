@@ -2,6 +2,7 @@ package de.unknowncity.plots.plot;
 
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.access.PlotState;
+import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.plot.group.PlotGroup;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;

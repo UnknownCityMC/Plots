@@ -2,7 +2,6 @@ package de.unknowncity.plots.command.admin;
 
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
-import de.unknowncity.plots.plot.Plot;
 import de.unknowncity.plots.plot.PlotUtil;
 import de.unknowncity.plots.service.PlotService;
 import org.bukkit.command.CommandSender;
@@ -30,7 +29,7 @@ public class PlotAdminResetCommand extends SubCommand {
         commandManager.command(builder.literal("reset")
                 .permission("plots.command.plotadmin")
                 .optional("id", stringParser(), (sender, input) ->
-                        CompletableFuture.completedFuture(plotService.plotCache().keySet().stream().map(Suggestion::suggestion).toList()))
+                        CompletableFuture.completedFuture(plotService.plotCache().asMap().keySet().stream().map(Suggestion::suggestion).toList()))
                 .apply(plugin.confirmationManager())
                 .handler(this::handleDelete)
                 .build()
