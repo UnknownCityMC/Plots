@@ -465,8 +465,11 @@ public class PlotService extends Service<PlotsPlugin> {
                 .equals(uuid)).sorted(Comparator.comparing(Plot::claimed)).toList();
     }
 
-    public List<Plot> findAvailablePlots() {
-        return plotCache.asMap().values().stream().filter(plot -> plot.state().equals(PlotState.AVAILABLE)).toList();
+    public List<Plot> findAvailablePlots(String groupName) {
+        return plotCache.asMap().values().stream()
+                .filter(plot -> plot.state().equals(PlotState.AVAILABLE))
+                .filter(plot -> plot.groupName() != null && plot.groupName().equals(groupName))
+                .toList();
     }
 
     public List<Plot> findPlotsByOwnerUUIDForGroup(UUID uuid, String groupName) {
@@ -484,7 +487,8 @@ public class PlotService extends Service<PlotsPlugin> {
                 location.getBlockZ()
         );
 
-        return plotSignCache.asMap().keySet().stream().anyMatch(sign -> sign.equals(plotSign)) ? Optional.of(plotSignCache.getIfPresent(plotSign)) : Optional.empty();
+        return plotSignCache.asMap().keySet().stream().anyMatch(sign -> sign.equals(plotSign)) ?
+                Optional.ofNullable(plotSignCache.getIfPresent(plotSign)) : Optional.empty();
     }
 
     public Cache<String, PlotGroup> groupCache() {

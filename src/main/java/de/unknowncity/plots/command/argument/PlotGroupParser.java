@@ -30,8 +30,8 @@ public class PlotGroupParser<C> implements ArgumentParser<C, PlotGroup> {
     @Override
     public @NonNull ArgumentParseResult<@NonNull PlotGroup> parse(@NonNull CommandContext<@NonNull C> commandContext, @NonNull CommandInput commandInput) {
         var token = commandInput.peekString();
-        if (plotService.groupCache().containsKey(token)) {
-            return ArgumentParseResult.success(plotService.groupCache().get(token));
+        if (plotService.groupCache().asMap().containsKey(token)) {
+            return ArgumentParseResult.success(plotService.groupCache().getIfPresent(token));
         }
 
         return ArgumentParseResult.failure(new PlotGroupParseException(token, commandContext));
@@ -40,7 +40,7 @@ public class PlotGroupParser<C> implements ArgumentParser<C, PlotGroup> {
     @Override
     public @NonNull SuggestionProvider<C> suggestionProvider() {
         return (context, input) ->
-                CompletableFuture.completedFuture(plotService.groupCache().keySet().stream().map(Suggestion::suggestion).toList());
+                CompletableFuture.completedFuture(plotService.groupCache().asMap().keySet().stream().map(Suggestion::suggestion).toList());
     }
 
     public static final class PlotGroupParseException extends ParserException {
