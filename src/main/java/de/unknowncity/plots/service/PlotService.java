@@ -40,6 +40,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -278,10 +279,10 @@ public class PlotService extends Service<PlotsPlugin> {
 
         try (EditSession editSession = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(world))) {
             var region = new CuboidRegion(plot.protectedRegion().getMinimumPoint(), plot.protectedRegion().getMaximumPoint());
-            region.expand(new BlockVector3(biomeExtend, 0, 0));
-            region.expand(new BlockVector3(-biomeExtend, 0, 0));
-            region.expand(new BlockVector3(0, 0, biomeExtend));
-            region.expand(new BlockVector3(0, 0, -biomeExtend));
+            region.expand(BlockVector3.at(biomeExtend, 0, 0));
+            region.expand(BlockVector3.at(-biomeExtend, 0, 0));
+            region.expand(BlockVector3.at(0, 0, biomeExtend));
+            region.expand(BlockVector3.at(0, 0, -biomeExtend));
 
             var replace = new BiomeReplace(editSession, biome);
             var visitor = new RegionVisitor(region, replace);
@@ -345,17 +346,14 @@ public class PlotService extends Service<PlotsPlugin> {
         plot.state(PlotState.SOLD);
         plot.owner(new PlotPlayer(plot.id(), player.getUniqueId(), player.getName()));
         savePlot(plot);
-        SignManager.updateSings(plot, plugin.messenger());
     }
 
     public void setPlotPrice(double price, Plot plot) {
         plot.price(price);
         savePlot(plot);
-        SignManager.updateSings(plot, plugin.messenger());
     }
 
     public void setPlotGroup(String groupName, Plot plot) {
-        plot.state(PlotState.SOLD);
 
         // remove all associations with the old group
         if (plot.groupName() != null && !plot.groupName().isEmpty()) {
@@ -370,7 +368,6 @@ public class PlotService extends Service<PlotsPlugin> {
         }
 
         savePlot(plot);
-        SignManager.updateSings(plot, plugin.messenger());
     }
 
     public void createPlotGroup(String name) {
@@ -471,6 +468,13 @@ public class PlotService extends Service<PlotsPlugin> {
     public List<Plot> findAvailablePlots() {
         return plotCache.asMap().values().stream().filter(plot -> plot.state().equals(PlotState.AVAILABLE)).toList();
     }
+
+    public List<Plot> findPlotsByOwnerUUIDForGroup(UUID uuid, String groupName) {
+        return findPlotsByOwnerUUID(uuid).stream()
+                .filter(plot -> plot.groupName() != null && plot.groupName().equals(groupName))
+                .toList();
+    }
+    
 
     public Optional<Plot> getPlotForSignLocation(Location location) {
         var plotSign = new PlotSign(

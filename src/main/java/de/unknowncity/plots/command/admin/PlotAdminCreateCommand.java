@@ -2,6 +2,8 @@ package de.unknowncity.plots.command.admin;
 
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
+import de.unknowncity.plots.command.argument.DoubleSuggestionProvider;
+import de.unknowncity.plots.plot.group.PlotGroup;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import org.bukkit.command.CommandSender;
@@ -15,6 +17,7 @@ import org.spongepowered.configurate.NodePath;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
+import static de.unknowncity.plots.command.argument.PlotGroupParser.plotGroupParser;
 import static org.incendo.cloud.parser.standard.DoubleParser.doubleParser;
 import static org.incendo.cloud.parser.standard.DurationParser.durationParser;
 import static org.incendo.cloud.parser.standard.StringParser.stringParser;
@@ -32,8 +35,8 @@ public class PlotAdminCreateCommand extends SubCommand {
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("createBuyFromRegion")
                 .permission("plots.command.plotadmin")
-                .required("price", doubleParser())
-                .flag(commandManager.flagBuilder("plotGroup").withComponent(stringParser()).build())
+                .required("price", doubleParser(), new DoubleSuggestionProvider())
+                .flag(commandManager.flagBuilder("group").withComponent(plotGroupParser(plotService)).build())
                 .senderType(Player.class)
                 .handler(this::handleCreateBuy)
                 .build()
@@ -41,9 +44,10 @@ public class PlotAdminCreateCommand extends SubCommand {
 
         commandManager.command(builder.literal("createBuyFromRegionName")
                 .permission("plots.command.plotadmin")
-                .required("region", stringParser(), (sender, input) -> CompletableFuture.completedFuture(regionService.getAllRegions().keySet().stream().map(Suggestion::suggestion).toList()))
-                .required("price", doubleParser())
-                .flag(commandManager.flagBuilder("plotGroup").withComponent(stringParser()).build())
+                .required("region", stringParser(), (sender, input) ->
+                        CompletableFuture.completedFuture(regionService.getAllRegions().keySet().stream().map(Suggestion::suggestion).toList()))
+                .required("price", doubleParser(), new DoubleSuggestionProvider())
+                .flag(commandManager.flagBuilder("group").withComponent(plotGroupParser(plotService)).build())
                 .senderType(Player.class)
                 .handler(this::handleCreateBuyName)
                 .build()
@@ -51,9 +55,9 @@ public class PlotAdminCreateCommand extends SubCommand {
 
         commandManager.command(builder.literal("createRentFromRegion")
                 .permission("plots.command.plotadmin")
-                .required("price", doubleParser())
+                .required("price", doubleParser(), new DoubleSuggestionProvider())
                 .required("rentInterval", durationParser())
-                .flag(commandManager.flagBuilder("plot-group").withComponent(stringParser()).build())
+                .flag(commandManager.flagBuilder("group").withComponent(plotGroupParser(plotService)).build())
                 .senderType(Player.class)
                 .handler(this::handleCreateRent)
                 .build()
@@ -61,10 +65,11 @@ public class PlotAdminCreateCommand extends SubCommand {
 
         commandManager.command(builder.literal("createRentFromRegionName")
                 .permission("plots.command.plotadmin")
-                .required("region", stringParser(), (sender, input) -> CompletableFuture.completedFuture(regionService.getAllRegions().keySet().stream().map(Suggestion::suggestion).toList()))
-                .required("price", doubleParser())
+                .required("region", stringParser(), (sender, input) ->
+                        CompletableFuture.completedFuture(regionService.getAllRegions().keySet().stream().map(Suggestion::suggestion).toList()))
+                .required("price", doubleParser(), new DoubleSuggestionProvider())
                 .required("rentInterval", durationParser())
-                .flag(commandManager.flagBuilder("plot-group").withComponent(stringParser()).build())
+                .flag(commandManager.flagBuilder("group").withComponent(plotGroupParser(plotService)).build())
                 .senderType(Player.class)
                 .handler(this::handleCreateRentName)
                 .build()
@@ -75,7 +80,7 @@ public class PlotAdminCreateCommand extends SubCommand {
     private void handleCreateBuy(CommandContext<Player> commandContext) {
         var player = commandContext.sender();
         var price = (double) commandContext.get("price");
-        var groupName = (String) commandContext.flags().get("plot-group");
+        var group = (PlotGroup) commandContext.flags().get("group");
 
         var region = regionService.getSuitableRegion(player.getLocation());
 
@@ -87,7 +92,7 @@ public class PlotAdminCreateCommand extends SubCommand {
                 return;
             }
 
-            if (plotService.createBuyPlotFromRegion(protectedRegion, world, price, groupName)) {
+            if (plotService.createBuyPlotFromRegion(protectedRegion, world, price, group.name())) {
                 plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "success"));
             } else {
                 plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "error"));
@@ -99,7 +104,7 @@ public class PlotAdminCreateCommand extends SubCommand {
         var player = commandContext.sender();
         var regionId = (String) commandContext.get("region");
         var price = (double) commandContext.get("price");
-        var groupName = (String) commandContext.flags().get("plot-group");
+        var group = (PlotGroup) commandContext.flags().get("group");
 
         var world = player.getWorld();
         var protectedRegion = regionService.getRegion(regionId, world);
@@ -114,7 +119,7 @@ public class PlotAdminCreateCommand extends SubCommand {
             return;
         }
 
-        if (plotService.createBuyPlotFromRegion(protectedRegion, world, price, groupName)) {
+        if (plotService.createBuyPlotFromRegion(protectedRegion, world, price, group.name())) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "success"));
         } else {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "error"));
@@ -124,7 +129,7 @@ public class PlotAdminCreateCommand extends SubCommand {
     private void handleCreateRent(CommandContext<Player> commandContext) {
         var player = commandContext.sender();
         var price = (double) commandContext.get("price");
-        var groupName = (String) commandContext.flags().get("plot-group");
+        var group = (PlotGroup) commandContext.flags().get("group");
 
         var rentInterval = commandContext.flags().getValue("rentInterval", Duration.ofDays(30));
 
@@ -138,7 +143,7 @@ public class PlotAdminCreateCommand extends SubCommand {
                 return;
             }
 
-            if (plotService.createRentPlotFromRegion(protectedRegion, world, price, groupName, rentInterval)) {
+            if (plotService.createRentPlotFromRegion(protectedRegion, world, price, group.name(), rentInterval)) {
                 plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "success"));
             } else {
                 plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "error"));
@@ -150,7 +155,7 @@ public class PlotAdminCreateCommand extends SubCommand {
         var player = commandContext.sender();
         var regionId = (String) commandContext.get("region");
         var price = (double) commandContext.get("price");
-        var groupName = (String) commandContext.flags().get("plot-group");
+        var group = (PlotGroup) commandContext.flags().get("group");
 
         var rentInterval = commandContext.flags().getValue("rentInterval", Duration.ofDays(30));
 
@@ -167,7 +172,7 @@ public class PlotAdminCreateCommand extends SubCommand {
             return;
         }
 
-        if (plotService.createRentPlotFromRegion(protectedRegion, world, price, groupName, rentInterval)) {
+        if (plotService.createRentPlotFromRegion(protectedRegion, world, price, group.name(), rentInterval)) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "success"));
         } else {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "error"));

@@ -1,19 +1,25 @@
 package de.unknowncity.plots.util;
 
-import de.unknowncity.plots.plot.group.PlotGroup;
 import org.bukkit.entity.Player;
 
 public class PermissionUtil {
-    private static final String BASE_PERMISSION = "ucplots.maxplots.";
 
-    public static int getMaxPlots(PlotGroup plotGroup, Player player) {
-        var groupBasePermission = BASE_PERMISSION + plotGroup.name();
+    public static int getPermValueInt(String perm, Player player) {
         return player.getEffectivePermissions()
                 .stream()
-                .filter(permission -> permission.getPermission().startsWith(groupBasePermission))
-                .map(permission -> permission.getPermission().replace(groupBasePermission, ""))
+                .filter(permission -> permission.getPermission().startsWith(perm))
+                .map(permission -> permission.getPermission().replace(perm + ".", ""))
                 .mapToInt(Integer::parseInt)
-                .findFirst()
+                .max()
                 .orElse(0);
+    }
+
+    public static String getPermValueString(String perm, Player player) {
+        return player.getEffectivePermissions()
+                .stream()
+                .filter(permission -> permission.getPermission().startsWith(perm))
+                .map(permission -> permission.getPermission().replace(perm + ".", ""))
+                .findFirst()
+                .orElse("");
     }
 }
