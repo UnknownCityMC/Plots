@@ -390,7 +390,7 @@ public class PlotService extends Service<PlotsPlugin> {
     public void savePlot(Plot plot) {
         CompletableFuture.runAsync(() -> {
             plotDao.write(plot);
-
+        }).whenComplete((result, throwable) -> {
             plot.flags().forEach((plotFlag, value) -> plotFlagDao.write(plot.id(), plotFlag.flagId(), plotFlag.marshall(value)));
             plot.interactables().forEach(plotInteractable -> plotInteractablesDao.write(plotInteractable, plot.id()));
             plot.members().forEach(plotMember -> plotMemberDao.write(plotMember, plot.id()));
