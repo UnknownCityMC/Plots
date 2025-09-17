@@ -29,7 +29,8 @@ public class PlotGroupParser<C> implements ArgumentParser<C, PlotGroup> {
 
     @Override
     public @NonNull ArgumentParseResult<@NonNull PlotGroup> parse(@NonNull CommandContext<@NonNull C> commandContext, @NonNull CommandInput commandInput) {
-        var token = commandInput.peekString();
+        var token = commandInput.readString();
+
         if (plotService.groupCache().asMap().containsKey(token)) {
             return ArgumentParseResult.success(plotService.groupCache().getIfPresent(token));
         }

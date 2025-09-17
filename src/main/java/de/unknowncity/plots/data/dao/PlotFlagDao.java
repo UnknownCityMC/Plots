@@ -24,7 +24,7 @@ public class PlotFlagDao {
 
     public List<PlotFlagWrapper<Object>> readAll() {
         @Language("mariadb")
-        var querySting = "SELECT plot_id, flag_id, value FROM plot_flag WHERE plot_id = :plotId";
+        var querySting = "SELECT plot_id, flag_id, value FROM plot_flag";
         return queryConfiguration.query(querySting)
                 .single()
                 .map(row -> {

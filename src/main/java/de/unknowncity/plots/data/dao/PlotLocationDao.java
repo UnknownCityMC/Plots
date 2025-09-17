@@ -41,7 +41,7 @@ public class PlotLocationDao {
     public List<PlotLocation> readAll() {
         @Language("mariadb")
         var queryString = """
-                SELECT plot_id, name, public, x, y, z, yaw, pitch FROM plot_location WHERE plot_id = :plotId;
+                SELECT plot_id, name, public, x, y, z, yaw, pitch FROM plot_location;
                 """;
         return queryConfiguration.query(queryString)
                 .single()

@@ -287,10 +287,10 @@ public abstract class Plot {
         return protectedRegion().getMaximumPoint().x() - protectedRegion().getMinimumPoint().x() + 1;
     }
 
-    @MappingProvider({"payment_type", "plot_id", "owner_id", "group_name", "region_id", "price", "world", "state", "claimed", "last_rent_paid", "rent_interval"})
+    @MappingProvider({"payment_type", "id", "owner_id", "group_name", "region_id", "price", "world", "state", "claimed", "last_rent_paid", "rent_interval"})
     public static RowMapping<Plot> map() {
         return row -> {
-            var plotId = row.getString("plot_id");
+            var plotId = row.getString("id");
 
             var paymentType = row.getEnum("payment_type", PlotPaymentType.class);
 

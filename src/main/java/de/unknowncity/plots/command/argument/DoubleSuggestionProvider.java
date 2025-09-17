@@ -13,7 +13,8 @@ import java.util.concurrent.CompletableFuture;
 public class DoubleSuggestionProvider implements SuggestionProvider<CommandSender> {
     private static final List<String> NUMBERS = List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
     private static final List<String> DECIMALS = List.of(".", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
-    private static final List<String> NEGATIVES = List.of( "-", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+    private static final List<String> NEGATIVES = List.of( "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+    public static final DoubleSuggestionProvider DOUBLE_SUGGESTION_PROVIDER = new DoubleSuggestionProvider();
 
     @Override
     public @NonNull CompletableFuture<? extends @NonNull Iterable<? extends @NonNull Suggestion>> suggestionsFuture(@NonNull CommandContext<CommandSender> context, @NonNull CommandInput input) {

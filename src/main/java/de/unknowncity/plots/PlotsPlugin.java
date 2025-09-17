@@ -157,7 +157,6 @@ public class PlotsPlugin extends PaperAstraPlugin {
 
         this.serviceRegistry.register(new PlotService(queryConfig, economyService, this));
 
-
         this.serviceRegistry().getRegistered(PlotService.class).cacheAll();
     }
 

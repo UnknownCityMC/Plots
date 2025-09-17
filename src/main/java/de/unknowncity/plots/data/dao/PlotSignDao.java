@@ -34,7 +34,7 @@ public class PlotSignDao {
     public List<PlotSign> readAll() {
         @Language("mariadb")
         var queryString = """
-                SELECT plot_id, x, y, z FROM plot_sign WHERE plot_id = :plotId;
+                SELECT plot_id, x, y, z FROM plot_sign;
                 """;
         return queryConfiguration.query(queryString)
                 .single()

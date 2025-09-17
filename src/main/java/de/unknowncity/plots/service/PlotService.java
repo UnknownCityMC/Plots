@@ -39,6 +39,7 @@ import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -47,6 +48,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class PlotService extends Service<PlotsPlugin> {
@@ -109,6 +111,8 @@ public class PlotService extends Service<PlotsPlugin> {
      */
 
     public void loadPlotCache() {
+        var logger = JavaPlugin.getPlugin(PlotsPlugin.class).getLogger();
+        logger.warning("Loading plots from database...");
         var plotsFuture = CompletableFuture.supplyAsync(plotDao::readAll);
         var membersFuture = CompletableFuture.supplyAsync(plotMemberDao::readAll);
         var deniedFuture = CompletableFuture.supplyAsync(plotDeniedPlayerDao::readAll);
@@ -127,10 +131,15 @@ public class PlotService extends Service<PlotsPlugin> {
                 flagsFuture,
                 interactablesFuture,
                 groupsFuture
-        ).thenRun(() -> {
+        ).whenComplete((result, throwable) -> {
+            if (throwable != null) {
+                logger.log(Level.SEVERE, "Failed to load plots from database.", throwable);
+                return;
+            }
+            logger.warning("Inserting plots into cache...");
             var plots = plotsFuture.join();
             plotCache.putAll(plots.stream().collect(Collectors.toMap(Plot::id, Function.identity())));
-
+            logger.warning("Inserting plots into cache done.");
             var members = membersFuture.join();
             members.forEach(plotMember -> {
                 var plot = plotCache.getIfPresent(plotMember.plotId());
@@ -183,7 +192,9 @@ public class PlotService extends Service<PlotsPlugin> {
             });
 
             var groups = groupsFuture.join();
+            JavaPlugin.getPlugin(PlotsPlugin.class).getLogger().warning("Loaded " + groups.size() + " plot groups.");
             groups.forEach(plotGroup -> {
+                logger.warning("Loaded plot group " + plotGroup.name());
                 plotGroupCache.put(plotGroup.name(), plotGroup);
                 plotCache.asMap().values().forEach(plot -> {
                     if (plot.groupName() != null && plot.groupName().equals(plotGroup.name())) {
@@ -372,8 +383,8 @@ public class PlotService extends Service<PlotsPlugin> {
 
     public void createPlotGroup(String name) {
         var plotGroup = new PlotGroup(name);
-        savePlotGroup(plotGroup);
         plotGroupCache.put(name, plotGroup);
+        savePlotGroup(plotGroup);
     }
 
     public void savePlot(Plot plot) {
@@ -457,8 +468,6 @@ public class PlotService extends Service<PlotsPlugin> {
     public Plot getPlotFromGroup(String id, String groupName) {
         return plotGroupCache.getIfPresent(groupName).plotsInGroup().get(id);
     }
-
-
 
     public List<Plot> findPlotsByOwnerUUID(UUID uuid) {
         return plotCache.asMap().values().stream().filter(plot -> plot.owner() != null && plot.owner().uuid()

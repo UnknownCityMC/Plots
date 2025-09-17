@@ -63,7 +63,7 @@ public class PlotMemberDao {
     public List<PlotMember> readAll() {
         @Language("mariadb")
         var queryString = """
-                SELECT plot_id, player_id, role  FROM plot_member WHERE plot_id = :plotId;;
+                SELECT plot_id, player_id, role  FROM plot_member;
                 """;
         return queryConfiguration.query(queryString)
                 .single()

@@ -1,5 +1,6 @@
 package de.unknowncity.plots.command.admin;
 
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.command.argument.DoubleSuggestionProvider;
@@ -18,6 +19,7 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
 import static de.unknowncity.plots.command.argument.PlotGroupParser.plotGroupParser;
+import static de.unknowncity.plots.command.argument.RegionParserParser.regionParser;
 import static org.incendo.cloud.parser.standard.DoubleParser.doubleParser;
 import static org.incendo.cloud.parser.standard.DurationParser.durationParser;
 import static org.incendo.cloud.parser.standard.StringParser.stringParser;
@@ -35,8 +37,8 @@ public class PlotAdminCreateCommand extends SubCommand {
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("createBuyFromRegion")
                 .permission("plots.command.plotadmin")
-                .required("price", doubleParser(), new DoubleSuggestionProvider())
-                .flag(commandManager.flagBuilder("group").withComponent(plotGroupParser(plotService)).build())
+                .required("price", doubleParser(), DoubleSuggestionProvider.DOUBLE_SUGGESTION_PROVIDER)
+                .required("group", plotGroupParser(plotService))
                 .senderType(Player.class)
                 .handler(this::handleCreateBuy)
                 .build()
@@ -44,10 +46,9 @@ public class PlotAdminCreateCommand extends SubCommand {
 
         commandManager.command(builder.literal("createBuyFromRegionName")
                 .permission("plots.command.plotadmin")
-                .required("region", stringParser(), (sender, input) ->
-                        CompletableFuture.completedFuture(regionService.getAllRegions().keySet().stream().map(Suggestion::suggestion).toList()))
-                .required("price", doubleParser(), new DoubleSuggestionProvider())
-                .flag(commandManager.flagBuilder("group").withComponent(plotGroupParser(plotService)).build())
+                .required("region", regionParser(regionService))
+                .required("price", doubleParser(), DoubleSuggestionProvider.DOUBLE_SUGGESTION_PROVIDER)
+                .required("group", plotGroupParser(plotService))
                 .senderType(Player.class)
                 .handler(this::handleCreateBuyName)
                 .build()
@@ -55,9 +56,9 @@ public class PlotAdminCreateCommand extends SubCommand {
 
         commandManager.command(builder.literal("createRentFromRegion")
                 .permission("plots.command.plotadmin")
-                .required("price", doubleParser(), new DoubleSuggestionProvider())
+                .required("price", doubleParser(), DoubleSuggestionProvider.DOUBLE_SUGGESTION_PROVIDER)
+                .required("group", plotGroupParser(plotService))
                 .required("rentInterval", durationParser())
-                .flag(commandManager.flagBuilder("group").withComponent(plotGroupParser(plotService)).build())
                 .senderType(Player.class)
                 .handler(this::handleCreateRent)
                 .build()
@@ -65,11 +66,10 @@ public class PlotAdminCreateCommand extends SubCommand {
 
         commandManager.command(builder.literal("createRentFromRegionName")
                 .permission("plots.command.plotadmin")
-                .required("region", stringParser(), (sender, input) ->
-                        CompletableFuture.completedFuture(regionService.getAllRegions().keySet().stream().map(Suggestion::suggestion).toList()))
-                .required("price", doubleParser(), new DoubleSuggestionProvider())
+                .required("region", regionParser(regionService))
+                .required("price", doubleParser(), DoubleSuggestionProvider.DOUBLE_SUGGESTION_PROVIDER)
+                .required("group", plotGroupParser(plotService))
                 .required("rentInterval", durationParser())
-                .flag(commandManager.flagBuilder("group").withComponent(plotGroupParser(plotService)).build())
                 .senderType(Player.class)
                 .handler(this::handleCreateRentName)
                 .build()
@@ -80,7 +80,7 @@ public class PlotAdminCreateCommand extends SubCommand {
     private void handleCreateBuy(CommandContext<Player> commandContext) {
         var player = commandContext.sender();
         var price = (double) commandContext.get("price");
-        var group = (PlotGroup) commandContext.flags().get("group");
+        var group = (PlotGroup) commandContext.get("group");
 
         var region = regionService.getSuitableRegion(player.getLocation());
 
@@ -102,17 +102,11 @@ public class PlotAdminCreateCommand extends SubCommand {
 
     private void handleCreateBuyName(CommandContext<Player> commandContext) {
         var player = commandContext.sender();
-        var regionId = (String) commandContext.get("region");
+        var protectedRegion = (ProtectedRegion) commandContext.get("region");
         var price = (double) commandContext.get("price");
-        var group = (PlotGroup) commandContext.flags().get("group");
+        var group = (PlotGroup) commandContext.get("group");
 
         var world = player.getWorld();
-        var protectedRegion = regionService.getRegion(regionId, world);
-
-        if (protectedRegion == null) {
-            plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "no-suitable-region"));
-            return;
-        }
 
         if (plotService.existsPlot(protectedRegion)) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "already-exists"));
@@ -129,7 +123,7 @@ public class PlotAdminCreateCommand extends SubCommand {
     private void handleCreateRent(CommandContext<Player> commandContext) {
         var player = commandContext.sender();
         var price = (double) commandContext.get("price");
-        var group = (PlotGroup) commandContext.flags().get("group");
+        var group = (PlotGroup) commandContext.get("group");
 
         var rentInterval = commandContext.flags().getValue("rentInterval", Duration.ofDays(30));
 
@@ -153,19 +147,14 @@ public class PlotAdminCreateCommand extends SubCommand {
 
     private void handleCreateRentName(CommandContext<Player> commandContext) {
         var player = commandContext.sender();
-        var regionId = (String) commandContext.get("region");
+        var protectedRegion = (ProtectedRegion) commandContext.get("region");
+
         var price = (double) commandContext.get("price");
-        var group = (PlotGroup) commandContext.flags().get("group");
+        var group = (PlotGroup) commandContext.get("group");
 
         var rentInterval = commandContext.flags().getValue("rentInterval", Duration.ofDays(30));
 
         var world = player.getWorld();
-        var protectedRegion = regionService.getRegion(regionId, world);
-
-        if (protectedRegion == null) {
-            plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "no-suitable-region"));
-            return;
-        }
 
         if (plotService.existsPlot(protectedRegion)) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "already-exists"));
