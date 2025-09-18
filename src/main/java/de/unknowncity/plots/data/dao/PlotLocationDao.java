@@ -45,6 +45,15 @@ public class PlotLocationDao {
                 """;
         return queryConfiguration.query(queryString)
                 .single()
-                .mapAs(PlotLocation.class).all();
+                .map(row -> new PlotLocation(
+                        row.getString("plot_id"),
+                        row.getString("name"),
+                        row.getBoolean("public"),
+                        row.getDouble("x"),
+                        row.getDouble("y"),
+                        row.getDouble("z"),
+                        row.getFloat("yaw"),
+                        row.getFloat("pitch")
+                )<).all();
     }
 }

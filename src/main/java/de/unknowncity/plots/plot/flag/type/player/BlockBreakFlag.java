@@ -17,7 +17,7 @@ public class BlockBreakFlag extends PlotAccessModifierFlag implements Listener {
     }
 
     @EventHandler
-    public void onBlockPlace(BlockBreakEvent event) {
+    public void onBlockBreak(BlockBreakEvent event) {
         var player = event.getPlayer();
 
         if (player.hasPermission("ucplots.interact.bypass")) {

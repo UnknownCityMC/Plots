@@ -1,7 +1,5 @@
 package de.unknowncity.plots.plot.location;
 
-import de.chojo.sadu.mapper.annotation.MappingProvider;
-import de.chojo.sadu.mapper.rowmapper.RowMapping;
 import org.bukkit.Location;
 
 public class PlotLocation extends PlotPosition {
@@ -28,19 +26,5 @@ public class PlotLocation extends PlotPosition {
 
     public boolean isPublic() {
         return isPublic;
-    }
-
-    @MappingProvider({"plot_id", "name", "public", "x", "y", "z", "yaw", "pitch"})
-    public static RowMapping<PlotLocation> map() {
-        return row -> new PlotLocation(
-                row.getString("plot_id"),
-                row.getString("name"),
-                row.getBoolean("public"),
-                row.getDouble("x"),
-                row.getDouble("y"),
-                row.getDouble("z"),
-                row.getFloat("yaw"),
-                row.getFloat("pitch")
-        );
     }
 }

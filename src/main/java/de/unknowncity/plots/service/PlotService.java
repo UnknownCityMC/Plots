@@ -136,10 +136,8 @@ public class PlotService extends Service<PlotsPlugin> {
                 logger.log(Level.SEVERE, "Failed to load plots from database.", throwable);
                 return;
             }
-            logger.warning("Inserting plots into cache...");
             var plots = plotsFuture.join();
             plotCache.putAll(plots.stream().collect(Collectors.toMap(Plot::id, Function.identity())));
-            logger.warning("Inserting plots into cache done.");
             var members = membersFuture.join();
             members.forEach(plotMember -> {
                 var plot = plotCache.getIfPresent(plotMember.plotId());
@@ -192,9 +190,7 @@ public class PlotService extends Service<PlotsPlugin> {
             });
 
             var groups = groupsFuture.join();
-            JavaPlugin.getPlugin(PlotsPlugin.class).getLogger().warning("Loaded " + groups.size() + " plot groups.");
             groups.forEach(plotGroup -> {
-                logger.warning("Loaded plot group " + plotGroup.name());
                 plotGroupCache.put(plotGroup.name(), plotGroup);
                 plotCache.asMap().values().forEach(plot -> {
                     if (plot.groupName() != null && plot.groupName().equals(plotGroup.name())) {
@@ -266,6 +262,7 @@ public class PlotService extends Service<PlotsPlugin> {
 
         region.setFlag(Flags.INTERACT, StateFlag.State.ALLOW);
         region.setFlag(Flags.USE, StateFlag.State.ALLOW);
+        region.setFlag(Flags.BUILD, StateFlag.State.ALLOW);
 
         flagRegistry.getAllRegistered().forEach(plotFlag -> plot.setFlag(plotFlag, plotFlag.defaultValue()));
 
