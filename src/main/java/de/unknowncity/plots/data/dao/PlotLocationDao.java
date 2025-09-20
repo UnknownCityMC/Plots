@@ -54,6 +54,6 @@ public class PlotLocationDao {
                         row.getDouble("z"),
                         row.getFloat("yaw"),
                         row.getFloat("pitch")
-                )<).all();
+                )).all();
     }
 }

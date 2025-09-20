@@ -84,12 +84,15 @@ public class WireframeCube {
         if (Math.abs(lengthX) > 0) {
             // x
             scale.set((float) Math.abs(lengthX), thickness, thickness);
+            display.getBoundingBox().expand(100, 0, 0);
         } else if (Math.abs(lengthY) > 0) {
             // y
             scale.set(thickness, (float) Math.abs(lengthY), thickness);
+            display.getBoundingBox().expand(0, lengthY, 0);
         } else if (Math.abs(lengthZ) > 0) {
             // z
             scale.set(thickness, thickness, (float )Math.abs(lengthZ));
+            display.getBoundingBox().expand(0, 0, lengthZ);
         }
 
         Transformation transformation = new Transformation(translation, leftRotation, scale, rightRotation);

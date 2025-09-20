@@ -92,7 +92,9 @@ public class PlotAdminCreateCommand extends SubCommand {
                 return;
             }
 
-            if (plotService.createBuyPlotFromRegion(protectedRegion, world, price, group.name())) {
+            var plotOpt = plotService.createBuyPlotFromRegion(protectedRegion, world, price, group.name());
+
+            if (plotOpt.isPresent()) {
                 plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "success"));
             } else {
                 plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "error"));
@@ -113,7 +115,9 @@ public class PlotAdminCreateCommand extends SubCommand {
             return;
         }
 
-        if (plotService.createBuyPlotFromRegion(protectedRegion, world, price, group.name())) {
+        var plotOpt = plotService.createBuyPlotFromRegion(protectedRegion, world, price, group.name());
+
+        if (plotOpt.isPresent()) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "success"));
         } else {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "error"));
@@ -137,7 +141,9 @@ public class PlotAdminCreateCommand extends SubCommand {
                 return;
             }
 
-            if (plotService.createRentPlotFromRegion(protectedRegion, world, price, group.name(), rentInterval)) {
+            var plotOpt = plotService.createRentPlotFromRegion(protectedRegion, world, price, group.name(), rentInterval);
+
+            if (plotOpt.isPresent()) {
                 plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "success"));
             } else {
                 plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "error"));
@@ -161,7 +167,9 @@ public class PlotAdminCreateCommand extends SubCommand {
             return;
         }
 
-        if (plotService.createRentPlotFromRegion(protectedRegion, world, price, group.name(), rentInterval)) {
+        var plotOpt = plotService.createRentPlotFromRegion(protectedRegion, world, price, group.name(), rentInterval);
+
+        if (plotOpt.isPresent()) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "success"));
         } else {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "create", "error"));

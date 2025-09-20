@@ -34,7 +34,6 @@ public class FreeBuildEditOutline {
 
         if (regionOutline != null) {
             regionOutline.removeWireframe();
-            System.out.println("frame not null");
         }
 
         if (!show) {
@@ -47,7 +46,6 @@ public class FreeBuildEditOutline {
 
         if (loc1 != null && loc2 != null) {
             var locCube1 = loc1.clone();
-            locCube1.setY(-64);
             var locCube2 = loc2.clone();
             locCube2.setY(320);
 

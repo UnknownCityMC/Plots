@@ -60,7 +60,7 @@ public class SignEditSession {
         setOutline(plot, sign, true);
 
         updateSings(plot, plugin.messenger());
-        plotService.plotSignCache().put(sign, plot);
+        plotService.plotSignCache().put(sign, plot.id());
         plotService.savePlot(plot);
         return true;
     }

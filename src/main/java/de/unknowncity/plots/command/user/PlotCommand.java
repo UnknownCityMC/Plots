@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
+import org.spongepowered.configurate.NodePath;
 
 public class PlotCommand extends PaperCommand<PlotsPlugin> {
     private final RegionService regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
@@ -22,7 +23,8 @@ public class PlotCommand extends PaperCommand<PlotsPlugin> {
 
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
-        var builder = commandManager.commandBuilder("plot");
+        var builder = commandManager.commandBuilder("plot")
+                .permission("plots.command.plot");
 
         commandManager.command(builder
                 .senderType(Player.class)
@@ -47,16 +49,19 @@ public class PlotCommand extends PaperCommand<PlotsPlugin> {
     private void handle(@NonNull CommandContext<Player> context) {
         var sender = context.sender();
 
-        PlotUtil.getPlotIfPresent(sender, plugin).ifPresent(plot -> {
+        PlotUtil.getPlotIfPresent(sender, plugin).ifPresentOrElse(plot -> {
             if (!PlotUtil.checkPlotSold(sender, plot, plugin)) {
                 return;
             }
 
             if (!plot.isOwner(sender.getUniqueId())) {
+                plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "only-owner"), plot.tagResolvers(sender, plugin.messenger()));
                 return;
             }
 
             PlotMainGUI.open(sender, plot, plugin);
+        }, () -> {
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot"));
         });
     }
 }

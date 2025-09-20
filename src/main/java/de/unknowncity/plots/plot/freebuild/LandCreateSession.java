@@ -12,6 +12,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.spongepowered.configurate.NodePath;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.UUID;
 
 public class LandCreateSession {
@@ -79,7 +82,11 @@ public class LandCreateSession {
     public void complete() {
         var world = player.getWorld();
 
-        var id = UUID.randomUUID().toString();
+        var id = generateId();
+        if (id == null) {
+            plugin.messenger().sendMessage(player, NodePath.path("command", "land", "claim", "error"));
+            return;
+        }
 
         if (pos1 == null) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "land", "claim", "not-selected"));
@@ -111,15 +118,34 @@ public class LandCreateSession {
         }
 
         var protectedRegion = regionService.createRegionFromLocations(world, loc1, loc2, id);
+        var plotOpt = plotService.createBuyPlotFromRegion(protectedRegion, world, price, null);
 
-        if (plotService.createBuyPlotFromRegion(protectedRegion, world, price, null)) {
+        if (plotOpt.isPresent()) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "land", "claim", "disable"));
             plugin.messenger().sendMessage(player, NodePath.path("command", "land", "claim", "success"));
+            plotService.claimPlot(player, plotOpt.get());
         } else {
             plugin.messenger().sendMessage(player, NodePath.path("command", "land", "claim", "error"));
         }
+    }
 
-        plotService.claimPlot(player, plotService.getPlot(id));
+    private String generateId() {
+        var uuid = UUID.randomUUID().toString();
+        try {
+            for (int i = 0; i < 5; i++) {
+                var shortHash = Base64.getUrlEncoder().withoutPadding()
+                        .encodeToString(
+                                MessageDigest.getInstance("SHA-256")
+                                        .digest(uuid.getBytes())
+                        ).substring(0, 10);
+                if (!plotService.existsPlot(shortHash)) {
+                    return shortHash;
+                }
+            }
+        } catch (NoSuchAlgorithmException e) {
+            return null;
+        }
+        return null;
     }
 
     private void displayPrice() {
