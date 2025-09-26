@@ -1,5 +1,6 @@
 package de.unknowncity.plots.data.dao;
 
+import de.chojo.sadu.queries.api.configuration.ConnectedQueryConfiguration;
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.unknowncity.plots.plot.access.type.PlotAccessModifier;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
@@ -33,18 +34,30 @@ public class PlotInteractablesDao {
                 ).all();
     }
 
-    public Boolean write(PlotInteractable plotInteractable, String plotId) {
+    public Boolean write(ConnectedQueryConfiguration connection, List<PlotInteractable> interactables, String plotId) {
         @Language("mariadb")
         var querySting = """
-                REPLACE INTO plot_interactables (block_type, plot_id, access_modifier)
-                VALUES (:block_type, :plot_id, :access_modifier)
+                INSERT INTO plot_interactables (
+                    block_type,
+                    plot_id,
+                    access_modifier
+                )
+                VALUES (
+                    :block_type,
+                    :plot_id,
+                    :access_modifier
+                )
+                ON DUPLICATE KEY UPDATE
+                    access_modifier = VALUES(access_modifier);
                 """;
-        return queryConfiguration.query(querySting)
-                .single(call()
+        return connection.query(querySting)
+                .batch(interactables.stream().map(plotInteractable -> call()
                         .bind("plot_id", plotId)
                         .bind("block_type", plotInteractable.blockType().name())
-                        .bind("access_modifier", plotInteractable.accessModifier())
+                        .bind("access_modifier", plotInteractable.accessModifier()
+                        ))
                 )
                 .insert().changed();
+
     }
 }

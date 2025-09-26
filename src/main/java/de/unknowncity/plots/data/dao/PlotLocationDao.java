@@ -1,5 +1,6 @@
 package de.unknowncity.plots.data.dao;
 
+import de.chojo.sadu.queries.api.configuration.ConnectedQueryConfiguration;
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.unknowncity.plots.plot.location.PlotLocation;
 import org.intellij.lang.annotations.Language;
@@ -18,13 +19,39 @@ public class PlotLocationDao {
         this.queryConfiguration = queryConfiguration;
     }
 
-    public Boolean write(PlotLocation plotLocation, String plotId) {
+    public Boolean write(ConnectedQueryConfiguration connection, PlotLocation plotLocation, String plotId) {
         @Language("mariadb")
         var queryString = """
-                REPLACE INTO plot_location (plot_id, name, public, x, y, z, yaw, pitch)
-                VALUES (:plotId, :name, :public, :x, :y, :z, :yaw, :pitch)
+                INSERT INTO plot_location (
+                    plot_id,
+                    name,
+                    public,
+                    x,
+                    y,
+                    z,
+                    yaw,
+                    pitch
+                )
+                VALUES (
+                    :plotId,
+                    :name,
+                    :public,
+                    :x,
+                    :y,
+                    :z,
+                    :yaw,
+                    :pitch
+                )
+                ON DUPLICATE KEY UPDATE
+                    public = VALUES(public),
+                    x      = VALUES(x),
+                    y      = VALUES(y),
+                    z      = VALUES(z),
+                    yaw    = VALUES(yaw),
+                    pitch  = VALUES(pitch);
+                
                 """;
-        return queryConfiguration.query(queryString)
+        return connection.query(queryString)
                 .single(call()
                         .bind("plotId", plotId)
                         .bind("name", plotLocation.name())

@@ -1,5 +1,6 @@
 package de.unknowncity.plots.data.dao;
 
+import de.chojo.sadu.queries.api.configuration.ConnectedQueryConfiguration;
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.chojo.sadu.queries.call.adapter.UUIDAdapter;
 import de.unknowncity.plots.plot.model.PlotPlayer;
@@ -17,16 +18,24 @@ public class PlotDeniedPlayerDao {
         this.queryConfiguration = queryConfiguration;
     }
 
-    public Boolean write(PlotPlayer plotPlayer, String plotId) {
+    public Boolean write(ConnectedQueryConfiguration connection, List<PlotPlayer> plotPlayers, String plotId) {
         @Language("mariadb")
         var queryString = """
-                REPLACE INTO plot_denied (player_id, plot_id)
-                VALUES (:playerId, :plotId);
+                INSERT INTO plot_denied (
+                    player_id,
+                    plot_id
+                )
+                VALUES (
+                    :playerId,
+                    :plotId
+                )
+                ON DUPLICATE KEY UPDATE
+                    player_id = VALUES(player_id);
                 """;
-        return queryConfiguration.query(queryString)
-                .single(call()
+        return connection.query(queryString)
+                .batch(plotPlayers.stream().map(plotPlayer -> call()
                         .bind("playerId", plotPlayer.uuid(), UUIDAdapter.AS_STRING)
-                        .bind("plotId", plotId)
+                        .bind("plotId", plotId))
                 )
                 .insert().changed();
     }

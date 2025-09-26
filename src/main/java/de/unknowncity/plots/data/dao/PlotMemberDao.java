@@ -1,6 +1,7 @@
 package de.unknowncity.plots.data.dao;
 
 import de.chojo.sadu.mapper.reader.StandardReader;
+import de.chojo.sadu.queries.api.configuration.ConnectedQueryConfiguration;
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.chojo.sadu.queries.call.adapter.UUIDAdapter;
 import de.unknowncity.plots.plot.model.PlotMember;
@@ -45,17 +46,28 @@ public class PlotMemberDao {
                 }).first();
     }
 
-    public Boolean write(PlotMember plotMember, String plotId) {
+    public Boolean write(ConnectedQueryConfiguration connection, List<PlotMember> plotMembers, String plotId) {
         @Language("mariadb")
         var queryString = """
-                REPLACE INTO plot_member (player_id, role, plot_id)
-                VALUES (:playerId, :role, :plotId);
+                INSERT INTO plot_member (
+                    player_id,
+                    role,
+                    plot_id
+                )
+                VALUES (
+                    :playerId,
+                    :role,
+                    :plotId
+                )
+                ON DUPLICATE KEY UPDATE
+                    role = VALUES(role);
+                
                 """;
-        return queryConfiguration.query(queryString)
-                .single(call()
+        return connection.query(queryString)
+                .batch(plotMembers.stream().map(plotMember -> call()
                         .bind("playerId", plotMember.uuid(), UUIDAdapter.AS_STRING)
                         .bind("plotId", plotId)
-                        .bind("role", plotMember.role())
+                        .bind("role", plotMember.role()))
                 )
                 .insert().changed();
     }

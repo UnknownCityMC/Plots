@@ -258,7 +258,7 @@ public class PlotService extends Service<PlotsPlugin> {
     }
 
     private Optional<Plot> createPlot(ProtectedRegion region, Plot plot, String plotGroupName) {
-        addPlotToPlotGroup(plot, plotGroupName);
+        plot.groupName(plotGroupName);
 
         region.setFlag(Flags.INTERACT, StateFlag.State.ALLOW);
         region.setFlag(Flags.USE, StateFlag.State.ALLOW);
@@ -297,19 +297,6 @@ public class PlotService extends Service<PlotsPlugin> {
             Operations.complete(visitor);
         } catch (WorldEditException e) {
             plugin.getLogger().warning("Failed to change biome for plot " + plot.id());
-        }
-    }
-
-    public void addPlotToPlotGroup(Plot plot, String plotGroupName) {
-        if (plotGroupName != null) {
-            var plotGroup = plotGroupCache.getIfPresent(plotGroupName);
-            if (plotGroup == null) {
-                return;
-            }
-            plotGroup.plotsInGroup().put(plot.id(), plot);
-            savePlotGroup(plotGroup);
-            plot.groupName(plotGroupName);
-            savePlot(plot);
         }
     }
 
@@ -388,22 +375,29 @@ public class PlotService extends Service<PlotsPlugin> {
         plotCache.put(plot.id(), plot);
 
         CompletableFuture.runAsync(() -> {
-            plotDao.write(plot);
-        }).whenComplete((result, throwable) -> {
-            if (throwable == null) {
-                plot.flags().forEach((plotFlag, value) -> plotFlagDao.write(plot.id(), plotFlag.flagId(), plotFlag.marshall(value)));
-                plot.interactables().forEach(plotInteractable -> plotInteractablesDao.write(plotInteractable, plot.id()));
-                plot.members().forEach(plotMember -> plotMemberDao.write(plotMember, plot.id()));
-                plot.deniedPlayers().forEach(plotDeniedPlayer -> plotDeniedPlayerDao.write(plotDeniedPlayer, plot.id()));
-                plotLocationDao.write(plot.plotHome(), plot.id());
-                plotSignDao.deleteAll(plot.id());
-                plotSignDao.writeAll(plot.signs(), plot.id());
-            } else {
+            try (var conn = queryConfiguration.withSingleTransaction()) {
+                plugin.getLogger().info("Saving plot with ID: " + plot.id());
+                plotDao.write(conn, plot);
+                plotFlagDao.write(conn, plot.id(), plot.flags());
+                plotInteractablesDao.write(conn, plot.interactables(), plot.id());
+                plotMemberDao.write(conn, plot.members(), plot.id());
+                plotDeniedPlayerDao.write(conn, plot.deniedPlayers(), plot.id());
+                plotLocationDao.write(conn, plot.plotHome(), plot.id());
+                plotSignDao.deleteAll(conn, plot.id());
+                plotSignDao.writeAll(conn, plot.signs(), plot.id());
+            } catch (Exception e) {
+                plugin.getLogger().log(Level.SEVERE, "Failed to save plot " + plot.id(), e);
+            }
+        }).exceptionally(throwable -> {
+            plugin.getLogger().log(Level.SEVERE, "Failed to save plot " + plot.id(), throwable);
+            return null;
+        }).whenComplete((unused, throwable) -> {
+            if (throwable != null) {
                 plugin.getLogger().log(Level.SEVERE, "Failed to save plot " + plot.id(), throwable);
+            } else {
+                SignManager.updateSings(plot, plugin.messenger());
             }
         });
-
-        SignManager.updateSings(plot, plugin.messenger());
     }
 
     public Optional<Plot> findPlotAt(Location location) {

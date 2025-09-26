@@ -1,5 +1,6 @@
 package de.unknowncity.plots.data.dao;
 
+import de.chojo.sadu.queries.api.configuration.ConnectedQueryConfiguration;
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.chojo.sadu.queries.call.adapter.UUIDAdapter;
 import de.unknowncity.plots.plot.model.Plot;
@@ -16,14 +17,46 @@ public class PlotDao {
         this.queryConfiguration = queryConfiguration;
     }
 
-    public Boolean write(Plot plot) {
+    public Boolean write(ConnectedQueryConfiguration connection, Plot plot) {
         @Language("mariadb")
         var queryString = """
-                REPLACE INTO plot (id, owner_id, region_id, group_name, world, state, payment_type, price, rent_interval, last_rent_paid)
-                VALUES (:plotId, :ownerId, :regionId, :groupName, :world, :state, :paymentType, :price, :rentInterval, :lastRentPaid)
+                INSERT INTO plot (
+                    id,
+                    owner_id,
+                    region_id,
+                    group_name,
+                    world,
+                    state,
+                    payment_type,
+                    price,
+                    rent_interval,
+                    last_rent_paid
+                )
+                VALUES (
+                    :plotId,
+                    :ownerId,
+                    :regionId,
+                    :groupName,
+                    :world,
+                    :state,
+                    :paymentType,
+                    :price,
+                    :rentInterval,
+                    :lastRentPaid
+                )
+                ON DUPLICATE KEY UPDATE
+                    owner_id      = VALUES(owner_id),
+                    region_id     = VALUES(region_id),
+                    group_name    = VALUES(group_name),
+                    world         = VALUES(world),
+                    state         = VALUES(state),
+                    payment_type  = VALUES(payment_type),
+                    price         = VALUES(price),
+                    rent_interval = VALUES(rent_interval),
+                    last_rent_paid= VALUES(last_rent_paid);
                 """;
 
-        return queryConfiguration.query(queryString)
+        return connection.query(queryString)
                 .single(call()
                         .bind("plotId", plot.id())
                         .bind("ownerId", plot.owner() == null ? null : plot.owner().uuid(), UUIDAdapter.AS_STRING)
