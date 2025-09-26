@@ -20,10 +20,12 @@ import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import de.unknowncity.plots.task.RentTask;
 import fr.skytasul.glowingentities.GlowingEntities;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.incendo.cloud.caption.Caption;
 import org.incendo.cloud.caption.CaptionProvider;
+import org.incendo.cloud.component.CommandComponent;
 import org.incendo.cloud.processors.cache.SimpleCache;
 import org.incendo.cloud.processors.confirmation.ConfirmationConfiguration;
 import org.incendo.cloud.processors.confirmation.ConfirmationManager;
@@ -101,11 +103,12 @@ public class PlotsPlugin extends PaperAstraPlugin {
                                 sender,
                                 NodePath.path("command", "confirm", "no-pending"))
                         )
-                        .confirmationRequiredNotifier((sender, paperCommandSourceConfirmationContext) -> {
-                            var command = paperCommandSourceConfirmationContext.command().rootComponent().name();
+                        .confirmationRequiredNotifier((sender, context) -> {
+                            var command = context.command().rootComponent().name();
                             messenger.sendMessage(
                                     sender,
-                                    NodePath.path("command", command, "confirm", "notification")
+                                    NodePath.path("command", "confirm", "notification"),
+                                    Placeholder.unparsed("command", command)
                             );
                         })
                         .build()

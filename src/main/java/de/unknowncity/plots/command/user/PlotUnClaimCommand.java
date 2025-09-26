@@ -28,9 +28,17 @@ public class PlotUnClaimCommand extends SubCommand {
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("unclaim")
                 .permission("plots.command.plot.unclaim")
+                .apply(plugin.confirmationManager())
                 .senderType(Player.class)
                 .handler(this::handleUnClaim)
                 .build());
+
+        commandManager.command(builder.literal("unclaim")
+                .permission("plots.command.plot.unclaim")
+                .literal("confirm")
+                .handler(plugin.confirmationManager().createExecutionHandler())
+                .build()
+        );
     }
 
     private void handleUnClaim(@NonNull CommandContext<Player> context) {
