@@ -5,7 +5,6 @@ import de.unknowncity.astralib.common.message.lang.Language;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.model.Plot;
-import de.unknowncity.plots.service.PlotService;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
@@ -17,7 +16,6 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.UUID;
 
-import static de.unknowncity.plots.plot.location.signs.SignOutline.setOutline;
 
 public class SignManager {
     private final HashMap<UUID, SignEditSession> editSessions = new HashMap<>();
@@ -28,7 +26,7 @@ public class SignManager {
     }
 
     public SignEditSession openEditSession(Player player) {
-        var editSession = new SignEditSession(plugin);
+        var editSession = new SignEditSession(plugin, player);
         editSessions.put(player.getUniqueId(), editSession);
         return editSession;
     }

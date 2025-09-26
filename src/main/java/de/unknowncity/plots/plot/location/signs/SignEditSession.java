@@ -4,23 +4,26 @@ import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.service.PlotService;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import static de.unknowncity.plots.plot.location.signs.SignManager.*;
-import static de.unknowncity.plots.plot.location.signs.SignOutline.setOutline;
 
 public class SignEditSession {
     private final PlotsPlugin plugin;
     private Plot plot;
     private final List<PlotSign> plotSigns = new LinkedList<>();
     private final PlotService plotService;
+    private SignOutline outline;
+    private final Player player;
 
 
-    public SignEditSession(PlotsPlugin plugin) {
+    public SignEditSession(PlotsPlugin plugin, Player player) {
         this.plugin = plugin;
         this.plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
+        this.player = player;
     }
 
     public void finish() {
@@ -29,7 +32,7 @@ public class SignEditSession {
         }
         
         plot.signs().forEach(plotSign -> {
-            setOutline(plot, plotSign, false);
+            outline.hideOutline();
         });
     }
 
@@ -44,8 +47,9 @@ public class SignEditSession {
     }
 
     private void open() {
+        outline = new SignOutline(player, plugin);
         plot.signs().forEach(plotSign -> {
-            setOutline(plot, plotSign, true);
+            outline.showOutline(plot, plotSign);
         });
     }
 
@@ -57,7 +61,7 @@ public class SignEditSession {
         }
 
         plot.signs().add(sign);
-        setOutline(plot, sign, true);
+        outline.showOutline(plot, sign);
 
         updateSings(plot, plugin.messenger());
         plotService.plotSignCache().put(sign, plot.id());
@@ -68,7 +72,7 @@ public class SignEditSession {
     public boolean removeSign(Location location) {
         var ignored = new PlotSign("", location.getBlockX(), location.getBlockY(), location.getBlockZ());
         if (plot.signs().stream().anyMatch(plotSign -> plotSign.equals(ignored))) {
-            setOutline(plot, ignored, false);
+            outline.hideOutline();
             clearSign(location);
         }
 
