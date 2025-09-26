@@ -484,6 +484,9 @@ public class PlotService extends Service<PlotsPlugin> {
     }
 
     public List<Plot> findPlotsByOwnerUUIDForGroup(UUID uuid, String groupName) {
+        if (groupName == null) {
+            return findPlotsByOwnerUUID(uuid);
+        }
         return findPlotsByOwnerUUID(uuid).stream()
                 .filter(plot -> plot.groupName() != null && plot.groupName().equals(groupName))
                 .toList();

@@ -50,12 +50,13 @@ public class PlotAdminResetCommand extends SubCommand {
 
         if (id != null) {
             if (!plotService.existsPlot(String.valueOf(id))) {
-                plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "resye", "not-exists"));
+                plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "reset", "not-exists"));
                 return;
             }
             plotService.resetPlot(plotService.getPlot(String.valueOf(id)));
         } else {
-            PlotUtil.getPlotIfPresent(player, plugin).ifPresent(plotService::resetPlot);
+            PlotUtil.getPlotIfPresent(player, plugin).ifPresentOrElse(plotService::resetPlot,
+                    () -> plugin.messenger().sendMessage(player, NodePath.path("command", "plot", "no-plot")));
         }
 
         plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "reset", "success"));

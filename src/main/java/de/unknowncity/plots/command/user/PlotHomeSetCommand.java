@@ -37,7 +37,7 @@ public class PlotHomeSetCommand extends SubCommand {
     private void handleHomeSet(@NonNull CommandContext<Player> context) {
         var sender = context.sender();
 
-        PlotUtil.getPlotIfPresent(sender, plugin).ifPresent(plot -> {
+        PlotUtil.getPlotIfPresent(sender, plugin).ifPresentOrElse(plot -> {
             if (!PlotUtil.checkPlotSold(sender, plot, plugin)) {
                 return;
             }
@@ -52,6 +52,6 @@ public class PlotHomeSetCommand extends SubCommand {
             plot.plotHome(newHome);
 
             plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "home", "setlocation", "success"), plot.tagResolvers(sender, plugin.messenger()));
-        });
+        }, () -> plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot")));
     }
 }

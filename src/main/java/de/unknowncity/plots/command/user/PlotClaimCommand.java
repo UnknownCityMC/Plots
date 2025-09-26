@@ -36,7 +36,7 @@ public class PlotClaimCommand extends SubCommand {
     private void handleClaim(@NonNull CommandContext<Player> context) {
         var sender = context.sender();
 
-        PlotUtil.getPlotIfPresent(sender, plugin).ifPresent(plot -> {
+        PlotUtil.getPlotIfPresent(sender, plugin).ifPresentOrElse(plot -> {
             var groupName = plot.groupName();
 
             if (!PlotUtil.checkPlotGroupLimit(sender, groupName, plugin)) {
@@ -55,6 +55,8 @@ public class PlotClaimCommand extends SubCommand {
 
             plotService.claimPlot(sender, plot);
             plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "success"), plot.tagResolvers(sender, plugin.messenger()));
+        }, () -> {
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot"));
         });
     }
 }

@@ -36,7 +36,7 @@ public class PlotUnClaimCommand extends SubCommand {
     private void handleUnClaim(@NonNull CommandContext<Player> context) {
         var sender = context.sender();
 
-        PlotUtil.getPlotIfPresent(sender, plugin).ifPresent(plot -> {
+        PlotUtil.getPlotIfPresent(sender, plugin).ifPresentOrElse(plot -> {
             if (!PlotUtil.checkPlotSold(sender, plot, plugin)) {
                 return;
             }
@@ -47,6 +47,6 @@ public class PlotUnClaimCommand extends SubCommand {
 
             plotService.unClaimPlot(plot);
             plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "unclaim", "success"), plot.tagResolvers(sender, plugin.messenger()));
-        });
+        }, () -> plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot")));
     }
 }

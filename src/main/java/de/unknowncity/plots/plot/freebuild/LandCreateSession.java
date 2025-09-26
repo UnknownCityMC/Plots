@@ -31,6 +31,8 @@ public class LandCreateSession {
     private double price = 0;
     private BukkitTask task;
 
+    private static final String FREEBUILD_GROUP_NAME = "freebuild";
+
     public LandCreateSession(Player player, PlotsPlugin plugin) {
         this.player = player;
         this.plugin = plugin;
@@ -118,7 +120,7 @@ public class LandCreateSession {
         }
 
         var protectedRegion = regionService.createRegionFromLocations(world, loc1, loc2, id);
-        var plotOpt = plotService.createBuyPlotFromRegion(protectedRegion, world, price, null);
+        var plotOpt = plotService.createBuyPlotFromRegion(protectedRegion, world, price, FREEBUILD_GROUP_NAME);
 
         if (plotOpt.isPresent()) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "land", "claim", "disable"));
@@ -133,7 +135,7 @@ public class LandCreateSession {
         var uuid = UUID.randomUUID().toString();
         try {
             for (int i = 0; i < 5; i++) {
-                var shortHash = Base64.getUrlEncoder().withoutPadding()
+                var shortHash = Base64.getEncoder().withoutPadding()
                         .encodeToString(
                                 MessageDigest.getInstance("SHA-256")
                                         .digest(uuid.getBytes())

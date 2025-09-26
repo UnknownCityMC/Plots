@@ -42,10 +42,10 @@ public class PlotAdminSetStatusCommand extends SubCommand {
         var player = commandContext.sender();
         var state = commandContext.<PlotState>get("state");
 
-        PlotUtil.getPlotIfPresent(player, plugin).ifPresent(plot -> {
+        PlotUtil.getPlotIfPresent(player, plugin).ifPresentOrElse(plot -> {
             plot.state(state);
             plotService.savePlot(plot);
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "setstatus", "success"), plot.tagResolvers(player, plugin.messenger()));
-        });
+        }, () -> plugin.messenger().sendMessage(player, NodePath.path("command", "plot", "no-plot")));
     }
 }

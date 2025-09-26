@@ -41,7 +41,7 @@ public class PlotUnDenyCommand extends SubCommand {
         var sender = context.sender();
         var target = (OfflinePlayer) context.get("target");
 
-        PlotUtil.getPlotIfPresent(sender, plugin).ifPresent(plot -> {
+        PlotUtil.getPlotIfPresent(sender, plugin).ifPresentOrElse(plot -> {
             if (!PlotUtil.checkPlotOwner(sender, plot, plugin)) {
                 return;
             }
@@ -57,6 +57,6 @@ public class PlotUnDenyCommand extends SubCommand {
             plotService.savePlot(plot);
             plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "undeny", "success"),
                     AstraArrays.merge(plot.tagResolvers(sender, plugin.messenger()), new TagResolver[]{Placeholder.unparsed("target", target.getName())}));
-        });
+        }, () -> plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot")));
     }
 }

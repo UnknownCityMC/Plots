@@ -43,7 +43,7 @@ public class PlotAddMemberCommand extends SubCommand {
         var target = (OfflinePlayer) context.get("target");
         var role = (PlotMemberRole) context.get("role");
 
-        PlotUtil.getPlotIfPresent(sender, plugin).ifPresent(plot -> {
+        PlotUtil.getPlotIfPresent(sender, plugin).ifPresentOrElse(plot -> {
             if (!PlotUtil.checkPlotOwner(sender, plot, plugin)) {
                 return;
             }
@@ -56,6 +56,8 @@ public class PlotAddMemberCommand extends SubCommand {
             plot.members().add(new PlotMember(plot.id(), target.getUniqueId(), target.getName(), role));
             plotService.savePlot(plot);
             plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "add", "success"), plot.tagResolvers(sender, plugin.messenger()));
+        }, () -> {
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot"));
         });
     }
 }

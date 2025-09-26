@@ -47,7 +47,7 @@ public class PlotHomeVisibilityCommand extends SubCommand {
         var sender = context.sender();
         var visibility = (PlotHomeVisibility) context.get("visibility");
 
-        PlotUtil.getPlotIfPresent(sender, plugin).ifPresent(plot -> {
+        PlotUtil.getPlotIfPresent(sender, plugin).ifPresentOrElse(plot -> {
             if (!PlotUtil.checkPlotSold(sender, plot, plugin)) {
                 return;
             }
@@ -63,6 +63,6 @@ public class PlotHomeVisibilityCommand extends SubCommand {
             plotService.savePlot(plot);
 
             plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "home", "setvisibility", "success"), plot.tagResolvers(sender, plugin.messenger()));
-        });
+        }, () -> plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot")));
     }
 }
