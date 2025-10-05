@@ -20,11 +20,6 @@ import java.util.*;
 public class RegionService extends Service<PlotsPlugin> {
     private final WorldGuard worldGuard = WorldGuard.getInstance();
 
-    @Override
-    public void shutdown() {
-
-    }
-
     /**
      * Returns a region suitable for mariadb creation at the location
      *

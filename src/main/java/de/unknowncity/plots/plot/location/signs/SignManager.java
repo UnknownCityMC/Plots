@@ -7,6 +7,7 @@ import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.model.Plot;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
+import org.bukkit.Tag;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
@@ -47,19 +48,21 @@ public class SignManager {
             var loc = new Location(plot.world(), relativePlotLocation.x(), relativePlotLocation.y(), relativePlotLocation.z());
             var block = plot.world().getBlockAt(loc);
 
-            if (!MaterialTags.SIGNS.isTagged(block)) {
+            if (!Tag.SIGNS.isTagged(block.getType())) {
                 plot.signs().remove(relativePlotLocation);
                 return;
             }
 
             var state = plot.state().name().toLowerCase();
+            var paymentType = plot.paymentType().name().toLowerCase();
 
             Sign sign = (Sign) block.getState();
 
-            sign.getSide(Side.FRONT).line(0, messenger.component(Language.GERMAN, NodePath.path("sign", state, "line-1"), plot.tagResolvers(null, messenger)));
-            sign.getSide(Side.FRONT).line(1, messenger.component(Language.GERMAN, NodePath.path("sign", state, "line-2"), plot.tagResolvers(null, messenger)));
-            sign.getSide(Side.FRONT).line(2, messenger.component(Language.GERMAN, NodePath.path("sign", state, "line-3"), plot.tagResolvers(null, messenger)));
-            sign.getSide(Side.FRONT).line(3, messenger.component(Language.GERMAN, NodePath.path("sign", state, "line-4"), plot.tagResolvers(null, messenger)));
+
+            sign.getSide(Side.FRONT).line(0, messenger.component(Language.GERMAN, NodePath.path("sign", paymentType, state, "line-1"), plot.tagResolvers(null, messenger)));
+            sign.getSide(Side.FRONT).line(1, messenger.component(Language.GERMAN, NodePath.path("sign", paymentType, state, "line-2"), plot.tagResolvers(null, messenger)));
+            sign.getSide(Side.FRONT).line(2, messenger.component(Language.GERMAN, NodePath.path("sign", paymentType, state, "line-3"), plot.tagResolvers(null, messenger)));
+            sign.getSide(Side.FRONT).line(3, messenger.component(Language.GERMAN, NodePath.path("sign", paymentType, state, "line-4"), plot.tagResolvers(null, messenger)));
             sign.update();
         });
     }

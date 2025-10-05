@@ -17,8 +17,8 @@ val mainClass = "${group}.${rootProject.name.lowercase()}.PlotsPlugin"
 val shadeBasePath = "${group}.${rootProject.name.lowercase()}.libs."
 
 repositories {
-    mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    mavenCentral()
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
     maven("https://repo.xenondevs.xyz/releases")
     maven("https://maven.enginehub.org/repo/")
@@ -33,7 +33,6 @@ repositories {
 dependencies {
     bukkitLibrary(libs.jackson.yaml)
     bukkitLibrary(libs.configurate.yaml)
-    bukkitLibrary(libs.glowing.entities)
 
 
     implementation(libs.invui)

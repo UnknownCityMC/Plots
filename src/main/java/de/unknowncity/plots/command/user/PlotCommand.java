@@ -32,7 +32,7 @@ public class PlotCommand extends PaperCommand<PlotsPlugin> {
         );
 
         new PlotClaimCommand(plugin, builder).apply(commandManager);
-        new PlotUnClaimCommand(plugin, builder).apply(commandManager);
+        new PlotSellCommand(plugin, builder).apply(commandManager);
         new PlotInfoCommand(plugin, builder).apply(commandManager);
         new PlotAddMemberCommand(plugin, builder).apply(commandManager);
         new PlotRemoveMemberCommand(plugin, builder).apply(commandManager);

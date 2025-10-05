@@ -72,8 +72,8 @@ public class SignEditSession {
     public boolean removeSign(Location location) {
         var ignored = new PlotSign("", location.getBlockX(), location.getBlockY(), location.getBlockZ());
         if (plot.signs().stream().anyMatch(plotSign -> plotSign.equals(ignored))) {
-            outline.hideOutline();
             clearSign(location);
+            outline.hideOutline(ignored);
         }
 
         var value = plot.signs().removeIf(plotSign -> plotSign.equals(ignored));
