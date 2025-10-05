@@ -35,7 +35,7 @@ public class RentService extends Service<PlotsPlugin> {
             plotService.plotCache().asMap().values().stream()
                     .filter(plot -> plot.state() == PlotState.SOLD && plot instanceof RentPlot)
                     .map(plot -> (RentPlot) plot)
-                    .filter(plot -> plot.lastRentPayed().plusMinutes(plot.rentIntervalInMin()).isAfter(LocalDateTime.now()))
+                    .filter(plot -> plot.lastRentPayed().plusMinutes(plot.rentIntervalInMin()).isBefore(LocalDateTime.now()))
                     .forEach(plot -> {
                         var price = plot.price();
                         var owner = plot.owner();
@@ -44,11 +44,16 @@ public class RentService extends Service<PlotsPlugin> {
 
                         if (!economyService.hasEnoughFunds(owner.uuid(), price)) {
                             if (plotService.backup(plot, owner.uuid())) {
-                                plotService.resetPlot(plot);
+                                Bukkit.getScheduler().runTask(plugin, () -> plotService.resetPlot(plot));
                             } else {
                                 plot.owner(null);
                                 plot.members(null);
                                 plot.state(PlotState.UNAVAILABLE);
+                            }
+                            if (player != null) {
+                                plugin.messenger().sendMessage(player, NodePath.path("task", "rent", "overdue"),
+                                        Placeholder.parsed("id", plot.id()), Placeholder.parsed("price", String.valueOf(price))
+                                );
                             }
                         } else {
                             economyService.withdraw(owner.uuid(), price);

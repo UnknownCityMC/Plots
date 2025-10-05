@@ -111,6 +111,8 @@ tasks {
         minecraftVersion("1.21")
 
         downloadPlugins {
+            modrinth("WorldGuard", "7.0.14")
+            url("https://ci.athion.net/job/FastAsyncWorldEdit/1175/artifact/artifacts/FastAsyncWorldEdit-Paper-2.13.3-SNAPSHOT-1175.jar")
             url("https://ci.unknowncity.de/job/AstraLib/lastSuccessfulBuild/artifact/astralib-paper/build/libs/AstraLib-Paper-0.3.0-SNAPSHOT-%2326.jar")
         }
     }
