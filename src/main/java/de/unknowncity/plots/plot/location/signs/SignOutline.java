@@ -17,12 +17,13 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SignOutline {
     private final Player player;
     private final Plugin plugin;
-    private Set<Entity> outlineEntities = new HashSet<>();
-    private static final NamespacedKey SIGN_GLOW = new NamespacedKey("ucplots", "signglow");
+    private Map<PlotSign, List<Entity>> outlineEntities = new HashMap<>();
+    private static final NamespacedKey SIGN_GLOW = new NamespacedKey("ucplots", "");
 
     public SignOutline(Player player, Plugin plugin) {
         this.player = player;
@@ -30,11 +31,19 @@ public class SignOutline {
     }
 
     public void hideOutline() {
-        outlineEntities.forEach(Entity::remove);
+        outlineEntities.forEach((plotSign, entities) -> entities.forEach(Entity::remove));
         outlineEntities.clear();
     }
 
+    public void hideOutline(PlotSign plotSign) {
+        for (PlotSign sign : outlineEntities.keySet().stream().filter(plotSign::equals).collect(Collectors.toSet())) {
+            outlineEntities.get(sign).forEach(Entity::remove);
+            outlineEntities.remove(sign);
+        }
+    }
+
     public void showOutline(Plot plot, PlotSign plotSign) {
+        outlineEntities.putIfAbsent(plotSign, new ArrayList<>());
         var location = new Location(plot.world(), plotSign.x(), plotSign.y(), plotSign.z());
 
         // Show outline (spawn new display entity)
@@ -51,7 +60,7 @@ public class SignOutline {
             ));
 
             applyCommonData(block, blockDisplay, location);
-            outlineEntities.add(blockDisplay);
+            outlineEntities.get(plotSign).add(blockDisplay);
         });
 
         // Add an outline to the signpost if the sign has one
@@ -66,11 +75,11 @@ public class SignOutline {
                 ));
 
                 applyCommonData(block, blockDisplay, location);
-                outlineEntities.add(blockDisplay);
+                outlineEntities.get(plotSign).add(blockDisplay);
             });
         }
 
-        outlineEntities.forEach(entity -> player.showEntity(plugin, entity));
+        outlineEntities.forEach((plotSigns, entities) -> entities.forEach(entity -> {player.showEntity(plugin, entity);}));
     }
 
     private void applyCommonData(Block block, BlockDisplay blockDisplay, Location location) {

@@ -17,8 +17,8 @@ val mainClass = "${group}.${rootProject.name.lowercase()}.PlotsPlugin"
 val shadeBasePath = "${group}.${rootProject.name.lowercase()}.libs."
 
 repositories {
-    mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    mavenCentral()
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
     maven("https://repo.xenondevs.xyz/releases")
     maven("https://maven.enginehub.org/repo/")
@@ -33,7 +33,6 @@ repositories {
 dependencies {
     bukkitLibrary(libs.jackson.yaml)
     bukkitLibrary(libs.configurate.yaml)
-    bukkitLibrary(libs.glowing.entities)
 
 
     implementation(libs.invui)
@@ -112,6 +111,8 @@ tasks {
         minecraftVersion("1.21")
 
         downloadPlugins {
+            modrinth("WorldGuard", "7.0.14")
+            url("https://ci.athion.net/job/FastAsyncWorldEdit/1175/artifact/artifacts/FastAsyncWorldEdit-Paper-2.13.3-SNAPSHOT-1175.jar")
             url("https://ci.unknowncity.de/job/AstraLib/lastSuccessfulBuild/artifact/astralib-paper/build/libs/AstraLib-Paper-0.3.0-SNAPSHOT-%2326.jar")
         }
     }

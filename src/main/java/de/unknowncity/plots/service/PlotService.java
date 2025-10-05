@@ -73,10 +73,10 @@ public class PlotService extends Service<PlotsPlugin> {
 
     private final SchematicManager schematicManager;
 
-    public PlotService(QueryConfiguration queryConfiguration, EconomyService economyService, PlotsPlugin plugin) {
+    public PlotService(QueryConfiguration queryConfiguration, PlotsPlugin plugin) {
         this.flagRegistry = new FlagRegistry(plugin);
         this.queryConfiguration = queryConfiguration;
-        this.economyService = economyService;
+        this.economyService = plugin.serviceRegistry().getRegistered(EconomyService.class);
         this.plugin = plugin;
         this.schematicManager = new SchematicManager(plugin);
 
@@ -318,7 +318,9 @@ public class PlotService extends Service<PlotsPlugin> {
     }
 
     public void unClaimPlot(Plot plot) {
-        economyService.deposit(plot.owner().uuid(), plot.price());
+        if (plot instanceof BuyPlot) {
+            economyService.deposit(plot.owner().uuid(), plot.price() * 0.8);
+        }
 
         resetPlot(plot);
     }
@@ -497,7 +499,6 @@ public class PlotService extends Service<PlotsPlugin> {
 
         var signOpt = plotSignCache.asMap().keySet().stream().filter(sign -> sign.equals(plotSign)).findFirst();
         return signOpt.map(sign -> plotCache.getIfPresent(plotSignCache.asMap().get(sign)));
-
     }
 
     public Cache<String, PlotGroup> groupCache() {
@@ -532,6 +533,9 @@ public class PlotService extends Service<PlotsPlugin> {
         });
         plot.members().clear();
         plot.deniedPlayers().clear();
+        if (plot instanceof RentPlot rentPlot) {
+            rentPlot.lastRentPayed(null);
+        }
         savePlot(plot);
 
         if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {

@@ -12,17 +12,14 @@ import org.bukkit.entity.Player;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
-import org.incendo.cloud.suggestion.Suggestion;
 import org.spongepowered.configurate.NodePath;
 
 import java.time.Duration;
-import java.util.concurrent.CompletableFuture;
 
 import static de.unknowncity.plots.command.argument.PlotGroupParser.plotGroupParser;
 import static de.unknowncity.plots.command.argument.RegionParserParser.regionParser;
 import static org.incendo.cloud.parser.standard.DoubleParser.doubleParser;
 import static org.incendo.cloud.parser.standard.DurationParser.durationParser;
-import static org.incendo.cloud.parser.standard.StringParser.stringParser;
 
 public class PlotAdminCreateCommand extends SubCommand {
 
@@ -129,7 +126,7 @@ public class PlotAdminCreateCommand extends SubCommand {
         var price = (double) commandContext.get("price");
         var group = (PlotGroup) commandContext.get("group");
 
-        var rentInterval = commandContext.flags().getValue("rentInterval", Duration.ofDays(30));
+        var rentInterval = commandContext.getOrDefault("rentInterval", Duration.ofDays(30));
 
         var region = regionService.getSuitableRegion(player.getLocation());
 
@@ -158,7 +155,7 @@ public class PlotAdminCreateCommand extends SubCommand {
         var price = (double) commandContext.get("price");
         var group = (PlotGroup) commandContext.get("group");
 
-        var rentInterval = commandContext.flags().getValue("rentInterval", Duration.ofDays(30));
+        var rentInterval = commandContext.getOrDefault("rentInterval", Duration.ofDays(30));
 
         var world = player.getWorld();
 

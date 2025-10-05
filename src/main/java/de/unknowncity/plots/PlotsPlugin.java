@@ -4,6 +4,7 @@ import com.sk89q.worldguard.WorldGuard;
 import de.unknowncity.astralib.common.configuration.YamlAstraConfiguration;
 import de.unknowncity.astralib.common.database.StandardDataBaseProvider;
 import de.unknowncity.astralib.common.message.lang.Localization;
+import de.unknowncity.astralib.common.registry.registrable.ClosableRegistrable;
 import de.unknowncity.astralib.common.service.ServiceRegistry;
 import de.unknowncity.astralib.paper.api.hook.defaulthooks.PlaceholderApiHook;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
@@ -12,20 +13,17 @@ import de.unknowncity.plots.command.admin.PlotAdminCommand;
 import de.unknowncity.plots.command.land.LandCommand;
 import de.unknowncity.plots.command.user.PlotCommand;
 import de.unknowncity.plots.configuration.PlotsConfiguration;
-import de.unknowncity.plots.data.model.plot.PlotLocations;
 import de.unknowncity.plots.listener.*;
 import de.unknowncity.plots.plot.freebuild.LandEditSessionHandler;
 import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
-import de.unknowncity.plots.task.RentTask;
-import fr.skytasul.glowingentities.GlowingEntities;
+import de.unknowncity.plots.task.RentService;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.incendo.cloud.caption.Caption;
 import org.incendo.cloud.caption.CaptionProvider;
-import org.incendo.cloud.component.CommandComponent;
 import org.incendo.cloud.processors.cache.SimpleCache;
 import org.incendo.cloud.processors.confirmation.ConfirmationConfiguration;
 import org.incendo.cloud.processors.confirmation.ConfirmationManager;
@@ -34,8 +32,6 @@ import org.spongepowered.configurate.NodePath;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.UUID;
 import java.util.logging.Level;
 
 public class PlotsPlugin extends PaperAstraPlugin {
@@ -43,9 +39,6 @@ public class PlotsPlugin extends PaperAstraPlugin {
     private PlotsConfiguration configuration;
     private PaperMessenger messenger;
     private ConfirmationManager<CommandSender> confirmationManager;
-    private RentTask rentTask;
-    public HashMap<UUID, PlotLocations> createPlotPlayers = new HashMap<>();
-    private GlowingEntities glowingEntities;
     private LandEditSessionHandler landEditSessionHandler;
 
     @Override
@@ -54,8 +47,6 @@ public class PlotsPlugin extends PaperAstraPlugin {
         initializeDataServices();
 
         registerCommands();
-
-        glowingEntities = new GlowingEntities(this);
 
         var pluginManager = getServer().getPluginManager();
         pluginManager.registerEvents(new PlotInteractListener(this), this);
@@ -69,9 +60,6 @@ public class PlotsPlugin extends PaperAstraPlugin {
                 serviceRegistry.getRegistered(PlotService.class),
                 messenger
         ), null);
-
-        rentTask = new RentTask(this, serviceRegistry.getRegistered(PlotService.class), serviceRegistry.getRegistered(EconomyService.class));
-        rentTask.start();
 
         commandManager.captionRegistry().registerProvider(CaptionProvider.forCaption(Caption.of("argument.parse.failure.player"),
                 sender -> messenger.getStringOrNotAvailable((Player) sender, NodePath.path("exception", "argument-parse", "player"))));
@@ -92,7 +80,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
 
     @Override
     public void onPluginDisable() {
-        rentTask.cancel();
+        serviceRegistry.getAllRegistered().forEach(ClosableRegistrable::shutdown);
     }
 
     public void registerCommands() {
@@ -151,14 +139,14 @@ public class PlotsPlugin extends PaperAstraPlugin {
         this.serviceRegistry = new ServiceRegistry<>(this);
 
         this.serviceRegistry.register(new RegionService());
-        var economyService = new EconomyService(configuration.economy());
-        this.serviceRegistry.register(economyService);
+        this.serviceRegistry.register(new EconomyService(configuration.economy()));
 
         var databaseSetting = configuration.database();
 
         var queryConfig = StandardDataBaseProvider.updateAndConnectToDataBase(databaseSetting, getClassLoader(), getDataPath());
 
-        this.serviceRegistry.register(new PlotService(queryConfig, economyService, this));
+        this.serviceRegistry.register(new PlotService(queryConfig, this));
+        this.serviceRegistry.register(new RentService(this));
 
         this.serviceRegistry().getRegistered(PlotService.class).cacheAll();
     }
@@ -177,10 +165,6 @@ public class PlotsPlugin extends PaperAstraPlugin {
 
     public PlotsConfiguration configuration() {
         return configuration;
-    }
-
-    public GlowingEntities glowingEntities() {
-        return glowingEntities;
     }
 
     public LandEditSessionHandler landEditSessionHandler() {
