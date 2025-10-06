@@ -10,7 +10,10 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
+import java.io.File;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -74,5 +77,23 @@ public class BackupService extends Service<PlotsPlugin> {
             viewers.forEach(player -> player.hideBossBar(bossbar));
         });
         return future;
+    }
+
+    public boolean backupBoundToPlayer(Plot plot, UUID owner) {
+        return schematicManager.createSchematicBackup(plot, owner);
+    }
+
+    public boolean hasBackup(Plot plot, UUID owner) {
+        var path = "/schematics/backups/" + owner.toString() + "_" + plot.id() + ".schem";
+        File file = new File(plotService.plugin().getDataPath() + path);
+        return file.exists();
+    }
+
+    public void loadBackupForPlayer(Plot plot, Player player) {
+        schematicManager.pasteOwnedBackupSchematic(plot, player.getUniqueId());
+    }
+
+    public void loadPresaleBackup(Plot plot) {
+        schematicManager.pastePresaleSchematic(plot);
     }
 }

@@ -15,7 +15,7 @@ public class PlotInteractable {
     private PlotAccessModifier accessModifier;
     public static final LinkedList<Material> VALID_TYPES = new LinkedList<>();
 
-    private PlotInteractable(String plotId, Material blockType, PlotAccessModifier accessModifier) {
+    public PlotInteractable(String plotId, Material blockType, PlotAccessModifier accessModifier) {
         this.plotId = plotId;
         this.blockType = blockType;
         this.accessModifier = accessModifier;

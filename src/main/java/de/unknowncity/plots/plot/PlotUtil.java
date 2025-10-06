@@ -31,8 +31,7 @@ public class PlotUtil {
             return Optional.empty();
         }
 
-        var plot = plotService.getPlot(plotId);
-        return Optional.of(plot);
+        return plotService.getPlot(plotId);
     }
 
     public static boolean checkPlotOwner(Player player, Plot plot, PlotsPlugin plugin) {
@@ -59,12 +58,13 @@ public class PlotUtil {
         if (possibleRegion.isEmpty()) {
             return Optional.empty();
         }
+
         var plotId = possibleRegion.get().getId();
         if (!plotService.existsPlot(plotId)) {
             return Optional.empty();
         }
-        var plot = plotService.getPlot(plotId);
-        return Optional.of(plot);
+
+        return plotService.getPlot(plotId);
     }
 
 

@@ -25,7 +25,7 @@ public class MembersGUI {
         var title = messenger.component(player, NodePath.path("gui", "members", "title"));
 
         var members = plot.members();
-        var items = members.stream().map(member -> new ManageMembersItem(plot, member, messenger)).toList();
+        var items = members.stream().map(member -> new ManageMembersItem(plugin, plot, member, messenger)).toList();
 
 
         var gui = PagedGui.ofItems(

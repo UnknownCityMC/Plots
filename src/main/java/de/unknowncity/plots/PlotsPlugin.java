@@ -14,10 +14,14 @@ import de.unknowncity.plots.command.land.LandCommand;
 import de.unknowncity.plots.command.user.PlotCommand;
 import de.unknowncity.plots.configuration.PlotsConfiguration;
 import de.unknowncity.plots.listener.*;
+import de.unknowncity.plots.plot.SchematicManager;
+import de.unknowncity.plots.plot.flag.FlagRegistry;
 import de.unknowncity.plots.plot.freebuild.LandEditSessionHandler;
+import de.unknowncity.plots.plot.location.signs.SignManager;
 import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
+import de.unknowncity.plots.service.plot.*;
 import de.unknowncity.plots.task.RentService;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
@@ -42,6 +46,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
     private PaperMessenger messenger;
     private ConfirmationManager<CommandSender> confirmationManager;
     private LandEditSessionHandler landEditSessionHandler;
+    private SignManager signManager;
 
     @Override
     public void onPluginEnable() {
@@ -71,6 +76,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
                 sender -> messenger.getStringOrNotAvailable((Player) sender, NodePath.path("exception", "argument-parse", "player"))));
 
         landEditSessionHandler = new LandEditSessionHandler(this);
+        signManager = new SignManager(this);
     }
 
     public void onPluginReload() {
@@ -151,10 +157,18 @@ public class PlotsPlugin extends PaperAstraPlugin {
 
         var queryConfig = StandardDataBaseProvider.updateAndConnectToDataBase(databaseSetting, getClassLoader(), getDataPath());
 
-        this.serviceRegistry.register(new PlotService(queryConfig, this));
+        var plotService = new PlotService(
+                this,
+                new FlagRegistry(this),
+                new SchematicManager(this),
+                queryConfig
+        );
+
+        this.serviceRegistry.register(plotService);
+
         this.serviceRegistry.register(new RentService(this));
 
-        this.serviceRegistry().getRegistered(PlotService.class).cacheAll();
+        plotService.cacheAll();
     }
 
     public ServiceRegistry<PlotsPlugin> serviceRegistry() {
@@ -177,4 +191,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
         return landEditSessionHandler;
     }
 
+    public SignManager signManager() {
+        return signManager;
+    }
 }

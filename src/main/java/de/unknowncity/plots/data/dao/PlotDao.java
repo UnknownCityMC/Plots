@@ -6,6 +6,7 @@ import de.chojo.sadu.queries.call.adapter.UUIDAdapter;
 import de.unknowncity.plots.plot.model.Plot;
 import org.intellij.lang.annotations.Language;
 
+import javax.management.Query;
 import java.util.List;
 
 import static de.chojo.sadu.queries.api.call.Call.call;
@@ -17,7 +18,7 @@ public class PlotDao {
         this.queryConfiguration = queryConfiguration;
     }
 
-    public Boolean write(ConnectedQueryConfiguration connection, Plot plot) {
+    public Boolean write(QueryConfiguration connection, Plot plot) {
         @Language("mariadb")
         var queryString = """
                 INSERT INTO plot (

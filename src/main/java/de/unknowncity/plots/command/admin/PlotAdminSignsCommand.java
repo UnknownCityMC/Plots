@@ -6,7 +6,6 @@ import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.plot.PlotUtil;
 import de.unknowncity.plots.plot.location.signs.SignManager;
 import de.unknowncity.plots.service.PlotService;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -45,7 +44,7 @@ public class PlotAdminSignsCommand extends SubCommand {
         var sender = context.sender();
         PlotUtil.getPlotIfPresent(sender, plugin).ifPresentOrElse(plot -> {
             plot.signs().forEach(sign -> {
-                SignManager.clearSign(new Location(plot.world(), sign.x(), sign.y(), sign.z()));
+                SignManager.setLineTextEmpty(new Location(plot.world(), sign.x(), sign.y(), sign.z()));
             });
             plot.signs(new ArrayList<>());
             plugin.serviceRegistry().getRegistered(PlotService.class).savePlot(plot);

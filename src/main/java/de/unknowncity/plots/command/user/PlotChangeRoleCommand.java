@@ -6,6 +6,7 @@ import de.unknowncity.plots.plot.PlotUtil;
 import de.unknowncity.plots.plot.access.type.PlotMemberRole;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
+import de.unknowncity.plots.service.plot.AccessService;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -52,8 +53,7 @@ public class PlotChangeRoleCommand extends SubCommand {
                 return;
             }
 
-            plot.changeMemberRole(target.getUniqueId(), role);
-            plotService.savePlot(plot);
+            plugin.serviceRegistry().getRegistered(AccessService.class).setMemberRole(plot, target.getUniqueId(), role);
 
             plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "changerole", "success"), plot.tagResolvers(sender, plugin.messenger()));
         }, () -> plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot")));

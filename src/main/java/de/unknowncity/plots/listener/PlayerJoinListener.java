@@ -2,6 +2,7 @@ package de.unknowncity.plots.listener;
 
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.service.PlotService;
+import de.unknowncity.plots.service.plot.AccessService;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -23,7 +24,7 @@ public class PlayerJoinListener implements Listener {
             var deniedPlayer = plot.findPlotBannedPlayer(player.getUniqueId());
 
            if (deniedPlayer.isPresent()) {
-               plot.kick(player);
+               plugin.serviceRegistry().getRegistered(AccessService.class).kickPlayer(plot, player);
                plugin.messenger().sendMessage(player, NodePath.path("event", "plot", "kick", "join"));
            }
         });

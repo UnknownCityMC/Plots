@@ -48,7 +48,7 @@ public class PlotAddMemberCommand extends SubCommand {
                 return;
             }
 
-            if (plot.isMemberOrOwner(target.getUniqueId())) {
+            if (plot.isMember(target.getUniqueId()) || plot.isOwner(target.getUniqueId())) {
                 plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "already-member"), plot.tagResolvers(sender, plugin.messenger()));
                 return;
             }

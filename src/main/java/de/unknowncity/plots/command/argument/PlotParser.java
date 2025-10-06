@@ -1,6 +1,6 @@
 package de.unknowncity.plots.command.argument;
 
-import de.unknowncity.plots.plot.group.PlotGroup;
+import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.service.PlotService;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.caption.Caption;
@@ -16,24 +16,24 @@ import org.incendo.cloud.suggestion.SuggestionProvider;
 
 import java.util.concurrent.CompletableFuture;
 
-public class PlotGroupParser<C> implements ArgumentParser<C, PlotGroup> {
+public class PlotParser<C> implements ArgumentParser<C, Plot> {
     private final PlotService plotService;
 
-    public PlotGroupParser(PlotService plotService) {
+    public PlotParser(PlotService plotService) {
         this.plotService = plotService;
     }
 
-    public static <C> ParserDescriptor<C, PlotGroup> plotGroupParser(PlotService plotService) {
-        return ParserDescriptor.of(new PlotGroupParser<>(plotService), PlotGroup.class);
+    public static <C> ParserDescriptor<C, Plot> plotParser(PlotService plotService) {
+        return ParserDescriptor.of(new PlotParser<>(plotService), Plot.class);
     }
 
     @Override
-    public @NonNull ArgumentParseResult<@NonNull PlotGroup> parse(@NonNull CommandContext<@NonNull C> commandContext, @NonNull CommandInput commandInput) {
+    public @NonNull ArgumentParseResult<@NonNull Plot> parse(@NonNull CommandContext<@NonNull C> commandContext, @NonNull CommandInput commandInput) {
         var token = commandInput.readString();
 
-        var plotGroupOpt = plotService.getGroup(token);
-        return plotGroupOpt.map(ArgumentParseResult::success)
-                .orElseGet(() -> ArgumentParseResult.failure(new PlotGroupParseException(token, commandContext)));
+        var plotOpt = plotService.getPlot(token);
+        return plotOpt.map(ArgumentParseResult::success)
+                .orElseGet(() -> ArgumentParseResult.failure(new PlotParseException(token, commandContext)));
 
     }
 
@@ -43,18 +43,18 @@ public class PlotGroupParser<C> implements ArgumentParser<C, PlotGroup> {
                 CompletableFuture.completedFuture(plotService.plotGroupCache().asMap().keySet().stream().map(Suggestion::suggestion).toList());
     }
 
-    public static final class PlotGroupParseException extends ParserException {
+    public static final class PlotParseException extends ParserException {
 
 
-        private PlotGroupParseException(
+        private PlotParseException(
                 final @NonNull String input,
                 final @NonNull CommandContext<?> context
         ) {
             super(
                     PlotGroupParser.class,
                     context,
-                    Caption.of("argument.parse.failure.group"),
-                    CaptionVariable.of("group", input)
+                    Caption.of("argument.parse.failure.plot"),
+                    CaptionVariable.of("plot", input)
             );
         }
     }

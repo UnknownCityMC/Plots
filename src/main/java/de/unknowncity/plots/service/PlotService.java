@@ -2,22 +2,14 @@ package de.unknowncity.plots.service;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.function.biome.BiomeReplace;
-import com.sk89q.worldedit.function.operation.Operations;
-import com.sk89q.worldedit.function.visitor.RegionVisitor;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldedit.world.biome.BiomeType;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.unknowncity.astralib.common.service.Service;
 import de.unknowncity.plots.PlotsPlugin;
+import de.unknowncity.plots.event.PlotClaimPlayerEvent;
+import de.unknowncity.plots.event.PlotSellPlayerEvent;
 import de.unknowncity.plots.data.dao.*;
 import de.unknowncity.plots.plot.model.BuyPlot;
 import de.unknowncity.plots.plot.model.Plot;
@@ -30,9 +22,9 @@ import de.unknowncity.plots.plot.flag.PlotFlags;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
 import de.unknowncity.plots.plot.group.PlotGroup;
 import de.unknowncity.plots.plot.location.PlotLocation;
-import de.unknowncity.plots.plot.location.signs.PlotSign;
 import de.unknowncity.plots.plot.location.signs.SignManager;
 import de.unknowncity.plots.service.backup.BackupService;
+import de.unknowncity.plots.service.plot.*;
 import de.unknowncity.plots.util.LocationUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -41,46 +33,50 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import javax.annotation.Nullable;
-import java.io.File;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class PlotService extends Service<PlotsPlugin> {
-    private final QueryConfiguration queryConfiguration;
     private final PlotsPlugin plugin;
-
+    private final FlagRegistry flagRegistry;
+    private final QueryConfiguration queryConfiguration;
+    ;
     private final Cache<String, Plot> plotCache = CacheBuilder.newBuilder().build();
     private final Cache<String, PlotGroup> plotGroupCache = CacheBuilder.newBuilder().build();
-    private final Cache<PlotSign, String> plotSignCache = CacheBuilder.newBuilder().build();
-    private final EconomyService economyService;
+    private final Logger logger = JavaPlugin.getPlugin(PlotsPlugin.class).getLogger();
 
-    private final FlagRegistry flagRegistry;
-    private final SignManager signManager;
-    private PlotDao plotDao;
-    private PlotFlagDao plotFlagDao;
-    private PlotInteractablesDao plotInteractablesDao;
-    private PlotGroupDao plotGroupDao;
-    private PlotLocationDao plotLocationDao;
-    private PlotSignDao plotSignDao;
-    private PlotMemberDao plotMemberDao;
-    private PlotDeniedPlayerDao plotDeniedPlayerDao;
+    private final PlotDao plotDao;
+    private final PlotGroupDao groupDao;
+
+    private final PlotMemberDao memberDao;
+    private final PlotDeniedPlayerDao deniedDao;
+    private final PlotSignDao signDao;
+    private final PlotLocationDao locationDao;
+    private final PlotFlagDao flagDao;
+    private final PlotInteractablesDao interactablesDao;
 
     private final SchematicManager schematicManager;
 
-    public PlotService(QueryConfiguration queryConfiguration, PlotsPlugin plugin) {
-        this.flagRegistry = new FlagRegistry(plugin);
-        this.queryConfiguration = queryConfiguration;
-        this.economyService = plugin.serviceRegistry().getRegistered(EconomyService.class);
+    public PlotService(PlotsPlugin plugin, FlagRegistry flagRegistry, SchematicManager schematicManager, QueryConfiguration queryConfiguration) {
         this.plugin = plugin;
-        this.schematicManager = new SchematicManager(plugin);
+        this.flagRegistry = flagRegistry;
+        this.queryConfiguration = queryConfiguration;
+        this.schematicManager = schematicManager;
 
-        this.signManager = new SignManager(plugin);
+        this.plotDao = new PlotDao(queryConfiguration);
+        this.groupDao = new PlotGroupDao(queryConfiguration);
+        this.memberDao = new PlotMemberDao(queryConfiguration);
+        this.deniedDao = new PlotDeniedPlayerDao(queryConfiguration);
+        this.signDao = new PlotSignDao(queryConfiguration);
+        this.locationDao = new PlotLocationDao(queryConfiguration);
+        this.flagDao = new PlotFlagDao(queryConfiguration, flagRegistry);
+        this.interactablesDao = new PlotInteractablesDao(queryConfiguration);
     }
 
     @Override
@@ -88,39 +84,278 @@ public class PlotService extends Service<PlotsPlugin> {
         PlotFlags.registerAllFlags(this);
 
         schematicManager.makeDirectories();
-
-        this.plotDao = new PlotDao(queryConfiguration);
-        this.plotFlagDao = new PlotFlagDao(queryConfiguration, flagRegistry);
-        this.plotInteractablesDao = new PlotInteractablesDao(queryConfiguration);
-        this.plotGroupDao = new PlotGroupDao(queryConfiguration);
-        this.plotLocationDao = new PlotLocationDao(queryConfiguration);
-        this.plotSignDao = new PlotSignDao(queryConfiguration);
-        this.plotMemberDao = new PlotMemberDao(queryConfiguration);
-        this.plotDeniedPlayerDao = new PlotDeniedPlayerDao(queryConfiguration);
-
         this.plugin.serviceRegistry().register(new BackupService(schematicManager, this));
+        var accessService = new AccessService(queryConfiguration, memberDao, deniedDao, logger, plugin);
+        var biomeService = new BiomeService(logger);
+        var flagService = new FlagService(flagDao, flagRegistry, queryConfiguration);
+        var interactablesService = new InteractablesService(interactablesDao, queryConfiguration);
+        var locationService = new PlotLocationService(locationDao, queryConfiguration);
+        var signService = new SignService(signDao, queryConfiguration);
+
+        plugin.serviceRegistry().register(accessService);
+        plugin.serviceRegistry().register(biomeService);
+        plugin.serviceRegistry().register(flagService);
+        plugin.serviceRegistry().register(interactablesService);
+        plugin.serviceRegistry().register(locationService);
+        plugin.serviceRegistry().register(signService);
+        signService.cacheAll();
     }
 
-    public void cacheAll() {
-        loadPlotCache();
+    public boolean existsPlot(String id) {
+        return plotCache.getIfPresent(id) != null;
+    }
+
+    public boolean existsPlot(ProtectedRegion region) {
+        return existsPlot(region.getId());
+    }
+
+    public boolean existsGroup(String id) {
+        return plotGroupCache.getIfPresent(id) != null;
+    }
+
+
+    public PlotGroup createPlotGroup(String name) {
+        var plotGroup = new PlotGroup(name);
+        CompletableFuture.runAsync(() -> groupDao.write(plotGroup));
+        plotGroupCache.put(name, plotGroup);
+        return plotGroup;
+    }
+
+    public void deletePlotGroup(String name) {
+        plotGroupCache.invalidate(name);
+        CompletableFuture.runAsync(() -> groupDao.delete(name));
+    }
+
+    public Optional<Plot> createBuyPlotFromRegion(ProtectedRegion region, World world, double price, String plotGroupName) {
+        var plotId = region.getId();
+        if (existsPlot(plotId)) {
+            return Optional.empty();
+        }
+        var plot = new BuyPlot(plotId, null, plotGroupName, region.getId(), price, world.getName(), PlotState.AVAILABLE, null);
+
+        return createPlot(region, plot, plotGroupName);
+    }
+
+    public Optional<Plot> createRentPlotFromRegion(ProtectedRegion region, World world, double price, String plotGroupName, Duration rentInterval) {
+        var plotId = region.getId();
+        if (existsPlot(plotId)) {
+            return Optional.empty();
+        }
+        var plot = new RentPlot(plotId, null, plotGroupName, region.getId(), price, world.getName(), PlotState.AVAILABLE, null, null, rentInterval.toMinutes());
+
+        return createPlot(region, plot, plotGroupName);
+    }
+
+    private Optional<Plot> createPlot(ProtectedRegion region, Plot plot, String plotGroupName) {
+        plot.groupName(plotGroupName);
+
+        region.setFlag(Flags.INTERACT, StateFlag.State.ALLOW);
+        region.setFlag(Flags.USE, StateFlag.State.ALLOW);
+        region.setFlag(Flags.BUILD, StateFlag.State.ALLOW);
+
+        setDefaults(plot);
+
+        savePlot(plot);
+        return Optional.of(plot);
+    }
+
+    private void setDefaults(Plot plot) {
+        plot.state(PlotState.AVAILABLE);
+        plot.owner(null);
+        flagRegistry.getAllRegistered().forEach(plotFlag -> plot.setFlag(plotFlag, plotFlag.defaultValue()));
+        if (plot instanceof RentPlot rentPlot) {
+            rentPlot.lastRentPayed(null);
+        }
+
+        if (plot instanceof RentPlot rentPlot) {
+            rentPlot.lastRentPayed(null);
+        }
+
+        var optLocation = LocationUtil.findSuitablePlotLocation(plot.world(), plot.protectedRegion());
+        if (optLocation.isPresent()) {
+            var location = optLocation.get();
+            var plotHome = new PlotLocation(plot.id(), plot.id(), true, location.x(), location.y(), location.z(), 0, 0);
+            plot.plotHome(plotHome);
+        }
+
+        plot.interactables(PlotInteractable.defaults());
+    }
+
+    public void deletePlot(String id) {
+        plotCache.invalidate(id);
+        CompletableFuture.runAsync(() -> plotDao.delete(id));
+    }
+
+    public void setPlotOwner(OfflinePlayer player, Plot plot) {
+        plot.state(PlotState.SOLD);
+        plot.owner(new PlotPlayer(plot.id(), player.getUniqueId(), player.getName()));
+        CompletableFuture.runAsync(() -> plotDao.write(queryConfiguration, plot));
+    }
+
+    public void setPlotPrice(double price, Plot plot) {
+        plot.updatePrice(price);
+        CompletableFuture.runAsync(() -> plotDao.write(queryConfiguration, plot));
+    }
+
+    public void setPlotGroup(String groupName, Plot plot) {
+        plot.groupName(groupName);
+        CompletableFuture.runAsync(() -> plotDao.write(queryConfiguration, plot));
+    }
+
+    public Optional<Plot> findPlotAt(Location location) {
+        var regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
+        var possibleRegion = regionService.getSuitableRegion(location);
+
+        if (possibleRegion.isEmpty()) {
+            return Optional.empty();
+        }
+
+        var plotId = possibleRegion.get().getId();
+
+        if (!existsPlot(plotId)) {
+            return Optional.empty();
+        }
+
+        return getPlot(plotId);
+    }
+
+    public Optional<Plot> findPlotForRegion(ProtectedRegion region) {
+        return getPlot(region.getId());
+    }
+
+    public Optional<Plot> getPlot(String id) {
+        return Optional.ofNullable(plotCache.getIfPresent(id));
+    }
+
+    public Optional<PlotGroup> getGroup(String id) {
+        return Optional.ofNullable(plotGroupCache.getIfPresent(id));
+    }
+
+    public Plot getPlot(ProtectedRegion region) {
+        return plotCache.getIfPresent(region.getId());
+    }
+
+    public List<Plot> findPlotsByOwnerUUID(UUID uuid) {
+        return plotCache.asMap().values().stream().filter(plot -> plot.owner() != null && plot.owner().uuid()
+                .equals(uuid)).sorted(Comparator.comparing(Plot::claimed)).toList();
+    }
+
+    public List<Plot> findAvailablePlots(String groupName) {
+        return plotCache.asMap().values().stream()
+                .filter(plot -> plot.state().equals(PlotState.AVAILABLE))
+                .filter(plot -> plot.groupName() != null && plot.groupName().equals(groupName))
+                .toList();
+    }
+
+    public List<Plot> findPlotsByOwnerUUIDForGroup(UUID uuid, String groupName) {
+        if (groupName == null) {
+            return findPlotsByOwnerUUID(uuid);
+        }
+        return findPlotsByOwnerUUID(uuid).stream()
+                .filter(plot -> plot.groupName() != null && plot.groupName().equals(groupName))
+                .toList();
+    }
+
+    public Optional<Plot> getPlotForSignLocation(Location location) {
+
+        var signCache = plugin.serviceRegistry().getRegistered(SignService.class).plotSignCache();
+        var signOpt = signCache.stream().filter(sign -> sign.isAt(location)).findFirst();
+        if (signOpt.isEmpty()) {
+            return Optional.empty();
+        }
+        return getPlot(signOpt.get().plotId());
+    }
+
+
+    public void resetPlot(Plot plot) {
+        setDefaults(plot);
+        savePlot(plot);
+        var accessService = plugin.serviceRegistry().getRegistered(AccessService.class);
+        accessService.clearMembers(plot);
+        accessService.clearDeniedPlayers(plot);
+
+        SignManager.updateSings(plot, plugin.messenger());
+    }
+
+    public boolean claimPlot(Player player, Plot plot) {
+        var event = new PlotClaimPlayerEvent(plot, player);
+        event.callEvent();
+        if (event.isCancelled()) {
+            return false;
+        }
+
+        if (plot instanceof RentPlot rentPlot) {
+            rentPlot.lastRentPayed(LocalDateTime.now());
+        }
+
+        plugin.serviceRegistry().getRegistered(EconomyService.class).withdraw(player.getUniqueId(), plot.price());
+
+        plot.state(PlotState.SOLD);
+        plot.owner(new PlotPlayer(plot.id(), player.getUniqueId(), player.getName()));
+        plotDao.write(queryConfiguration, plot);
+
+        if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
+            schematicManager.createPreSaleSchematic(plot);
+        }
+
+        SignManager.updateSings(plot, plugin.messenger());
+        return true;
+    }
+
+    public boolean unClaimPlot(Plot plot) {
+        var event = new PlotSellPlayerEvent(plot, Bukkit.getPlayer(plot.owner().uuid()));
+        event.callEvent();
+        if (event.isCancelled()) {
+            return false;
+        }
+        if (plot instanceof BuyPlot) {
+            plugin.serviceRegistry().getRegistered(EconomyService.class).deposit(plot.owner().uuid(), plot.price() * 0.8);
+        }
+
+        resetPlot(plot);
+        return true;
+    }
+
+    public void savePlot(Plot plot) {
+        plotCache.put(plot.id(), plot);
+
+        CompletableFuture.runAsync(() -> {
+            try (var conn = queryConfiguration.withSingleTransaction()) {
+                //logger.info("Saving plot with ID: " + plot.id());
+                plotDao.write(conn, plot);
+                plugin.serviceRegistry().getRegistered(FlagService.class).saveCurrentFlags(conn, plot);
+                plugin.serviceRegistry().getRegistered(InteractablesService.class).saveCurrentInteractables(conn, plot);
+                plugin.serviceRegistry().getRegistered(PlotLocationService.class).setPlotHome(conn, plot, plot.plotHome());
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Failed to save plot " + plot.id(), e);
+            }
+        }).exceptionally(throwable -> {
+            logger.log(Level.SEVERE, "Failed to save plot " + plot.id(), throwable);
+            return null;
+        }).whenComplete((unused, throwable) -> {
+            if (throwable != null) {
+                logger.log(Level.SEVERE, "Failed to save plot " + plot.id(), throwable);
+            } else {
+                SignManager.updateSings(plot, plugin.messenger());
+            }
+        });
     }
 
     /* Load everything in memory as we need access to all plots, members, flags, etc. when a location in
     the world is interacted with, to check if the interaction is allowed.
     For example, a member is allowed to build on a plot (if the access modifier is set to this value), but a non-member is not.
      */
-
-    public void loadPlotCache() {
+    public void cacheAll() {
         var logger = JavaPlugin.getPlugin(PlotsPlugin.class).getLogger();
         logger.warning("Loading plots from database...");
         var plotsFuture = CompletableFuture.supplyAsync(plotDao::readAll);
-        var membersFuture = CompletableFuture.supplyAsync(plotMemberDao::readAll);
-        var deniedFuture = CompletableFuture.supplyAsync(plotDeniedPlayerDao::readAll);
-        var signsFuture = CompletableFuture.supplyAsync(plotSignDao::readAll);
-        var warpsFuture = CompletableFuture.supplyAsync(plotLocationDao::readAll);
-        var flagsFuture = CompletableFuture.supplyAsync(plotFlagDao::readAll);
-        var interactablesFuture = CompletableFuture.supplyAsync(plotInteractablesDao::readAll);
-        var groupsFuture = CompletableFuture.supplyAsync(plotGroupDao::readAll);
+        var membersFuture = CompletableFuture.supplyAsync(memberDao::readAll);
+        var deniedFuture = CompletableFuture.supplyAsync(deniedDao::readAll);
+        var signsFuture = CompletableFuture.supplyAsync(signDao::readAll);
+        var warpsFuture = CompletableFuture.supplyAsync(locationDao::readAll);
+        var flagsFuture = CompletableFuture.supplyAsync(flagDao::readAll);
+        var interactablesFuture = CompletableFuture.supplyAsync(interactablesDao::readAll);
+        var groupsFuture = CompletableFuture.supplyAsync(groupDao::readAll);
 
         CompletableFuture.allOf(
                 plotsFuture,
@@ -159,9 +394,6 @@ public class PlotService extends Service<PlotsPlugin> {
                 var plot = plotCache.getIfPresent(plotSign.plotId());
                 if (plot != null) {
                     plot.signs().add(plotSign);
-
-                    // Mapping between PlotSign and Plot for easy access when a player clicks a plot sign
-                    plotSignCache.put(plotSign, plot.id());
                 }
             });
 
@@ -192,356 +424,23 @@ public class PlotService extends Service<PlotsPlugin> {
             var groups = groupsFuture.join();
             groups.forEach(plotGroup -> {
                 plotGroupCache.put(plotGroup.name(), plotGroup);
-                plotCache.asMap().values().forEach(plot -> {
-                    if (plot.groupName() != null && plot.groupName().equals(plotGroup.name())) {
-                        plotGroup.plotsInGroup().put(plot.id(), plot);
-                    }
-                });
             });
         });
-    }
-
-
-    public boolean existsPlot(String id) {
-        return plotCache.getIfPresent(id) != null;
-    }
-
-    public boolean existsGroup(String id) {
-        return plotGroupCache.getIfPresent(id) != null;
-    }
-
-    public boolean existsPlot(ProtectedRegion region) {
-        return existsPlot(region.getId());
-    }
-
-    public void savePlotGroup(PlotGroup plotGroup) {
-        CompletableFuture.runAsync(() -> plotGroupDao.write(plotGroup));
-        plotGroupCache.put(plotGroup.name(), plotGroup);
-        plotGroup.plotsInGroup().values().forEach(this::savePlot);
-    }
-
-    public void deletePlotGroup(String name) {
-        var plotGroup = plotGroupCache.getIfPresent(name);
-        if (plotGroup == null) {
-            return;
-        }
-        deletePlotGroup(plotGroup);
-    }
-
-    public void deletePlotGroup(PlotGroup plotGroup) {
-        plotGroup.plotsInGroup().values().forEach(plot -> {
-            plot.groupName(null);
-            savePlot(plot);
-        });
-        plotGroupCache.invalidate(plotGroup.name());
-        plotGroupDao.delete(plotGroup.name());
-    }
-
-    public Optional<Plot> createBuyPlotFromRegion(ProtectedRegion region, World world, double price, String plotGroupName) {
-        var plotId = region.getId();
-        if (existsPlot(plotId)) {
-            return Optional.empty();
-        }
-        var plot = new BuyPlot(plotId, null, plotGroupName,  region.getId(), price, world.getName(), PlotState.AVAILABLE, null);
-
-        return createPlot(region, plot, plotGroupName);
-    }
-
-    public Optional<Plot> createRentPlotFromRegion(ProtectedRegion region, World world, double price, String plotGroupName, Duration rentInterval) {
-        var plotId = region.getId();
-        if (existsPlot(plotId)) {
-            return Optional.empty();
-        }
-        var plot = new RentPlot(plotId, null, plotGroupName, region.getId(), price, world.getName(), PlotState.AVAILABLE, null, null, rentInterval.toMinutes());
-
-        return createPlot(region, plot, plotGroupName);
-    }
-
-    private Optional<Plot> createPlot(ProtectedRegion region, Plot plot, String plotGroupName) {
-        plot.groupName(plotGroupName);
-
-        region.setFlag(Flags.INTERACT, StateFlag.State.ALLOW);
-        region.setFlag(Flags.USE, StateFlag.State.ALLOW);
-        region.setFlag(Flags.BUILD, StateFlag.State.ALLOW);
-
-        flagRegistry.getAllRegistered().forEach(plotFlag -> plot.setFlag(plotFlag, plotFlag.defaultValue()));
-
-        var optLocation = LocationUtil.findSuitablePlotLocation(plot.world(), region);
-        if (optLocation.isPresent()) {
-            var location = optLocation.get();
-            var plotHome = new PlotLocation(plot.id(), plot.id(), true, location.x(), location.y(), location.z(), 0, 0);
-            plot.plotHome(plotHome);
-        } else {
-            return Optional.empty();
-        }
-
-        plot.interactables(PlotInteractable.defaults());
-
-        savePlot(plot);
-        return Optional.of(plot);
-    }
-
-    public void setBiome(Plot plot, BiomeType biome) {
-        var world = plot.world();
-        final var biomeExtend = 3;
-
-        try (EditSession editSession = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(world))) {
-            var region = new CuboidRegion(plot.protectedRegion().getMinimumPoint(), plot.protectedRegion().getMaximumPoint());
-            region.expand(BlockVector3.at(biomeExtend, 0, 0));
-            region.expand(BlockVector3.at(-biomeExtend, 0, 0));
-            region.expand(BlockVector3.at(0, 0, biomeExtend));
-            region.expand(BlockVector3.at(0, 0, -biomeExtend));
-
-            var replace = new BiomeReplace(editSession, biome);
-            var visitor = new RegionVisitor(region, replace);
-            Operations.complete(visitor);
-        } catch (WorldEditException e) {
-            plugin.getLogger().warning("Failed to change biome for plot " + plot.id());
-        }
-    }
-
-    public void claimPlot(Player player, Plot plot) {
-        economyService.withdraw(player.getUniqueId(), plot.price());
-        if (plot instanceof RentPlot rentPlot) {
-            rentPlot.lastRentPayed(LocalDateTime.now());
-        }
-
-        plot.state(PlotState.SOLD);
-        plot.owner(new PlotPlayer(plot.id(), player.getUniqueId(), player.getName()));
-        savePlot(plot);
-
-        if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
-            schematicManager.createPreSaleSchematic(plot);
-        }
-
-        SignManager.updateSings(plot, plugin.messenger());
-    }
-
-    public void unClaimPlot(Plot plot) {
-        if (plot instanceof BuyPlot) {
-            economyService.deposit(plot.owner().uuid(), plot.price() * 0.8);
-        }
-
-        resetPlot(plot);
-    }
-
-    public boolean backup(Plot plot, UUID owner) {
-        return schematicManager.createSchematicBackup(plot, owner);
-    }
-
-    public boolean hasBackup(Plot plot, UUID owner) {
-        var path = "/schematics/backups/" + owner.toString() + "_" + plot.id() + ".schem";
-        File file = new File(plugin.getDataPath() + path);
-        return file.exists();
-    }
-
-    public void loadBackupForPlayer(Plot plot, Player player) {
-        claimPlot(player, plot);
-    }
-
-    public void setPlotOwner(OfflinePlayer player, Plot plot) {
-        plot.state(PlotState.SOLD);
-        plot.owner(new PlotPlayer(plot.id(), player.getUniqueId(), player.getName()));
-        savePlot(plot);
-    }
-
-    public void setPlotPrice(double price, Plot plot) {
-        plot.price(price);
-        savePlot(plot);
-    }
-
-    public void setPlotGroup(String groupName, Plot plot) {
-
-        // remove all associations with the old group
-        if (plot.groupName() != null && !plot.groupName().isEmpty()) {
-            var plotGroup = plotGroupCache.getIfPresent(plot.groupName());
-            if (plotGroup != null) {
-                plotGroup.plotsInGroup().remove(plot.id());
-            }
-        }
-        var plotGroup = plotGroupCache.getIfPresent(plot.groupName());
-        if (plotGroup != null) {
-            plotGroup.plotsInGroup().put(plot.id(), plot);
-        }
-
-        savePlot(plot);
-    }
-
-    public void createPlotGroup(String name) {
-        var plotGroup = new PlotGroup(name);
-        plotGroupCache.put(name, plotGroup);
-        savePlotGroup(plotGroup);
-    }
-
-    public void savePlot(Plot plot) {
-        plotCache.put(plot.id(), plot);
-
-        CompletableFuture.runAsync(() -> {
-            try (var conn = queryConfiguration.withSingleTransaction()) {
-                plugin.getLogger().info("Saving plot with ID: " + plot.id());
-                plotDao.write(conn, plot);
-                plotFlagDao.write(conn, plot.id(), plot.flags());
-                plotInteractablesDao.write(conn, plot.interactables(), plot.id());
-                plotMemberDao.write(conn, plot.members(), plot.id());
-                plotDeniedPlayerDao.write(conn, plot.deniedPlayers(), plot.id());
-                plotLocationDao.write(conn, plot.plotHome(), plot.id());
-                plotSignDao.deleteAll(conn, plot.id());
-                plotSignDao.writeAll(conn, plot.signs(), plot.id());
-            } catch (Exception e) {
-                plugin.getLogger().log(Level.SEVERE, "Failed to save plot " + plot.id(), e);
-            }
-        }).exceptionally(throwable -> {
-            plugin.getLogger().log(Level.SEVERE, "Failed to save plot " + plot.id(), throwable);
-            return null;
-        }).whenComplete((unused, throwable) -> {
-            if (throwable != null) {
-                plugin.getLogger().log(Level.SEVERE, "Failed to save plot " + plot.id(), throwable);
-            } else {
-                SignManager.updateSings(plot, plugin.messenger());
-            }
-        });
-    }
-
-    public Optional<Plot> findPlotAt(Location location) {
-        var regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
-        var possibleRegion = regionService.getSuitableRegion(location);
-
-        if (possibleRegion.isEmpty()) {
-            return Optional.empty();
-        }
-
-        var plotId = possibleRegion.get().getId();
-
-        if (!existsPlot(plotId)) {
-            return Optional.empty();
-        }
-
-        return Optional.of(getPlot(plotId));
-    }
-
-    public Optional<Plot> findPlotForRegion(ProtectedRegion region) {
-        var plotId = region.getId();
-        if (!existsPlot(plotId)) {
-            return Optional.empty();
-        }
-        return Optional.of(getPlot(plotId));
-    }
-
-    public void deletePlot(String id) {
-        var plot = plotCache.getIfPresent(id);
-        if (plot == null) {
-            return;
-        }
-        deletePlot(plot);
-    }
-
-    public void deletePlot(Plot plot) {
-        plotDao.delete(plot.id());
-        plotCache.invalidate(plot.id());
-        if (plot.groupName() != null) {
-            var plotGroup = plotGroupCache.getIfPresent(plot.groupName());
-            if (plotGroup == null) {
-                return;
-            }
-            plotGroup.plotsInGroup().remove(plot.id());
-        }
-    }
-
-    public PlotGroup getPlotGroupWithPlots(String name) {
-        return plotGroupCache.getIfPresent(name);
-    }
-
-    public Plot getPlot(String id) {
-        return plotCache.getIfPresent(id);
-    }
-
-    public PlotGroup getGroup(String id) {
-        return plotGroupCache.getIfPresent(id);
-    }
-
-    public Plot getPlot(ProtectedRegion region) {
-        return plotCache.getIfPresent(region.getId());
-    }
-
-    public Plot getPlotFromGroup(String id, String groupName) {
-        return plotGroupCache.getIfPresent(groupName).plotsInGroup().get(id);
-    }
-
-    public List<Plot> findPlotsByOwnerUUID(UUID uuid) {
-        return plotCache.asMap().values().stream().filter(plot -> plot.owner() != null && plot.owner().uuid()
-                .equals(uuid)).sorted(Comparator.comparing(Plot::claimed)).toList();
-    }
-
-    public List<Plot> findAvailablePlots(String groupName) {
-        return plotCache.asMap().values().stream()
-                .filter(plot -> plot.state().equals(PlotState.AVAILABLE))
-                .filter(plot -> plot.groupName() != null && plot.groupName().equals(groupName))
-                .toList();
-    }
-
-    public List<Plot> findPlotsByOwnerUUIDForGroup(UUID uuid, String groupName) {
-        if (groupName == null) {
-            return findPlotsByOwnerUUID(uuid);
-        }
-        return findPlotsByOwnerUUID(uuid).stream()
-                .filter(plot -> plot.groupName() != null && plot.groupName().equals(groupName))
-                .toList();
-    }
-    
-
-    public Optional<Plot> getPlotForSignLocation(Location location) {
-        var plotSign = new PlotSign(
-                "",
-                location.getBlockX(),
-                location.getBlockY(),
-                location.getBlockZ()
-        );
-
-        var signOpt = plotSignCache.asMap().keySet().stream().filter(sign -> sign.equals(plotSign)).findFirst();
-        return signOpt.map(sign -> plotCache.getIfPresent(plotSignCache.asMap().get(sign)));
-    }
-
-    public Cache<String, PlotGroup> groupCache() {
-        return plotGroupCache;
-    }
-
-    public Cache<String, Plot> plotCache() {
-        return plotCache;
-    }
-
-    public Cache<PlotSign, String> plotSignCache() {
-        return plotSignCache;
-    }
-
-    public FlagRegistry flagRegistry() {
-        return flagRegistry;
     }
 
     public PlotsPlugin plugin() {
         return plugin;
     }
 
-    public SignManager signManager() {
-        return signManager;
+    public FlagRegistry flagRegistry() {
+        return flagRegistry;
     }
 
-    public void resetPlot(Plot plot) {
-        plot.state(PlotState.AVAILABLE);
-        plot.owner(null);
-        flagRegistry.getAllRegistered().forEach(plotFlag -> {
-            plot.setFlag(plotFlag, plotFlag.defaultValue());
-        });
-        plot.members().clear();
-        plot.deniedPlayers().clear();
-        if (plot instanceof RentPlot rentPlot) {
-            rentPlot.lastRentPayed(null);
-        }
-        savePlot(plot);
+    public Cache<String, Plot> plotCache() {
+        return plotCache;
+    }
 
-        if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
-            schematicManager.pastePresaleSchematic(plot);
-        }
-
-        SignManager.updateSings(plot, plugin.messenger());
+    public Cache<String, PlotGroup> plotGroupCache() {
+        return plotGroupCache;
     }
 }

@@ -23,7 +23,7 @@ public class PlotSignLinkListener implements Listener {
         this.plugin = plotsPlugin;
         this.regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
         this.plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
-        this.signManager = plotService.signManager();
+        this.signManager = plugin.signManager();
     }
 
     @EventHandler

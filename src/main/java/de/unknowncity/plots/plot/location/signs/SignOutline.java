@@ -44,7 +44,7 @@ public class SignOutline {
 
     public void showOutline(Plot plot, PlotSign plotSign) {
         outlineEntities.putIfAbsent(plotSign, new ArrayList<>());
-        var location = new Location(plot.world(), plotSign.x(), plotSign.y(), plotSign.z());
+        var location = new org.bukkit.Location(plot.world(), plotSign.x(), plotSign.y(), plotSign.z());
 
         // Show outline (spawn new display entity)
         var block = location.getBlock();
@@ -82,7 +82,7 @@ public class SignOutline {
         outlineEntities.forEach((plotSigns, entities) -> entities.forEach(entity -> {player.showEntity(plugin, entity);}));
     }
 
-    private void applyCommonData(Block block, BlockDisplay blockDisplay, Location location) {
+    private void applyCommonData(Block block, BlockDisplay blockDisplay, org.bukkit.Location location) {
         blockDisplay.setBlock(Material.RED_CONCRETE.createBlockData());
         blockDisplay.setRotation(yawRotation(block), location.getPitch());
         blockDisplay.setVisibleByDefault(false);

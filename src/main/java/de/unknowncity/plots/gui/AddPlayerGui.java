@@ -109,7 +109,7 @@ public class AddPlayerGui {
                     player.playSound(player.getLocation(), "entity.villager.no", 1, 1);
                     return;
                 }
-                plot.denyPlayer(target);
+                plot.addDeniedPlayer(target);
                 player.playSound(player.getLocation(), "entity.experience_orb.pickup", 1, 1);
                 if (target instanceof Player targetPlayer) {
                     plugin.messenger().sendMessage(player, NodePath.path("event", "plot", "kick", "target"), plot.tagResolvers(targetPlayer, messenger));

@@ -6,6 +6,7 @@ import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
+import de.unknowncity.plots.service.backup.BackupService;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -18,6 +19,7 @@ import static org.incendo.cloud.bukkit.parser.PlayerParser.playerParser;
 
 public class PlotAdminLoadBackupCommand extends SubCommand {
     private final PlotService plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
+    private final BackupService backupService = plugin.serviceRegistry().getRegistered(BackupService.class);
     private final RegionService regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
     private final EconomyService economyService = plugin.serviceRegistry().getRegistered(EconomyService.class);
 
@@ -48,7 +50,7 @@ public class PlotAdminLoadBackupCommand extends SubCommand {
 
             var plot = plotService.getPlot(protectedRegion);
 
-            if (!plotService.hasBackup(plot, target.getUniqueId())) {
+            if (!backupService.hasBackup(plot, target.getUniqueId())) {
                 plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "load-backup", "not-found"));
                 return;
             }
@@ -58,7 +60,8 @@ public class PlotAdminLoadBackupCommand extends SubCommand {
                 return;
             }
 
-            plotService.loadBackupForPlayer(plot, target);
+            backupService.loadBackupForPlayer(plot, target);
+            plotService.claimPlot(target, plot);
         }, () -> plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "no-suitable-region")));
     }
 }

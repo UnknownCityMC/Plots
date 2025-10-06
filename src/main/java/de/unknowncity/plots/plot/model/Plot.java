@@ -9,8 +9,8 @@ import de.chojo.sadu.mapper.reader.StandardReader;
 import de.chojo.sadu.mapper.rowmapper.RowMapping;
 import de.unknowncity.astralib.common.message.lang.Language;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
-import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.plot.access.PlotState;
+import de.unknowncity.plots.plot.access.type.PlotAccessModifier;
 import de.unknowncity.plots.plot.access.type.PlotMemberRole;
 import de.unknowncity.plots.plot.economy.PlotPaymentType;
 import de.unknowncity.plots.plot.flag.PlotFlag;
@@ -64,15 +64,11 @@ public abstract class Plot {
     public abstract PlotPaymentType paymentType();
 
     public List<PlotMember> members() {
-        return members;
+        return Collections.unmodifiableList(members);
     }
 
     public List<PlotPlayer> deniedPlayers() {
-        return deniedPlayers;
-    }
-
-    public void deniedPlayers(List<PlotPlayer> bannedPlayers) {
-        this.deniedPlayers.addAll(bannedPlayers);
+        return Collections.unmodifiableList(deniedPlayers);
     }
 
     public String id() {
@@ -104,23 +100,28 @@ public abstract class Plot {
     }
 
     public List<PlotSign> signs() {
-        return signs;
-    }
-
-    public LocalDateTime claimed() {
-        return claimed;
+        return Collections.unmodifiableList(signs);
     }
 
     public Map<PlotFlag<?>, ?> flags() {
-        return flags;
+        return Collections.unmodifiableMap(flags);
     }
 
     public List<PlotInteractable> interactables() {
-        return interactables;
+        return Collections.unmodifiableList(interactables);
     }
 
     public void interactables(List<PlotInteractable> interactables) {
         this.interactables = interactables;
+    }
+
+    public void updateInteractable(Material material, PlotAccessModifier modifier) {
+        interactables.removeIf(plotInteractable -> plotInteractable.blockType() == material);
+        interactables.add(new PlotInteractable(plotId, material, modifier));
+    }
+
+    public LocalDateTime claimed() {
+        return claimed;
     }
 
     /**
@@ -163,7 +164,7 @@ public abstract class Plot {
     }
 
     public Biome biome() {
-        var location = new Location(world(), protectedRegion().getMinimumPoint().x(), protectedRegion().getMinimumPoint().y(), protectedRegion().getMinimumPoint().z());
+        var location = new org.bukkit.Location(world(), protectedRegion().getMinimumPoint().x(), protectedRegion().getMinimumPoint().y(), protectedRegion().getMinimumPoint().z());
         return world().getBiome(location);
     }
 
@@ -171,7 +172,7 @@ public abstract class Plot {
         return price;
     }
 
-    public void price(double price) {
+    public void updatePrice(double price) {
         this.price = price;
     }
 
@@ -232,16 +233,6 @@ public abstract class Plot {
         return deniedPlayers.stream().filter(bannedPlayer -> bannedPlayer.uuid().equals(uuid)).findFirst();
     }
 
-    public void changeMemberRole(UUID memberId, PlotMemberRole newRole) {
-        findPlotMember(memberId).ifPresent(plotMember -> {
-            plotMember.role(newRole);
-        });
-    }
-
-    public boolean isMemberOrOwner(UUID uuid) {
-        return findPlotMember(uuid).isPresent() || owner().uuid().equals(uuid);
-    }
-
     public boolean isOwner(UUID uuid) {
         return owner != null && owner.uuid().equals(uuid);
     }
@@ -254,27 +245,42 @@ public abstract class Plot {
         return findPlotBannedPlayer(uuid).isPresent();
     }
 
-    public void trustPlayer(PlotMember plotMember) {
+    public PlotMember addMember(OfflinePlayer offlinePlayer, PlotMemberRole role) {
+        var plotMember = new PlotMember(plotId, offlinePlayer.getUniqueId(), offlinePlayer.getName(), role);
         members.add(plotMember);
+        return plotMember;
     }
 
-    public void denyPlayer(OfflinePlayer offlinePlayer) {
-        members.removeIf(member -> member.uuid().equals(offlinePlayer.getUniqueId()));
-        deniedPlayers.add(new PlotPlayer(plotId, offlinePlayer.getUniqueId(), offlinePlayer.getName()));
-        if (offlinePlayer instanceof Player player) {
-            if (player.hasPermission(Permissions.BYPASS_ENTRY)) {
-                return;
-            }
-            kick(player);
-        }
+    public void removeMember(UUID uuid) {
+        members.removeIf(member -> member.uuid().equals(uuid));
     }
 
-    public void kick(Player player) {
-        if (player.hasPermission(Permissions.BYPASS_ENTRY)) {
-            return;
-        }
-        player.teleport(world().getSpawnLocation());
+    public PlotPlayer addDeniedPlayer(OfflinePlayer offlinePlayer) {
+        var deniedPlayer = new PlotPlayer(plotId, offlinePlayer.getUniqueId(), offlinePlayer.getName());
+        deniedPlayers.add(deniedPlayer);
+        return deniedPlayer;
     }
+
+    public void removeDeniedPlayer(UUID uuid) {
+        deniedPlayers.removeIf(member -> member.uuid().equals(uuid));
+    }
+
+    public PlotSign addSign(org.bukkit.Location location) {
+        var sign = new PlotSign(plotId, location.getBlockX(), location.getBlockY(), location.getBlockZ());
+        signs.add(sign);
+        return sign;
+    }
+
+    public void removeSign(org.bukkit.Location location) {
+        signs.removeIf(plotSign -> plotSign.equals(new PlotSign(plotId, location.getBlockX(), location.getBlockY(), location.getBlockZ())));
+    }
+
+//    public void kick(Player player) {
+//        if (player.hasPermission(Permissions.BYPASS_ENTRY)) {
+//            return;
+//        }
+//        player.teleport(world().getSpawnLocation());
+//    }
 
     public int height() {
         return protectedRegion().getMaximumPoint().y() - protectedRegion().getMinimumPoint().y() + 1;

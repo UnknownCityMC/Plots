@@ -2,9 +2,12 @@ package de.unknowncity.plots.gui.items;
 
 import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
+import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.plot.model.PlotMember;
 import de.unknowncity.plots.plot.access.type.PlotMemberRole;
+import de.unknowncity.plots.plot.model.PlotPlayer;
+import de.unknowncity.plots.service.plot.AccessService;
 import de.unknowncity.plots.util.SkullHelper;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
@@ -25,8 +28,10 @@ public class ManageMembersItem extends AbstractPagedGuiBoundItem {
     private final Plot plot;
     private final PlotMember member;
     private final PaperMessenger messenger;
+    private final PlotsPlugin plugin;
 
-    public ManageMembersItem(Plot plot, PlotMember member, PaperMessenger messenger) {
+    public ManageMembersItem(PlotsPlugin plugin, Plot plot, PlotMember member, PaperMessenger messenger) {
+        this.plugin = plugin;
         this.plot = plot;
         this.member = member;
         this.messenger = messenger;
@@ -84,9 +89,7 @@ public class ManageMembersItem extends AbstractPagedGuiBoundItem {
 
         player.playSound(player.getLocation(), "ui.button.click", 1, 1);
 
-        member.role(role);
-
-        plot.changeMemberRole(member.uuid(), role);
+        plugin.serviceRegistry().getRegistered(AccessService.class).setMemberRole(plot, member.uuid(), role);
 
         notifyWindows();
     }

@@ -56,7 +56,7 @@ public class PlotDenyCommand extends SubCommand {
                 return;
             }
 
-            plot.denyPlayer(target);
+            plot.addDeniedPlayer(target);
 
             plotService.savePlot(plot);
             plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "deny", "success"),

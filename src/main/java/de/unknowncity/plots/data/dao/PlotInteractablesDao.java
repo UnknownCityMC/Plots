@@ -34,7 +34,7 @@ public class PlotInteractablesDao {
                 ).all();
     }
 
-    public Boolean write(ConnectedQueryConfiguration connection, List<PlotInteractable> interactables, String plotId) {
+    public Boolean write(QueryConfiguration configuration, String plotId, List<PlotInteractable> interactables) {
         @Language("mariadb")
         var querySting = """
                 INSERT INTO plot_interactables (
@@ -50,7 +50,7 @@ public class PlotInteractablesDao {
                 ON DUPLICATE KEY UPDATE
                     access_modifier = VALUES(access_modifier);
                 """;
-        return connection.query(querySting)
+        return configuration.query(querySting)
                 .batch(interactables.stream().map(plotInteractable -> call()
                         .bind("plot_id", plotId)
                         .bind("block_type", plotInteractable.blockType().name())
