@@ -3,10 +3,9 @@ package de.unknowncity.plots.gui.items;
 import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
 import de.unknowncity.plots.PlotsPlugin;
+import de.unknowncity.plots.plot.access.type.PlotMemberRole;
 import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.plot.model.PlotMember;
-import de.unknowncity.plots.plot.access.type.PlotMemberRole;
-import de.unknowncity.plots.plot.model.PlotPlayer;
 import de.unknowncity.plots.service.plot.AccessService;
 import de.unknowncity.plots.util.SkullHelper;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -67,10 +66,12 @@ public class ManageMembersItem extends AbstractPagedGuiBoundItem {
         return new ItemWrapper(builder);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull Click click) {
         if (clickType == ClickType.SHIFT_LEFT) {
-            plot.members().removeIf(plotMember -> plotMember.uuid().equals(member.uuid()));
+            plugin.serviceRegistry().getRegistered(AccessService.class).removeMember(plot, member.uuid());
+
             var gui = (PagedGui<Item>) getGui();
             gui.setContent(gui.getContent().stream().filter(item -> !item.equals(this)).toList());
             player.playSound(player.getLocation(), "entity.item.break", 1, 1);

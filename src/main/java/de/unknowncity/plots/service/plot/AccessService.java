@@ -14,6 +14,7 @@ import de.unknowncity.plots.plot.model.PlotMember;
 import de.unknowncity.plots.plot.model.PlotPlayer;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -26,14 +27,12 @@ public class AccessService extends Service<PlotsPlugin> {
     private final QueryConfiguration queryConfiguration;
     private final Logger logger;
     private final PlotMemberDao memberDao;
-    private final PlotsPlugin plugin;
 
-    public AccessService(QueryConfiguration queryConfiguration, PlotMemberDao plotMemberDao, PlotDeniedPlayerDao plotDeniedPlayerDao, Logger logger, PlotsPlugin plugin) {
+    public AccessService(QueryConfiguration queryConfiguration, PlotMemberDao plotMemberDao, PlotDeniedPlayerDao plotDeniedPlayerDao, Logger logger) {
         this.queryConfiguration = queryConfiguration;
         this.deniedPlayerDao = plotDeniedPlayerDao;
         this.memberDao = plotMemberDao;
         this.logger = logger;
-        this.plugin = plugin;
     }
 
     public void denyPlayer(Plot plot, OfflinePlayer offlinePlayer) {
@@ -50,10 +49,10 @@ public class AccessService extends Service<PlotsPlugin> {
         new PlotInfoUpdateEvent(plot).callEvent();
     }
 
-    public void unDenyPlayer(Plot plot, OfflinePlayer offlinePlayer) {
-        plot.removeDeniedPlayer(offlinePlayer.getUniqueId());
+    public void unDenyPlayer(Plot plot, UUID uuid) {
+        plot.removeDeniedPlayer(uuid);
         new PlotInfoUpdateEvent(plot).callEvent();
-        CompletableFuture.runAsync(() -> deniedPlayerDao.delete(plot.id(), offlinePlayer.getUniqueId()));
+        CompletableFuture.runAsync(() -> deniedPlayerDao.delete(plot.id(), uuid));
     }
 
     public void clearDeniedPlayers(Plot plot) {
@@ -68,9 +67,14 @@ public class AccessService extends Service<PlotsPlugin> {
         CompletableFuture.runAsync(() -> {
             try (ConnectedQueryConfiguration configuration = queryConfiguration.withSingleTransaction()) {
                 memberDao.write(configuration, plot.id(), member);
+
                 deniedPlayerDao.delete(configuration, plot.id(), offlinePlayer.getUniqueId());
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Could not save member to database", e);
+            }
+        }).whenComplete((unused, throwable) -> {
+            if (throwable != null) {
+                JavaPlugin.getPlugin(PlotsPlugin.class).getLogger().log(Level.SEVERE, "Error while saving plot data: ", throwable);
             }
         });
         new PlotInfoUpdateEvent(plot).callEvent();
@@ -78,37 +82,37 @@ public class AccessService extends Service<PlotsPlugin> {
 
     public void removeMember(Plot plot, UUID uuid) {
         plot.removeMember(uuid);
-        CompletableFuture.runAsync(() -> memberDao.delete(plot.id(), uuid));
+        CompletableFuture.runAsync(() -> memberDao.delete(plot.id(), uuid)).whenComplete((unused, throwable) -> {
+            if (throwable != null) {
+                JavaPlugin.getPlugin(PlotsPlugin.class).getLogger().log(Level.SEVERE, "Error while saving plot data: ", throwable);
+            }
+        });
         new PlotInfoUpdateEvent(plot).callEvent();
 
     }
 
     public void setMemberRole(Plot plot, UUID uuid, PlotMemberRole role) {
-        Optional<PlotMember> member = findMember(plot, uuid);
+        Optional<PlotMember> member = plot.findPlotMember(uuid);
         if (member.isPresent()) {
             var plotMember = member.get();
             plotMember.role(role);
-            CompletableFuture.runAsync(() -> memberDao.update(plot.id(), plotMember));
+            CompletableFuture.runAsync(() -> memberDao.update(plot.id(), plotMember)).whenComplete((unused, throwable) -> {
+                if (throwable != null) {
+                    JavaPlugin.getPlugin(PlotsPlugin.class).getLogger().log(Level.SEVERE, "Error while saving plot data: ", throwable);
+                }
+            });
         }
         new PlotInfoUpdateEvent(plot).callEvent();
     }
 
     public void clearMembers(Plot plot) {
         plot.members().clear();
-        CompletableFuture.runAsync(() -> memberDao.deleteAll(plot.id()));
+        CompletableFuture.runAsync(() -> memberDao.deleteAll(plot.id())).whenComplete((unused, throwable) -> {
+            if (throwable != null) {
+                JavaPlugin.getPlugin(PlotsPlugin.class).getLogger().log(Level.SEVERE, "Error while saving plot data: ", throwable);
+            }
+        });
         new PlotInfoUpdateEvent(plot).callEvent();
-    }
-
-    public boolean isMember(Plot plot, UUID uuid) {
-        return plot.members().stream().anyMatch(member -> member.uuid().equals(uuid));
-    }
-
-    public Optional<PlotMember> findMember(Plot plot, UUID uuid) {
-        return plot.members().stream().filter(member -> member.uuid().equals(uuid)).findFirst();
-    }
-
-    public Optional<PlotPlayer> findDeniedPlayer(Plot plot, UUID uuid) {
-        return plot.deniedPlayers().stream().filter(deniedPlayer -> deniedPlayer.uuid().equals(uuid)).findFirst();
     }
 
     public void kickPlayer(Plot plot, Player player) {

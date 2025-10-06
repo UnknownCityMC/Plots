@@ -48,7 +48,7 @@ public class RentService extends Service<PlotsPlugin> {
                                 Bukkit.getScheduler().runTask(plugin, () -> plotService.resetPlot(plot));
                             } else {
                                 plot.owner(null);
-                                plot.members(null);
+                                plot.members().clear();
                                 plot.state(PlotState.UNAVAILABLE);
                             }
                             if (player != null) {

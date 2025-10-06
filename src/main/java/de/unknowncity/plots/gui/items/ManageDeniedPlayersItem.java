@@ -2,8 +2,10 @@ package de.unknowncity.plots.gui.items;
 
 import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
+import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.plot.model.PlotPlayer;
+import de.unknowncity.plots.service.plot.AccessService;
 import de.unknowncity.plots.util.SkullHelper;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
@@ -17,15 +19,17 @@ import xyz.xenondevs.invui.item.Item;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.ItemWrapper;
 
-public class ManageBannedMember extends AbstractPagedGuiBoundItem {
+public class ManageDeniedPlayersItem extends AbstractPagedGuiBoundItem {
     private final PaperMessenger messenger;
     private final Plot plot;
     private final PlotPlayer bannedPlayer;
+    private final PlotsPlugin plugin;
 
-    public ManageBannedMember(Plot plot, PlotPlayer bannedPlayer, PaperMessenger messenger) {
+    public ManageDeniedPlayersItem(Plot plot, PlotPlayer bannedPlayer, PaperMessenger messenger, PlotsPlugin plugin) {
         this.messenger = messenger;
         this.plot = plot;
         this.bannedPlayer = bannedPlayer;
+        this.plugin = plugin;
     }
 
     @Override
@@ -46,10 +50,12 @@ public class ManageBannedMember extends AbstractPagedGuiBoundItem {
         return new ItemWrapper(builder);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull Click click) {
         if (clickType == ClickType.SHIFT_LEFT) {
-            plot.deniedPlayers().remove(bannedPlayer);
+            plugin.serviceRegistry().getRegistered(AccessService.class).unDenyPlayer(plot, bannedPlayer.uuid());
+
             var gui = (PagedGui<Item>) getGui();
             gui.setContent(gui.getContent().stream().filter(item -> !item.equals(this)).toList());
             player.playSound(player.getLocation(), "entity.item.break", 1, 1);

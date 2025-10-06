@@ -10,10 +10,9 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import de.unknowncity.astralib.common.service.Service;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.data.model.plot.PlotExpandDirection;
+import de.unknowncity.plots.plot.PlotExpandDirection;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.event.block.BlockCanBuildEvent;
 
 import java.util.*;
 

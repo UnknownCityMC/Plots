@@ -3,10 +3,7 @@ package de.unknowncity.plots.command.user;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.plot.PlotUtil;
-import de.unknowncity.plots.plot.location.PlotLocation;
-import de.unknowncity.plots.service.EconomyService;
-import de.unknowncity.plots.service.PlotService;
-import de.unknowncity.plots.service.RegionService;
+import de.unknowncity.plots.service.plot.PlotLocationService;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -16,9 +13,7 @@ import org.incendo.cloud.context.CommandContext;
 import org.spongepowered.configurate.NodePath;
 
 public class PlotHomeSetCommand extends SubCommand {
-    private final RegionService regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
-    private final PlotService plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
-    private final EconomyService economyService = plugin.serviceRegistry().getRegistered(EconomyService.class);
+    private final PlotLocationService locationService = plugin.serviceRegistry().getRegistered(PlotLocationService.class);
 
     public PlotHomeSetCommand(PlotsPlugin plugin, Command.Builder<CommandSender> builder) {
         super(plugin, builder);
@@ -48,8 +43,8 @@ public class PlotHomeSetCommand extends SubCommand {
 
             var location = sender.getLocation();
             var oldHome = plot.plotHome();
-            var newHome = new PlotLocation(plot.id(), oldHome.name(), oldHome.isPublic(), location.x(), location.y(), location.z(), location.getYaw(), location.getPitch());
-            plot.plotHome(newHome);
+
+            locationService.setPlotHome(plot, oldHome.isPublic(), location);
 
             plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "home", "setlocation", "success"), plot.tagResolvers(sender, plugin.messenger()));
         }, () -> plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot")));

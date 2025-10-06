@@ -6,6 +6,7 @@ import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.plot.PlotUtil;
 import de.unknowncity.plots.plot.location.signs.SignManager;
 import de.unknowncity.plots.service.PlotService;
+import de.unknowncity.plots.service.plot.SignService;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -15,9 +16,8 @@ import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
 import org.spongepowered.configurate.NodePath;
 
-import java.util.ArrayList;
-
 public class PlotAdminSignsCommand extends SubCommand {
+    private final SignService signService = plugin.serviceRegistry().getRegistered(SignService.class);
 
     public PlotAdminSignsCommand(PlotsPlugin plugin, Command.Builder<CommandSender> builder) {
         super(plugin, builder);
@@ -43,11 +43,10 @@ public class PlotAdminSignsCommand extends SubCommand {
     private void handleDeleteAll(@NonNull CommandContext<Player> context) {
         var sender = context.sender();
         PlotUtil.getPlotIfPresent(sender, plugin).ifPresentOrElse(plot -> {
-            plot.signs().forEach(sign -> {
-                SignManager.setLineTextEmpty(new Location(plot.world(), sign.x(), sign.y(), sign.z()));
-            });
-            plot.signs(new ArrayList<>());
-            plugin.serviceRegistry().getRegistered(PlotService.class).savePlot(plot);
+            plot.signs().forEach(sign -> SignManager.setLineTextEmpty(new Location(plot.world(), sign.x(), sign.y(), sign.z())));
+
+            signService.removeAll(plot);
+
             plugin.messenger().sendMessage(sender, NodePath.path("command", "plotadmin", "signs", "deleteAll"));
         }, () -> plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot")));
     }
@@ -55,9 +54,7 @@ public class PlotAdminSignsCommand extends SubCommand {
     private void handleUpdateAll(@NonNull CommandContext<Player> context) {
         var sender = context.sender();
         var plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
-        plotService.plotCache().asMap().forEach((id, plot) -> {
-            SignManager.updateSings(plot, plugin.messenger());
-        });
+        plotService.plotCache().asMap().forEach((id, plot) -> SignManager.updateSings(plot, plugin.messenger()));
         plugin.messenger().sendMessage(sender, NodePath.path("command", "plotadmin", "signs", "updateAll"));
     }
 }

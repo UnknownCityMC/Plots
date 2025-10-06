@@ -21,7 +21,6 @@ import de.unknowncity.plots.plot.location.signs.SignManager;
 import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
-import de.unknowncity.plots.service.plot.*;
 import de.unknowncity.plots.task.RentService;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
@@ -50,14 +49,16 @@ public class PlotsPlugin extends PaperAstraPlugin {
 
     @Override
     public void onPluginEnable() {
+        this.signManager = new SignManager(this);
+
         onPluginReload();
+
         initializeDataServices();
 
         registerCommands();
 
-        Permissions.ALL_PERMISSIONS.forEach(permission -> {
-            Bukkit.getPluginManager().addPermission(new Permission(permission));
-        });
+        Permissions.ALL_PERMISSIONS.forEach(permission -> Bukkit.getPluginManager().addPermission(new Permission(permission)));
+
 
         var pluginManager = getServer().getPluginManager();
         pluginManager.registerEvents(new PlotInteractListener(this), this);
@@ -76,7 +77,6 @@ public class PlotsPlugin extends PaperAstraPlugin {
                 sender -> messenger.getStringOrNotAvailable((Player) sender, NodePath.path("exception", "argument-parse", "player"))));
 
         landEditSessionHandler = new LandEditSessionHandler(this);
-        signManager = new SignManager(this);
     }
 
     public void onPluginReload() {

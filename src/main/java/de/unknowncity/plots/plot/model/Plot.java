@@ -37,10 +37,10 @@ public abstract class Plot {
     private String groupName;
     private double price;
     private PlotState state;
-    private LocalDateTime claimed;
+    private final LocalDateTime claimed;
 
-    private List<PlotMember> members = new ArrayList<>();
-    private List<PlotPlayer> deniedPlayers = new ArrayList<>();
+    private final List<PlotMember> members = new ArrayList<>();
+    private final List<PlotPlayer> deniedPlayers = new ArrayList<>();
     private final Map<PlotFlag<?>, Object> flags = new HashMap<>();
     private List<PlotInteractable> interactables = new ArrayList<>();
     private PlotLocation plotHome;
@@ -64,11 +64,11 @@ public abstract class Plot {
     public abstract PlotPaymentType paymentType();
 
     public List<PlotMember> members() {
-        return Collections.unmodifiableList(members);
+        return members;
     }
 
     public List<PlotPlayer> deniedPlayers() {
-        return Collections.unmodifiableList(deniedPlayers);
+        return deniedPlayers;
     }
 
     public String id() {
@@ -100,15 +100,15 @@ public abstract class Plot {
     }
 
     public List<PlotSign> signs() {
-        return Collections.unmodifiableList(signs);
+        return signs;
     }
 
     public Map<PlotFlag<?>, ?> flags() {
-        return Collections.unmodifiableMap(flags);
+        return flags;
     }
 
     public List<PlotInteractable> interactables() {
-        return Collections.unmodifiableList(interactables);
+        return interactables;
     }
 
     public void interactables(List<PlotInteractable> interactables) {
@@ -129,10 +129,6 @@ public abstract class Plot {
      */
     public PlotInteractable getInteractable(Material material) {
         return interactables.stream().filter(plotInteractable -> plotInteractable.blockType() == material).findFirst().orElse(null);
-    }
-
-    public void members(List<PlotMember> plotMembers) {
-        this.members = plotMembers;
     }
 
     public void signs(List<PlotSign> signs) {
@@ -265,22 +261,15 @@ public abstract class Plot {
         deniedPlayers.removeIf(member -> member.uuid().equals(uuid));
     }
 
-    public PlotSign addSign(org.bukkit.Location location) {
+    public PlotSign addSign(Location location) {
         var sign = new PlotSign(plotId, location.getBlockX(), location.getBlockY(), location.getBlockZ());
         signs.add(sign);
         return sign;
     }
 
-    public void removeSign(org.bukkit.Location location) {
+    public void removeSign(Location location) {
         signs.removeIf(plotSign -> plotSign.equals(new PlotSign(plotId, location.getBlockX(), location.getBlockY(), location.getBlockZ())));
     }
-
-//    public void kick(Player player) {
-//        if (player.hasPermission(Permissions.BYPASS_ENTRY)) {
-//            return;
-//        }
-//        player.teleport(world().getSpawnLocation());
-//    }
 
     public int height() {
         return protectedRegion().getMaximumPoint().y() - protectedRegion().getMinimumPoint().y() + 1;

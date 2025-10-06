@@ -44,3 +44,4 @@ bin/
 .idea
 /sqlite.db
 /.env
+/run/

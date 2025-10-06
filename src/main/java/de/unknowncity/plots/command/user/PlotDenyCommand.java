@@ -3,8 +3,7 @@ package de.unknowncity.plots.command.user;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.plot.PlotUtil;
-import de.unknowncity.plots.service.PlotService;
-import de.unknowncity.plots.service.RegionService;
+import de.unknowncity.plots.service.plot.AccessService;
 import de.unknowncity.plots.util.AstraArrays;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -20,8 +19,7 @@ import org.spongepowered.configurate.NodePath;
 import static de.unknowncity.plots.command.argument.UcPlayerParser.ucPlayerParser;
 
 public class PlotDenyCommand extends SubCommand {
-    private final RegionService regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
-    private final PlotService plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
+    private final AccessService accessService = plugin.serviceRegistry().getRegistered(AccessService.class);
 
     public PlotDenyCommand(PlotsPlugin plugin, Command.Builder<CommandSender> builder) {
         super(plugin, builder);
@@ -56,9 +54,8 @@ public class PlotDenyCommand extends SubCommand {
                 return;
             }
 
-            plot.addDeniedPlayer(target);
+            accessService.denyPlayer(plot, target);
 
-            plotService.savePlot(plot);
             plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "deny", "success"),
                     AstraArrays.merge(plot.tagResolvers(sender, plugin.messenger()), new TagResolver[]{Placeholder.unparsed("target", target.getName())}));
         }, () -> plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot")));

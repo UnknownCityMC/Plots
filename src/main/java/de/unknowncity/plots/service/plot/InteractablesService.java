@@ -8,8 +8,10 @@ import de.unknowncity.plots.plot.access.type.PlotAccessModifier;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
 import de.unknowncity.plots.plot.model.Plot;
 import org.bukkit.Material;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
 
 public class InteractablesService extends Service<PlotsPlugin> {
     private final PlotInteractablesDao interactablesDao;
@@ -22,7 +24,11 @@ public class InteractablesService extends Service<PlotsPlugin> {
 
     public void setDefaults(Plot plot) {
         plot.interactables(PlotInteractable.defaults());
-        CompletableFuture.runAsync(() -> interactablesDao.write(queryConfiguration, plot.id(), plot.interactables()));
+        CompletableFuture.runAsync(() -> interactablesDao.write(queryConfiguration, plot.id(), plot.interactables())).whenComplete((unused, throwable) -> {
+            if (throwable != null) {
+                JavaPlugin.getPlugin(PlotsPlugin.class).getLogger().log(Level.SEVERE, "Error while saving plot data: ", throwable);
+            }
+        });
     }
 
     public void setInteractable(Plot plot, Material material, PlotAccessModifier modifier) {
@@ -30,7 +36,11 @@ public class InteractablesService extends Service<PlotsPlugin> {
     }
 
     public void saveCurrentInteractables(Plot plot) {
-        CompletableFuture.runAsync(() -> interactablesDao.write(queryConfiguration, plot.id(), plot.interactables()));
+        CompletableFuture.runAsync(() -> interactablesDao.write(queryConfiguration, plot.id(), plot.interactables())).whenComplete((unused, throwable) -> {
+            if (throwable != null) {
+                JavaPlugin.getPlugin(PlotsPlugin.class).getLogger().log(Level.SEVERE, "Error while saving plot data: ", throwable);
+            }
+        });
     }
 
     public void saveCurrentInteractables(QueryConfiguration configuration, Plot plot) {

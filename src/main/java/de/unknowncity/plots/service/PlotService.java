@@ -46,7 +46,7 @@ public class PlotService extends Service<PlotsPlugin> {
     private final PlotsPlugin plugin;
     private final FlagRegistry flagRegistry;
     private final QueryConfiguration queryConfiguration;
-    ;
+
     private final Cache<String, Plot> plotCache = CacheBuilder.newBuilder().build();
     private final Cache<String, PlotGroup> plotGroupCache = CacheBuilder.newBuilder().build();
     private final Logger logger = JavaPlugin.getPlugin(PlotsPlugin.class).getLogger();
@@ -85,12 +85,12 @@ public class PlotService extends Service<PlotsPlugin> {
 
         schematicManager.makeDirectories();
         this.plugin.serviceRegistry().register(new BackupService(schematicManager, this));
-        var accessService = new AccessService(queryConfiguration, memberDao, deniedDao, logger, plugin);
+        var accessService = new AccessService(queryConfiguration, memberDao, deniedDao, logger);
         var biomeService = new BiomeService(logger);
         var flagService = new FlagService(flagDao, flagRegistry, queryConfiguration);
         var interactablesService = new InteractablesService(interactablesDao, queryConfiguration);
         var locationService = new PlotLocationService(locationDao, queryConfiguration);
-        var signService = new SignService(signDao, queryConfiguration);
+        var signService = new SignService(signDao);
 
         plugin.serviceRegistry().register(accessService);
         plugin.serviceRegistry().register(biomeService);
@@ -98,7 +98,6 @@ public class PlotService extends Service<PlotsPlugin> {
         plugin.serviceRegistry().register(interactablesService);
         plugin.serviceRegistry().register(locationService);
         plugin.serviceRegistry().register(signService);
-        signService.cacheAll();
     }
 
     public boolean existsPlot(String id) {
@@ -114,11 +113,10 @@ public class PlotService extends Service<PlotsPlugin> {
     }
 
 
-    public PlotGroup createPlotGroup(String name) {
+    public void createPlotGroup(String name) {
         var plotGroup = new PlotGroup(name);
         CompletableFuture.runAsync(() -> groupDao.write(plotGroup));
         plotGroupCache.put(name, plotGroup);
-        return plotGroup;
     }
 
     public void deletePlotGroup(String name) {
@@ -302,18 +300,17 @@ public class PlotService extends Service<PlotsPlugin> {
         return true;
     }
 
-    public boolean unClaimPlot(Plot plot) {
+    public void unClaimPlot(Plot plot) {
         var event = new PlotSellPlayerEvent(plot, Bukkit.getPlayer(plot.owner().uuid()));
         event.callEvent();
         if (event.isCancelled()) {
-            return false;
+            return;
         }
         if (plot instanceof BuyPlot) {
             plugin.serviceRegistry().getRegistered(EconomyService.class).deposit(plot.owner().uuid(), plot.price() * 0.8);
         }
 
         resetPlot(plot);
-        return true;
     }
 
     public void savePlot(Plot plot) {
@@ -395,6 +392,7 @@ public class PlotService extends Service<PlotsPlugin> {
                 if (plot != null) {
                     plot.signs().add(plotSign);
                 }
+                plugin.serviceRegistry().getRegistered(SignService.class).plotSignCache().add(plotSign);
             });
 
             var warps = warpsFuture.join();
@@ -422,9 +420,7 @@ public class PlotService extends Service<PlotsPlugin> {
             });
 
             var groups = groupsFuture.join();
-            groups.forEach(plotGroup -> {
-                plotGroupCache.put(plotGroup.name(), plotGroup);
-            });
+            groups.forEach(plotGroup -> plotGroupCache.put(plotGroup.name(), plotGroup));
         });
     }
 
