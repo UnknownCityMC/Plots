@@ -1,5 +1,6 @@
 package de.unknowncity.plots.plot.flag.type.player;
 
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.plot.access.PlotAccessUtil;
 import de.unknowncity.plots.plot.access.type.PlotAccessModifier;
 import de.unknowncity.plots.plot.flag.PlotAccessModifierFlag;
@@ -23,7 +24,7 @@ public class ItemDropFlag extends PlotAccessModifierFlag implements Listener {
             return;
         }
 
-        if (player.hasPermission("ucplots.interact.bypass")) {
+        if (player.hasPermission(Permissions.BYPASS_INTERACT)) {
             return;
         }
 

@@ -1,5 +1,6 @@
 package de.unknowncity.plots.command.user;
 
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.service.PlotService;
@@ -66,7 +67,7 @@ public class PlotHomeCommand extends SubCommand {
                 plot.plotHome().isPublic() ||
                         plot.owner().uuid().equals(sender.getUniqueId()) ||
                         plot.members().stream().anyMatch(plotMember -> plotMember.uuid().equals(sender.getUniqueId())) ||
-                        sender.hasPermission("plots.command.plot.teleport.others")
+                        sender.hasPermission(Permissions.COMMAND_TELEPORT_OTHERS)
         ) {
             sender.teleport(plot.plotHome().getLocation(plot.world()));
             plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "plot-tp", "success"));

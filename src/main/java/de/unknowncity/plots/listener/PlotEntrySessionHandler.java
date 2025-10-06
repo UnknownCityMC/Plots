@@ -9,6 +9,7 @@ import com.sk89q.worldguard.session.Session;
 import com.sk89q.worldguard.session.handler.Handler;
 import de.unknowncity.astralib.common.temporal.CooldownAction;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.service.PlotService;
 import org.bukkit.Bukkit;
 import org.spongepowered.configurate.NodePath;
@@ -60,7 +61,7 @@ public class PlotEntrySessionHandler extends Handler {
                     return false;
                 }
 
-                if (bukkitPlayer.hasPermission("plots.entry.bypass")) {
+                if (bukkitPlayer.hasPermission(Permissions.BYPASS_ENTRY)) {
                     return true;
                 }
 

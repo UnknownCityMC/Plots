@@ -20,8 +20,10 @@ import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import de.unknowncity.plots.task.RentService;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permission;
 import org.incendo.cloud.caption.Caption;
 import org.incendo.cloud.caption.CaptionProvider;
 import org.incendo.cloud.processors.cache.SimpleCache;
@@ -47,6 +49,10 @@ public class PlotsPlugin extends PaperAstraPlugin {
         initializeDataServices();
 
         registerCommands();
+
+        Permissions.ALL_PERMISSIONS.forEach(permission -> {
+            Bukkit.getPluginManager().addPermission(new Permission(permission));
+        });
 
         var pluginManager = getServer().getPluginManager();
         pluginManager.registerEvents(new PlotInteractListener(this), this);

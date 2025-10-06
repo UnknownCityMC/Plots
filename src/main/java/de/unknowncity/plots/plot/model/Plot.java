@@ -9,6 +9,7 @@ import de.chojo.sadu.mapper.reader.StandardReader;
 import de.chojo.sadu.mapper.rowmapper.RowMapping;
 import de.unknowncity.astralib.common.message.lang.Language;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.plot.access.PlotState;
 import de.unknowncity.plots.plot.access.type.PlotMemberRole;
 import de.unknowncity.plots.plot.economy.PlotPaymentType;
@@ -242,7 +243,7 @@ public abstract class Plot {
     }
 
     public boolean isOwner(UUID uuid) {
-        return owner().uuid().equals(uuid);
+        return owner != null && owner.uuid().equals(uuid);
     }
 
     public boolean isMember(UUID uuid) {
@@ -261,7 +262,7 @@ public abstract class Plot {
         members.removeIf(member -> member.uuid().equals(offlinePlayer.getUniqueId()));
         deniedPlayers.add(new PlotPlayer(plotId, offlinePlayer.getUniqueId(), offlinePlayer.getName()));
         if (offlinePlayer instanceof Player player) {
-            if (player.hasPermission("plots.entry.bypass")) {
+            if (player.hasPermission(Permissions.BYPASS_ENTRY)) {
                 return;
             }
             kick(player);
@@ -269,7 +270,7 @@ public abstract class Plot {
     }
 
     public void kick(Player player) {
-        if (player.hasPermission("plots.entry.bypass")) {
+        if (player.hasPermission(Permissions.BYPASS_ENTRY)) {
             return;
         }
         player.teleport(world().getSpawnLocation());

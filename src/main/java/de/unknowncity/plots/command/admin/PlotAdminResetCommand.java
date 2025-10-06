@@ -1,5 +1,6 @@
 package de.unknowncity.plots.command.admin;
 
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.plot.PlotUtil;
@@ -27,7 +28,7 @@ public class PlotAdminResetCommand extends SubCommand {
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("reset")
-                .permission("plots.command.plotadmin")
+                .permission(Permissions.COMMAND_PLOT_ADMIN)
                 .optional("id", stringParser(), (sender, input) ->
                         CompletableFuture.completedFuture(plotService.plotCache().asMap().keySet().stream().map(Suggestion::suggestion).toList()))
                 .apply(plugin.confirmationManager())
@@ -36,7 +37,7 @@ public class PlotAdminResetCommand extends SubCommand {
         );
 
         commandManager.command(builder.literal("reset")
-                .permission("plots.command.plotadmin")
+                .permission(Permissions.COMMAND_PLOT_ADMIN)
                 .literal("confirm")
                 .handler(plugin.confirmationManager().createExecutionHandler())
                 .build()

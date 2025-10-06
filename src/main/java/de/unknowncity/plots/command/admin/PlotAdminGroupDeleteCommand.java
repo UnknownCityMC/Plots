@@ -1,5 +1,6 @@
 package de.unknowncity.plots.command.admin;
 
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.service.PlotService;
@@ -26,7 +27,7 @@ public class PlotAdminGroupDeleteCommand extends SubCommand {
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("group").literal("delete")
-                .permission("plots.command.plotadmin")
+                .permission(Permissions.COMMAND_PLOT_ADMIN)
                 .required("group-name", stringParser(), (sender, input) ->
                         CompletableFuture.completedFuture(plotService.groupCache().asMap().keySet().stream().map(Suggestion::suggestion).toList()))
                 .apply(plugin.confirmationManager())
@@ -35,7 +36,7 @@ public class PlotAdminGroupDeleteCommand extends SubCommand {
         );
 
         commandManager.command(builder.literal("group").literal("delete")
-                .permission("plots.command.plotadmin")
+                .permission(Permissions.COMMAND_PLOT_ADMIN)
                 .literal("confirm")
                 .handler(plugin.confirmationManager().createExecutionHandler())
                 .build()

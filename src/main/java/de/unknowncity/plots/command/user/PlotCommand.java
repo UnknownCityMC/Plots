@@ -23,10 +23,10 @@ public class PlotCommand extends PaperCommand<PlotsPlugin> {
 
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
-        var builder = commandManager.commandBuilder("plot")
-                .permission("plots.command.plot");
+        var builder = commandManager.commandBuilder("plot");
 
-        commandManager.command(builder
+        commandManager.command(commandManager.commandBuilder("plot")
+                .permission("plots.command.plot")
                 .senderType(Player.class)
                 .handler(this::handle)
         );

@@ -1,5 +1,6 @@
 package de.unknowncity.plots.plot;
 
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.access.PlotState;
 import de.unknowncity.plots.plot.model.Plot;
@@ -35,7 +36,7 @@ public class PlotUtil {
     }
 
     public static boolean checkPlotOwner(Player player, Plot plot, PlotsPlugin plugin) {
-        if (!plot.owner().uuid().equals(player.getUniqueId()) && !player.hasPermission("ucplots.command.plotadmin")) {
+        if (!plot.owner().uuid().equals(player.getUniqueId()) && !player.hasPermission(Permissions.COMMAND_PLOT_ADMIN)) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plot", "no-owner"));
             return false;
         }
