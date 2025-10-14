@@ -76,6 +76,7 @@ public class AccessService extends Service<PlotsPlugin> {
             if (throwable != null) {
                 JavaPlugin.getPlugin(PlotsPlugin.class).getLogger().log(Level.SEVERE, "Error while saving plot data: ", throwable);
             }
+            plot.protectedRegion().getMembers().addPlayer(offlinePlayer.getUniqueId());
         });
         new PlotInfoUpdateEvent(plot).callEvent();
     }
@@ -86,9 +87,9 @@ public class AccessService extends Service<PlotsPlugin> {
             if (throwable != null) {
                 JavaPlugin.getPlugin(PlotsPlugin.class).getLogger().log(Level.SEVERE, "Error while saving plot data: ", throwable);
             }
+            plot.protectedRegion().getMembers().removePlayer(uuid);
         });
         new PlotInfoUpdateEvent(plot).callEvent();
-
     }
 
     public void setMemberRole(Plot plot, UUID uuid, PlotMemberRole role) {
@@ -111,6 +112,7 @@ public class AccessService extends Service<PlotsPlugin> {
             if (throwable != null) {
                 JavaPlugin.getPlugin(PlotsPlugin.class).getLogger().log(Level.SEVERE, "Error while saving plot data: ", throwable);
             }
+            plot.protectedRegion().getMembers().removeAll();
         });
         new PlotInfoUpdateEvent(plot).callEvent();
     }

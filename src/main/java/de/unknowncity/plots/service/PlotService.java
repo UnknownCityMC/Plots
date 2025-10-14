@@ -149,7 +149,6 @@ public class PlotService extends Service<PlotsPlugin> {
 
         region.setFlag(Flags.INTERACT, StateFlag.State.ALLOW);
         region.setFlag(Flags.USE, StateFlag.State.ALLOW);
-        region.setFlag(Flags.BUILD, StateFlag.State.ALLOW);
 
         setDefaults(plot);
 
@@ -271,6 +270,9 @@ public class PlotService extends Service<PlotsPlugin> {
         var accessService = plugin.serviceRegistry().getRegistered(AccessService.class);
         accessService.clearMembers(plot);
         accessService.clearDeniedPlayers(plot);
+        plot.protectedRegion().getOwners().removeAll();
+        plot.protectedRegion().getMembers().removeAll();
+
 
         SignManager.updateSings(plot, plugin.messenger());
     }
@@ -291,6 +293,8 @@ public class PlotService extends Service<PlotsPlugin> {
         plot.state(PlotState.SOLD);
         plot.owner(new PlotPlayer(plot.id(), player.getUniqueId(), player.getName()));
         plotDao.write(queryConfiguration, plot);
+
+        plot.protectedRegion().getOwners().addPlayer(player.getUniqueId());
 
         if (!plugin.configuration().fb().noSchematic().contains(plot.world().getName())) {
             schematicManager.createPreSaleSchematic(plot);
