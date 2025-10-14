@@ -5,6 +5,9 @@ import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.plot.PlotUtil;
 import de.unknowncity.plots.plot.access.type.PlotMemberRole;
 import de.unknowncity.plots.service.plot.AccessService;
+import de.unknowncity.plots.util.AstraArrays;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -52,7 +55,11 @@ public class PlotAddMemberCommand extends SubCommand {
 
             accessService.addMember(plot, target, role);
 
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "add", "success"), plot.tagResolvers(sender, plugin.messenger()));
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "add", "success"),
+                    AstraArrays.merge(plot.tagResolvers(sender, plugin.messenger()), new TagResolver[]{
+                            Placeholder.unparsed("target", target.getName()),
+                            Placeholder.unparsed("role", role.name())
+            }));
         }, () -> plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot")));
     }
 }
