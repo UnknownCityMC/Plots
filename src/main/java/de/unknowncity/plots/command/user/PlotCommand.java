@@ -44,6 +44,8 @@ public class PlotCommand extends PaperCommand<PlotsPlugin> {
 
         new PlotHomeSetCommand(plugin, builder).apply(commandManager);
         new PlotHomeVisibilityCommand(plugin, builder).apply(commandManager);
+
+        new PlotsCommand(plugin).apply(commandManager);
     }
 
     private void handle(@NonNull CommandContext<Player> context) {

@@ -18,19 +18,30 @@ public class PlotGroupDao {
 
     public List<PlotGroup> readAll() {
         @Language("mariadb")
-        var querySting = "SELECT name FROM plot_group";
+        var querySting = "SELECT name, display_item FROM plot_group";
         return queryConfiguration.query(querySting)
                 .single()
-                .map(row -> new PlotGroup(
-                        row.getString("name")
-                )).all();
+                .map(row -> {
+                    var displayItemBytes = row.getBytes("display_item");
+                    if (displayItemBytes != null) {
+                        return new PlotGroup(
+                                row.getString("name"),
+                                displayItemBytes
+                        );
+                    }
+                    return new PlotGroup(
+                            row.getString("name")
+                    );
+                }).all();
     }
 
     public Boolean write(PlotGroup plotGroup) {
         @Language("mariadb")
-        var querySting = "REPLACE INTO plot_group(name) VALUE (:name)";
+        var querySting = "INSERT INTO plot_group(name, display_item) VALUE (:name, :display_item) ON DUPLICATE KEY UPDATE display_item = VALUES(display_item);";
         return queryConfiguration.query(querySting)
-                .single(call().bind("name", plotGroup.name()))
+                .single(call()
+                        .bind("name", plotGroup.name())
+                        .bind("display_item", plotGroup.displayItem().serializeAsBytes()))
                 .insert().changed();
     }
 

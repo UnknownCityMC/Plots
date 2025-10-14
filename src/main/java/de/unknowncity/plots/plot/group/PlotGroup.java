@@ -1,6 +1,41 @@
 package de.unknowncity.plots.plot.group;
 
-public record PlotGroup(String name) {
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+
+public class PlotGroup {
+    public static final ItemStack DEFAULT_DISPLAY_ITEM = new ItemStack(Material.PAPER);
+    private final String name;
+    private ItemStack displayItem;
+
+    public PlotGroup(String name) {
+        this.name = name;
+        this.displayItem = DEFAULT_DISPLAY_ITEM;
+    }
+
+    public PlotGroup(String name, ItemStack displayItem) {
+        this.name = name;
+        this.displayItem = displayItem;
+    }
+
+    public PlotGroup(String name, byte[] displayItem) {
+        this.name = name;
+        this.displayItem = ItemStack.deserializeBytes(displayItem);
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public ItemStack displayItem() {
+        return displayItem;
+    }
+
+    public void resetDisplayItem() {
+        this.displayItem = DEFAULT_DISPLAY_ITEM;
+    }
+
     private static final String BASE_PERMISSION = "plots.limit.";
 
     /**
@@ -12,5 +47,9 @@ public record PlotGroup(String name) {
      */
     public static String permission(String groupName) {
         return BASE_PERMISSION + groupName;
+    }
+
+    public void displayItem(@NotNull ItemStack itemStack) {
+        this.displayItem = itemStack;
     }
 }

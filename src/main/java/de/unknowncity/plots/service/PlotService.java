@@ -31,7 +31,9 @@ import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -122,6 +124,16 @@ public class PlotService extends Service<PlotsPlugin> {
     public void deletePlotGroup(String name) {
         plotGroupCache.invalidate(name);
         CompletableFuture.runAsync(() -> groupDao.delete(name));
+    }
+
+    public void setPlotGroupDisplayItem(PlotGroup plotGroup, @NotNull ItemStack itemStack) {
+        plotGroup.displayItem(itemStack);
+        groupDao.write(plotGroup);
+    }
+
+    public void unsetPlotGroupDisplayItem(PlotGroup plotGroup) {
+        plotGroup.resetDisplayItem();
+        groupDao.write(plotGroup);
     }
 
     public Optional<Plot> createBuyPlotFromRegion(ProtectedRegion region, World world, double price, String plotGroupName) {
@@ -233,8 +245,16 @@ public class PlotService extends Service<PlotsPlugin> {
     }
 
     public List<Plot> findPlotsByOwnerUUID(UUID uuid) {
-        return plotCache.asMap().values().stream().filter(plot -> plot.owner() != null && plot.owner().uuid()
-                .equals(uuid)).sorted(Comparator.comparing(Plot::claimed)).toList();
+        return plotCache.asMap().values().stream().filter(plot -> plot.isOwner(uuid))
+                .sorted(Comparator.comparing(Plot::claimed))
+                .toList();
+    }
+
+    public List<Plot> findPlotsByMember(UUID memberOrOwner) {
+        return plotCache.asMap().values().stream()
+                .filter(plot -> plot.isMember(memberOrOwner))
+                .sorted(Comparator.comparing(Plot::claimed))
+                .toList();
     }
 
     public List<Plot> findAvailablePlots(String groupName) {
