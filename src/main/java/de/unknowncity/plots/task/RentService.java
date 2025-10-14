@@ -4,9 +4,9 @@ import de.unknowncity.astralib.common.service.Service;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.model.RentPlot;
 import de.unknowncity.plots.plot.access.PlotState;
-import de.unknowncity.plots.plot.location.signs.SignManager;
 import de.unknowncity.plots.service.EconomyService;
 import de.unknowncity.plots.service.PlotService;
+import de.unknowncity.plots.service.backup.BackupService;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
@@ -43,11 +43,12 @@ public class RentService extends Service<PlotsPlugin> {
                         var player = Bukkit.getPlayer(owner.uuid());
 
                         if (!economyService.hasEnoughFunds(owner.uuid(), price)) {
-                            if (plotService.backup(plot, owner.uuid())) {
+                            var backupService = plugin.serviceRegistry().getRegistered(BackupService.class);
+                            if (backupService.backupBoundToPlayer(plot, owner.uuid())) {
                                 Bukkit.getScheduler().runTask(plugin, () -> plotService.resetPlot(plot));
                             } else {
                                 plot.owner(null);
-                                plot.members(null);
+                                plot.members().clear();
                                 plot.state(PlotState.UNAVAILABLE);
                             }
                             if (player != null) {

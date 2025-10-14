@@ -1,16 +1,12 @@
 package de.unknowncity.plots.data.dao;
 
-import de.chojo.sadu.queries.api.configuration.ConnectedQueryConfiguration;
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.unknowncity.plots.plot.location.PlotLocation;
 import org.intellij.lang.annotations.Language;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 import static de.chojo.sadu.queries.api.call.Call.call;
-import static de.chojo.sadu.queries.api.query.Query.query;
 
 public class PlotLocationDao {
     private final QueryConfiguration queryConfiguration;
@@ -19,7 +15,7 @@ public class PlotLocationDao {
         this.queryConfiguration = queryConfiguration;
     }
 
-    public Boolean write(ConnectedQueryConfiguration connection, PlotLocation plotLocation, String plotId) {
+    public Boolean write(QueryConfiguration connection, String plotId, PlotLocation plotLocation) {
         @Language("mariadb")
         var queryString = """
                 INSERT INTO plot_location (

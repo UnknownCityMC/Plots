@@ -1,6 +1,7 @@
 package de.unknowncity.plots.command.admin;
 
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.command.argument.DoubleSuggestionProvider;
@@ -33,7 +34,7 @@ public class PlotAdminCreateCommand extends SubCommand {
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("createBuyFromRegion")
-                .permission("plots.command.plotadmin")
+                .permission(Permissions.COMMAND_PLOT_ADMIN)
                 .required("price", doubleParser(), DoubleSuggestionProvider.DOUBLE_SUGGESTION_PROVIDER)
                 .required("group", plotGroupParser(plotService))
                 .senderType(Player.class)
@@ -42,7 +43,7 @@ public class PlotAdminCreateCommand extends SubCommand {
         );
 
         commandManager.command(builder.literal("createBuyFromRegionName")
-                .permission("plots.command.plotadmin")
+                .permission(Permissions.COMMAND_PLOT_ADMIN)
                 .required("region", regionParser(regionService))
                 .required("price", doubleParser(), DoubleSuggestionProvider.DOUBLE_SUGGESTION_PROVIDER)
                 .required("group", plotGroupParser(plotService))
@@ -52,7 +53,7 @@ public class PlotAdminCreateCommand extends SubCommand {
         );
 
         commandManager.command(builder.literal("createRentFromRegion")
-                .permission("plots.command.plotadmin")
+                .permission(Permissions.COMMAND_PLOT_ADMIN)
                 .required("price", doubleParser(), DoubleSuggestionProvider.DOUBLE_SUGGESTION_PROVIDER)
                 .required("group", plotGroupParser(plotService))
                 .required("rentInterval", durationParser())
@@ -62,7 +63,7 @@ public class PlotAdminCreateCommand extends SubCommand {
         );
 
         commandManager.command(builder.literal("createRentFromRegionName")
-                .permission("plots.command.plotadmin")
+                .permission(Permissions.COMMAND_PLOT_ADMIN)
                 .required("region", regionParser(regionService))
                 .required("price", doubleParser(), DoubleSuggestionProvider.DOUBLE_SUGGESTION_PROVIDER)
                 .required("group", plotGroupParser(plotService))

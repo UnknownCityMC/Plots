@@ -2,27 +2,24 @@ package de.unknowncity.plots.plot.location.signs;
 
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.model.Plot;
-import de.unknowncity.plots.service.PlotService;
+import de.unknowncity.plots.service.plot.SignService;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import static de.unknowncity.plots.plot.location.signs.SignManager.*;
+import static de.unknowncity.plots.plot.location.signs.SignManager.setLineTextEmpty;
+import static de.unknowncity.plots.plot.location.signs.SignManager.updateSings;
 
 public class SignEditSession {
     private final PlotsPlugin plugin;
     private Plot plot;
-    private final List<PlotSign> plotSigns = new LinkedList<>();
-    private final PlotService plotService;
+    private final SignService signService;
     private SignOutline outline;
     private final Player player;
 
 
     public SignEditSession(PlotsPlugin plugin, Player player) {
         this.plugin = plugin;
-        this.plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
+        this.signService = plugin.serviceRegistry().getRegistered(SignService.class);
         this.player = player;
     }
 
@@ -54,30 +51,27 @@ public class SignEditSession {
     }
 
     public boolean addSign(Location location) {
-        var sign = new PlotSign("", location.getBlockX(), location.getBlockY(), location.getBlockZ());
 
-        if (plot.signs().stream().anyMatch(sign::equals)) {
+        if (plot.signs().stream().anyMatch(plotSign -> plotSign.isAt(location))) {
             return false;
         }
 
-        plot.signs().add(sign);
+        var sign = signService.addSign(plot, location);
         outline.showOutline(plot, sign);
-
         updateSings(plot, plugin.messenger());
-        plotService.plotSignCache().put(sign, plot.id());
-        plotService.savePlot(plot);
         return true;
     }
 
     public boolean removeSign(Location location) {
-        var ignored = new PlotSign("", location.getBlockX(), location.getBlockY(), location.getBlockZ());
-        if (plot.signs().stream().anyMatch(plotSign -> plotSign.equals(ignored))) {
-            clearSign(location);
-            outline.hideOutline(ignored);
+        var sign = plot.signs().stream().filter(plotSign -> plotSign.isAt(location)).findFirst();
+        if (sign.isEmpty()) {
+            return false;
         }
 
-        var value = plot.signs().removeIf(plotSign -> plotSign.equals(ignored));
-        plotService.savePlot(plot);
-        return value;
+        outline.hideOutline(sign.get());
+        setLineTextEmpty(location);
+
+        signService.removeSign(plot, location);
+        return true;
     }
 }

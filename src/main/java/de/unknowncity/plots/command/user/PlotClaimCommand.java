@@ -53,8 +53,10 @@ public class PlotClaimCommand extends SubCommand {
                 return;
             }
 
-            plotService.claimPlot(sender, plot);
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "success"), plot.tagResolvers(sender, plugin.messenger()));
+            if (plotService.claimPlot(sender, plot)) {
+                economyService.withdraw(sender.getUniqueId(), plot.price());
+                plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "claim", "success"), plot.tagResolvers(sender, plugin.messenger()));
+            }
         }, () -> {
             plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot"));
         });

@@ -40,7 +40,7 @@ public class PreparedItems {
         var lore = plugin.messenger().componentList(player, NodePath.path("gui", "main", "item", "info", "lore"),
                 plot.tagResolvers(player, plugin.messenger()));
 
-        var item = ItemBuilder.of(Material.WITHER_SKELETON_SKULL)
+        var item = ItemBuilder.of(PLOT_INFO_SKULL)
                 .name(name)
                 .lore(lore)
                 .item();
@@ -48,7 +48,7 @@ public class PreparedItems {
         return Item.simple(item);
     }
 
-    public static Item warp(Player player, Plot plot, PlotsPlugin plugin) {
+    public static Item warp(Player player, PlotsPlugin plugin) {
         var name = plugin.messenger().component(player, NodePath.path("gui", "main", "item", "warp", "name"));
         var lore = plugin.messenger().componentList(player, NodePath.path("gui", "main", "item", "warp", "lore"));
 
@@ -112,7 +112,7 @@ public class PreparedItems {
 
 
         return Item.builder().setItemProvider(item).addClickHandler(click -> {
-            BannedPlayersGUI.open(player, plot, plugin);
+            DeniedPlayersGUI.open(player, plot, plugin);
             player.playSound(player.getLocation(), "ui.button.click", 1, 1);
         }).build();
     }

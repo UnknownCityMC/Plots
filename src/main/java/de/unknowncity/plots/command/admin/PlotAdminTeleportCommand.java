@@ -1,7 +1,9 @@
 package de.unknowncity.plots.command.admin;
 
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
+import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.service.PlotService;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -14,6 +16,7 @@ import org.spongepowered.configurate.NodePath;
 
 import java.util.concurrent.CompletableFuture;
 
+import static de.unknowncity.plots.command.argument.PlotParser.plotParser;
 import static org.incendo.cloud.parser.standard.StringParser.stringParser;
 
 public class PlotAdminTeleportCommand extends SubCommand {
@@ -26,10 +29,9 @@ public class PlotAdminTeleportCommand extends SubCommand {
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("teleport")
-                .permission("plots.command.plotadmin")
+                .permission(Permissions.COMMAND_PLOT_ADMIN)
                 .senderType(Player.class)
-                .optional("plotId", stringParser(), (sender, input) ->
-                        CompletableFuture.completedFuture(plotService.plotCache().asMap().keySet().stream().map(Suggestion::suggestion).toList()))
+                .optional("plot", plotParser(plotService))
                 .handler(this::handleTeleportId)
                 .build()
         );
@@ -37,14 +39,7 @@ public class PlotAdminTeleportCommand extends SubCommand {
 
     private void handleTeleportId(@NonNull CommandContext<Player> context) {
         var sender = context.sender();
-        var id = context.getOrDefault("plotId", "");
-
-        if (!plotService.existsPlot(id)) {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "plot-tp", "not-found"));
-            return;
-        }
-
-        var plot = plotService.getPlot(id);
+        var plot = context.<Plot>get("plot");
         
         sender.teleport(plot.plotHome().getLocation(plot.world()));
         plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "plot-tp", "success"));

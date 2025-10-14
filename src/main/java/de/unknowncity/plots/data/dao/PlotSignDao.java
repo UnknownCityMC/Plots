@@ -1,12 +1,10 @@
 package de.unknowncity.plots.data.dao;
 
-import de.chojo.sadu.queries.api.configuration.ConnectedQueryConfiguration;
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.unknowncity.plots.plot.location.signs.PlotSign;
 import org.intellij.lang.annotations.Language;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import static de.chojo.sadu.queries.api.call.Call.call;
 
@@ -17,19 +15,19 @@ public class PlotSignDao {
         this.queryConfiguration = queryConfiguration;
     }
 
-    public Boolean writeAll(ConnectedQueryConfiguration connection, List<PlotSign> plotSigns, String plotId) {
+    public void save(PlotSign plotSign) {
         @Language("mariadb")
-        var queryString = """
-                REPLACE INTO plot_sign (plot_id, id, x, y, z)
-                VALUES (:plotId, :id, :x, :y, :z)
+        var query = """
+                INSERT INTO plot_sign (plot_id, x, y, z)
+                VALUES (:plotId, :x, :y, :z)
                 """;
-        return connection.query(queryString)
-                .batch(plotSigns.stream().map(plotSign -> call().bind("plotId", plotId)
-                        .bind("id", plotSigns.indexOf(plotSign))
+        queryConfiguration.query(query)
+                .single(call()
+                        .bind("plotId", plotSign.plotId())
                         .bind("x", plotSign.x())
                         .bind("y", plotSign.y())
-                        .bind("z", plotSign.z())))
-                .insert().changed();
+                        .bind("z", plotSign.z())
+                ).insert().changed();
     }
 
     public List<PlotSign> readAll() {
@@ -43,7 +41,7 @@ public class PlotSignDao {
                 .all();
     }
 
-    public Boolean delete(String plotId, int id) {
+    public boolean delete(String plotId, int id) {
         @Language("mariadb")
         var queryString = """
                 DELETE FROM plot_sign WHERE plot_id = :plotId AND id = :id;
@@ -54,13 +52,24 @@ public class PlotSignDao {
                 .delete().changed();
     }
 
-    public Boolean deleteAll(ConnectedQueryConfiguration connection, String plotId) {
+    public Boolean delete(String plotId, int x, int y, int z) {
+        @Language("mariadb")
+        var queryString = """
+                DELETE FROM plot_sign WHERE plot_id = :plotId AND x = :x AND y = :y AND z = :z;;
+                """;
+
+        return queryConfiguration.query(queryString)
+                .single(call().bind("plotId", plotId).bind("x", x).bind("y", y).bind("z", z))
+                .delete().changed();
+    }
+
+    public void deleteAll(String plotId) {
         @Language("mariadb")
         var queryString = """
                 DELETE FROM plot_sign WHERE plot_id = :plotId;
                 """;
 
-        return connection.query(queryString)
+        queryConfiguration.query(queryString)
                 .single(call().bind("plotId", plotId))
                 .delete().changed();
     }

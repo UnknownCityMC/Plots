@@ -1,5 +1,6 @@
 package de.unknowncity.plots.command.admin;
 
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.service.PlotService;
@@ -23,7 +24,7 @@ public class PlotAdminGroupCreateCommand extends SubCommand {
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("group").literal("create")
-                .permission("plots.command.plotadmin")
+                .permission(Permissions.COMMAND_PLOT_ADMIN)
                 .required("group-name", stringParser())
                 .handler(this::handleCreate)
                 .build()

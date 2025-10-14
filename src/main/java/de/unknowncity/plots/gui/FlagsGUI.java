@@ -6,6 +6,7 @@ import de.unknowncity.plots.gui.items.*;
 import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.plot.flag.PlotFlag;
 import de.unknowncity.plots.service.PlotService;
+import de.unknowncity.plots.service.plot.FlagService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
@@ -22,11 +23,12 @@ public class FlagsGUI {
 
     public static void open(Player player, Plot plot, PlotsPlugin plugin) {
         var messenger = plugin.messenger();
-        var plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
+        var flagsService = plugin.serviceRegistry().getRegistered(FlagService.class);
+        var flagRegistry = plugin.serviceRegistry().getRegistered(PlotService.class).flagRegistry();
 
         var title = messenger.component(player, NodePath.path("gui", "flags", "title"));
 
-        var flagCategories = plotService.flagRegistry().flagCategories();
+        var flagCategories = flagRegistry.flagCategories();
 
         var playerFlags = flagCategories.get(PlotFlag.Category.PLAYER);
         var playerFLagItems = playerFlags.stream()
@@ -130,7 +132,7 @@ public class FlagsGUI {
         Window.builder()
                 .setUpperGui(tabbedGUI)
                 .setTitle(title)
-                .addCloseHandler((reason) -> plotService.savePlot(plot))
+                .addCloseHandler((reason) -> flagsService.saveCurrentFlags(plot))
                 .open(player);
     }
 

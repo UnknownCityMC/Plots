@@ -1,6 +1,5 @@
 package de.unknowncity.plots.plot.location.signs;
 
-import com.destroystokyo.paper.MaterialTags;
 import de.unknowncity.astralib.common.message.lang.Language;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
 import de.unknowncity.plots.PlotsPlugin;
@@ -67,7 +66,7 @@ public class SignManager {
         });
     }
 
-    public static void clearSign(Location location) {
+    public static void setLineTextEmpty(Location location) {
         Sign sign = (Sign) location.getBlock().getState();
         sign.getSide(Side.FRONT).line(0, Component.empty());
         sign.getSide(Side.FRONT).line(1, Component.empty());

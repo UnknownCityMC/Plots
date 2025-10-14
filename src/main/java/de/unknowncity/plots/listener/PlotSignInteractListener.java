@@ -23,7 +23,7 @@ public class PlotSignInteractListener implements Listener {
 
     public PlotSignInteractListener(PlotsPlugin plugin) {
         this.plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
-        this.signManager = plotService.signManager();
+        this.signManager = plugin.signManager();
         this.messenger = plugin.messenger();
         this.economyService = plugin.serviceRegistry().getRegistered(EconomyService.class);
         this.plugin = plugin;

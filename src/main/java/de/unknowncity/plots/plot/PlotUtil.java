@@ -1,5 +1,6 @@
 package de.unknowncity.plots.plot;
 
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.access.PlotState;
 import de.unknowncity.plots.plot.model.Plot;
@@ -30,12 +31,11 @@ public class PlotUtil {
             return Optional.empty();
         }
 
-        var plot = plotService.getPlot(plotId);
-        return Optional.of(plot);
+        return plotService.getPlot(plotId);
     }
 
     public static boolean checkPlotOwner(Player player, Plot plot, PlotsPlugin plugin) {
-        if (!plot.owner().uuid().equals(player.getUniqueId()) && !player.hasPermission("ucplots.command.plotadmin")) {
+        if (!plot.owner().uuid().equals(player.getUniqueId()) && !player.hasPermission(Permissions.COMMAND_PLOT_ADMIN)) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "plot", "no-owner"));
             return false;
         }
@@ -58,12 +58,13 @@ public class PlotUtil {
         if (possibleRegion.isEmpty()) {
             return Optional.empty();
         }
+
         var plotId = possibleRegion.get().getId();
         if (!plotService.existsPlot(plotId)) {
             return Optional.empty();
         }
-        var plot = plotService.getPlot(plotId);
-        return Optional.of(plot);
+
+        return plotService.getPlot(plotId);
     }
 
 

@@ -1,5 +1,6 @@
 package de.unknowncity.plots.listener;
 
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.access.PlotAccessUtil;
 import de.unknowncity.plots.service.PlotService;
@@ -31,7 +32,7 @@ public class PlotInteractListener implements Listener {
             return;
         }
 
-        if (player.hasPermission("ucplots.interact.bypass")) {
+        if (player.hasPermission(Permissions.BYPASS_INTERACT)) {
             return;
         }
 

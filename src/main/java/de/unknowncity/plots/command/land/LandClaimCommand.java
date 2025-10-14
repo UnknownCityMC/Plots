@@ -1,10 +1,7 @@
 package de.unknowncity.plots.command.land;
 
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
-import de.unknowncity.plots.data.model.plot.PlotLocations;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import org.bukkit.command.CommandSender;
@@ -13,8 +10,6 @@ import org.incendo.cloud.Command;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
 import org.spongepowered.configurate.NodePath;
-
-import static org.incendo.cloud.parser.standard.StringParser.stringParser;
 
 public class LandClaimCommand extends SubCommand {
 

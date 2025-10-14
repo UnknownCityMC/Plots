@@ -1,5 +1,6 @@
 package de.unknowncity.plots.command.admin;
 
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.plot.PlotUtil;
@@ -30,7 +31,7 @@ public class PlotAdminSetRentIntervalCommand extends SubCommand {
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("setRentInterval")
-                .permission("plots.command.plotadmin")
+                .permission(Permissions.COMMAND_PLOT_ADMIN)
                 .required("interval", durationParser())
                 .senderType(Player.class)
                 .handler(this::setRentInterval)

@@ -1,8 +1,10 @@
 package de.unknowncity.plots.command.admin;
 
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.plot.PlotUtil;
+import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.service.PlotService;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -14,6 +16,7 @@ import org.spongepowered.configurate.NodePath;
 
 import java.util.concurrent.CompletableFuture;
 
+import static de.unknowncity.plots.command.argument.PlotParser.plotParser;
 import static org.incendo.cloud.parser.standard.StringParser.stringParser;
 
 public class PlotAdminResetCommand extends SubCommand {
@@ -27,16 +30,14 @@ public class PlotAdminResetCommand extends SubCommand {
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("reset")
-                .permission("plots.command.plotadmin")
-                .optional("id", stringParser(), (sender, input) ->
-                        CompletableFuture.completedFuture(plotService.plotCache().asMap().keySet().stream().map(Suggestion::suggestion).toList()))
-                .apply(plugin.confirmationManager())
+                .permission(Permissions.COMMAND_PLOT_ADMIN)
+                .optional("plot", plotParser(plotService))
                 .handler(this::handleDelete)
                 .build()
         );
 
         commandManager.command(builder.literal("reset")
-                .permission("plots.command.plotadmin")
+                .permission(Permissions.COMMAND_PLOT_ADMIN)
                 .literal("confirm")
                 .handler(plugin.confirmationManager().createExecutionHandler())
                 .build()
@@ -45,18 +46,17 @@ public class PlotAdminResetCommand extends SubCommand {
 
     private void handleDelete(CommandContext<CommandSender> commandContext) {
         var player = (Player) commandContext.sender();
-        var id = commandContext.getOrDefault("id", null);
 
-
-        if (id != null) {
-            if (!plotService.existsPlot(String.valueOf(id))) {
-                plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "reset", "not-exists"));
+        if (commandContext.contains("plot")) {
+            var plot = commandContext.<Plot>get("plot");
+            plotService.resetPlot(plot);
+        } else {
+            var plotOpt = PlotUtil.getPlotIfPresent(player, plugin);
+            if (plotOpt.isEmpty()) {
+                plugin.messenger().sendMessage(player, NodePath.path("command", "plot", "no-plot"));
                 return;
             }
-            plotService.resetPlot(plotService.getPlot(String.valueOf(id)));
-        } else {
-            PlotUtil.getPlotIfPresent(player, plugin).ifPresentOrElse(plotService::resetPlot,
-                    () -> plugin.messenger().sendMessage(player, NodePath.path("command", "plot", "no-plot")));
+            plotService.resetPlot(plotOpt.get());
         }
 
         plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "reset", "success"));

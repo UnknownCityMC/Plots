@@ -21,4 +21,8 @@ public record PlotSign(String plotId, long x, long y, long z) {
             return new PlotSign(plotId, x, y, z);
         };
     }
+
+    public boolean isAt(org.bukkit.Location location) {
+        return location.getBlockX() == x() && location.getBlockY() == y() && location.getBlockZ() == z();
+    }
 }
