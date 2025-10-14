@@ -186,7 +186,7 @@ public abstract class Plot {
                 Placeholder.component("group", groupName() != null ? Component.text(groupName()) :
                         messenger.component(player, NodePath.path("plot", "info", "no-group"))),
                 Placeholder.parsed("price", String.valueOf(price())),
-                Placeholder.parsed("state", state().name()),
+                Placeholder.component("state", messenger.component(player, NodePath.path("plot", "info", "state", state.name()))),
                 Placeholder.component("owner-id", owner() != null ? Component.text(owner().toString())
                         : messenger.component(player, NodePath.path("plot", "info", "no-owner"))),
                 Placeholder.component("owner-name", owner() != null ? Component.text(owner.name())
