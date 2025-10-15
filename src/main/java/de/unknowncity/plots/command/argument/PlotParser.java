@@ -40,7 +40,7 @@ public class PlotParser<C> implements ArgumentParser<C, Plot> {
     @Override
     public @NonNull SuggestionProvider<C> suggestionProvider() {
         return (context, input) ->
-                CompletableFuture.completedFuture(plotService.plotGroupCache().asMap().keySet().stream().map(Suggestion::suggestion).toList());
+                CompletableFuture.completedFuture(plotService.plotCache().asMap().keySet().stream().map(Suggestion::suggestion).toList());
     }
 
     public static final class PlotParseException extends ParserException {
