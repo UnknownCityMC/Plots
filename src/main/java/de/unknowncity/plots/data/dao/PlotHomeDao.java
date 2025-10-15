@@ -1,24 +1,24 @@
 package de.unknowncity.plots.data.dao;
 
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
-import de.unknowncity.plots.plot.location.PlotLocation;
+import de.unknowncity.plots.plot.location.PlotHome;
 import org.intellij.lang.annotations.Language;
 
 import java.util.List;
 
 import static de.chojo.sadu.queries.api.call.Call.call;
 
-public class PlotLocationDao {
+public class PlotHomeDao {
     private final QueryConfiguration queryConfiguration;
 
-    public PlotLocationDao(QueryConfiguration queryConfiguration) {
+    public PlotHomeDao(QueryConfiguration queryConfiguration) {
         this.queryConfiguration = queryConfiguration;
     }
 
-    public Boolean write(QueryConfiguration connection, String plotId, PlotLocation plotLocation) {
+    public Boolean write(QueryConfiguration connection, String plotId, PlotHome plotHome) {
         @Language("mariadb")
         var queryString = """
-                INSERT INTO plot_location (
+                INSERT INTO plot_home (
                     plot_id,
                     name,
                     public,
@@ -50,25 +50,25 @@ public class PlotLocationDao {
         return connection.query(queryString)
                 .single(call()
                         .bind("plotId", plotId)
-                        .bind("name", plotLocation.name())
-                        .bind("public", plotLocation.isPublic())
-                        .bind("x", plotLocation.x())
-                        .bind("y", plotLocation.y())
-                        .bind("z", plotLocation.z())
-                        .bind("yaw", plotLocation.yaw())
-                        .bind("pitch", plotLocation.pitch())
+                        .bind("name", plotHome.name())
+                        .bind("public", plotHome.isPublic())
+                        .bind("x", plotHome.x())
+                        .bind("y", plotHome.y())
+                        .bind("z", plotHome.z())
+                        .bind("yaw", plotHome.yaw())
+                        .bind("pitch", plotHome.pitch())
                 )
                 .insert().changed();
     }
 
-    public List<PlotLocation> readAll() {
+    public List<PlotHome> readAll() {
         @Language("mariadb")
         var queryString = """
-                SELECT plot_id, name, public, x, y, z, yaw, pitch FROM plot_location;
+                SELECT plot_id, name, public, x, y, z, yaw, pitch FROM plot_home;
                 """;
         return queryConfiguration.query(queryString)
                 .single()
-                .map(row -> new PlotLocation(
+                .map(row -> new PlotHome(
                         row.getString("plot_id"),
                         row.getString("name"),
                         row.getBoolean("public"),

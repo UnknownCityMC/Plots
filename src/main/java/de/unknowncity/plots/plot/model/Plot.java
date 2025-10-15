@@ -16,7 +16,7 @@ import de.unknowncity.plots.plot.economy.PlotPaymentType;
 import de.unknowncity.plots.plot.flag.PlotFlag;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
 import de.unknowncity.plots.plot.flag.WorldGuardFlag;
-import de.unknowncity.plots.plot.location.PlotLocation;
+import de.unknowncity.plots.plot.location.PlotHome;
 import de.unknowncity.plots.plot.location.signs.PlotSign;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -43,7 +43,7 @@ public abstract class Plot {
     private final List<PlotPlayer> deniedPlayers = new ArrayList<>();
     private final Map<PlotFlag<?>, Object> flags = new HashMap<>();
     private List<PlotInteractable> interactables = new ArrayList<>();
-    private PlotLocation plotHome;
+    private PlotHome plotHome;
     private List<PlotSign> signs = new ArrayList<>();
 
     public Plot(String plotId, String groupName, PlotPlayer owner, String regionId, double price, String worldName, PlotState state, LocalDateTime claimed) {
@@ -91,11 +91,11 @@ public abstract class Plot {
         return groupName;
     }
 
-    public PlotLocation plotHome() {
+    public PlotHome plotHome() {
         return plotHome;
     }
 
-    public void plotHome(PlotLocation plotHome) {
+    public void plotHome(PlotHome plotHome) {
         this.plotHome = plotHome;
     }
 

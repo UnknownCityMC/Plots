@@ -37,5 +37,6 @@ public class PlotAdminCommand extends PaperCommand<PlotsPlugin> {
         new PlotAdminSetRentIntervalCommand(plugin, builder).apply(commandManager);
 
         new PlotAdminGroupItemCommandCommand(plugin, builder).apply(commandManager);
+        new PlotAdminUpdateHomeCommand(plugin, builder).apply(commandManager);
     }
 }

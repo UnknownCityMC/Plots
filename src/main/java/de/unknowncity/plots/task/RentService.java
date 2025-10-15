@@ -60,7 +60,7 @@ public class RentService extends Service<PlotsPlugin> {
                             economyService.withdraw(owner.uuid(), price);
 
                             plot.lastRentPayed(LocalDateTime.now());
-                            plotService.savePlot(plot);
+                            plotService.savePlot(plot, false);
                             if (player != null) {
                                 plugin.messenger().sendMessage(player, NodePath.path("task", "rent", "success"),
                                         Placeholder.parsed("id", plot.id()), Placeholder.parsed("price", String.valueOf(price))

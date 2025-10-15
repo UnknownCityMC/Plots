@@ -16,7 +16,7 @@ public class PlotCacheLoader {
     private final PlotMemberDao memberDao;
     private final PlotDeniedPlayerDao deniedDao;
     private final PlotSignDao signDao;
-    private final PlotLocationDao locationDao;
+    private final PlotHomeDao locationDao;
     private final PlotFlagDao flagDao;
     private final PlotInteractablesDao interactablesDao;
     private final PlotGroupDao groupDao;
@@ -29,7 +29,7 @@ public class PlotCacheLoader {
             PlotMemberDao memberDao,
             PlotDeniedPlayerDao deniedDao,
             PlotSignDao signDao,
-            PlotLocationDao locationDao,
+            PlotHomeDao locationDao,
             PlotFlagDao flagDao,
             PlotInteractablesDao interactablesDao,
             PlotGroupDao groupDao,

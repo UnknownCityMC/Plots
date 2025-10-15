@@ -21,7 +21,7 @@ import de.unknowncity.plots.plot.flag.FlagRegistry;
 import de.unknowncity.plots.plot.flag.PlotFlags;
 import de.unknowncity.plots.plot.flag.PlotInteractable;
 import de.unknowncity.plots.plot.group.PlotGroup;
-import de.unknowncity.plots.plot.location.PlotLocation;
+import de.unknowncity.plots.plot.location.PlotHome;
 import de.unknowncity.plots.plot.location.signs.SignManager;
 import de.unknowncity.plots.service.backup.BackupService;
 import de.unknowncity.plots.service.plot.*;
@@ -59,7 +59,8 @@ public class PlotService extends Service<PlotsPlugin> {
     private final PlotMemberDao memberDao;
     private final PlotDeniedPlayerDao deniedDao;
     private final PlotSignDao signDao;
-    private final PlotLocationDao locationDao;
+    private final PlotHomeDao locationDao;
+    private final PlotHomeResetsDao homeResetDao;
     private final PlotFlagDao flagDao;
     private final PlotInteractablesDao interactablesDao;
 
@@ -76,7 +77,8 @@ public class PlotService extends Service<PlotsPlugin> {
         this.memberDao = new PlotMemberDao(queryConfiguration);
         this.deniedDao = new PlotDeniedPlayerDao(queryConfiguration);
         this.signDao = new PlotSignDao(queryConfiguration);
-        this.locationDao = new PlotLocationDao(queryConfiguration);
+        this.locationDao = new PlotHomeDao(queryConfiguration);
+        this.homeResetDao = new PlotHomeResetsDao(queryConfiguration);
         this.flagDao = new PlotFlagDao(queryConfiguration, flagRegistry);
         this.interactablesDao = new PlotInteractablesDao(queryConfiguration);
     }
@@ -91,7 +93,7 @@ public class PlotService extends Service<PlotsPlugin> {
         var biomeService = new BiomeService(logger);
         var flagService = new FlagService(flagDao, flagRegistry, queryConfiguration);
         var interactablesService = new InteractablesService(interactablesDao, queryConfiguration);
-        var locationService = new PlotLocationService(locationDao, queryConfiguration);
+        var locationService = new PlotLocationService(locationDao, homeResetDao, queryConfiguration);
         var signService = new SignService(signDao);
 
         plugin.serviceRegistry().register(accessService);
@@ -162,9 +164,16 @@ public class PlotService extends Service<PlotsPlugin> {
         region.setFlag(Flags.INTERACT, StateFlag.State.ALLOW);
         region.setFlag(Flags.USE, StateFlag.State.ALLOW);
 
+        var optLocation = LocationUtil.findSuitablePlotLocation(plot.world(), plot.protectedRegion());
+        if (optLocation.isPresent()) {
+            var location = optLocation.get();
+            var plotHome = new PlotHome(plot.id(), plot.id(), true, location.x(), location.y(), location.z(), 0, 0);
+            plot.plotHome(plotHome);
+        }
+
         setDefaults(plot);
 
-        savePlot(plot);
+        savePlot(plot, true);
         return Optional.of(plot);
     }
 
@@ -178,13 +187,6 @@ public class PlotService extends Service<PlotsPlugin> {
 
         if (plot instanceof RentPlot rentPlot) {
             rentPlot.lastRentPayed(null);
-        }
-
-        var optLocation = LocationUtil.findSuitablePlotLocation(plot.world(), plot.protectedRegion());
-        if (optLocation.isPresent()) {
-            var location = optLocation.get();
-            var plotHome = new PlotLocation(plot.id(), plot.id(), true, location.x(), location.y(), location.z(), 0, 0);
-            plot.plotHome(plotHome);
         }
 
         plot.interactables(PlotInteractable.defaults());
@@ -286,13 +288,28 @@ public class PlotService extends Service<PlotsPlugin> {
 
     public void resetPlot(Plot plot) {
         setDefaults(plot);
-        savePlot(plot);
+        savePlot(plot, false);
         var accessService = plugin.serviceRegistry().getRegistered(AccessService.class);
         accessService.clearMembers(plot);
         accessService.clearDeniedPlayers(plot);
         plot.protectedRegion().getOwners().removeAll();
         plot.protectedRegion().getMembers().removeAll();
 
+        plugin.serviceRegistry().getRegistered(PlotLocationService.class).getHomeResetLocation(plot).whenComplete((plotPosition, throwable) -> {
+            if (throwable != null || plotPosition.isEmpty()) {
+                plugin.getLogger().log(Level.SEVERE, "Failed to get home reset location for plot " + plot.id(), throwable);
+                return;
+            }
+            plot.plotHome(new PlotHome(
+                    plot.id(), "",
+                    true,
+                    plotPosition.get().x(),
+                    plotPosition.get().y(),
+                    plotPosition.get().z(),
+                    plotPosition.get().yaw(),
+                    plotPosition.get().pitch())
+            );
+        });
 
         SignManager.updateSings(plot, plugin.messenger());
     }
@@ -337,7 +354,7 @@ public class PlotService extends Service<PlotsPlugin> {
         resetPlot(plot);
     }
 
-    public void savePlot(Plot plot) {
+    public void savePlot(Plot plot, boolean isAtCreation) {
         plotCache.put(plot.id(), plot);
 
         CompletableFuture.runAsync(() -> {
@@ -347,6 +364,9 @@ public class PlotService extends Service<PlotsPlugin> {
                 plugin.serviceRegistry().getRegistered(FlagService.class).saveCurrentFlags(conn, plot);
                 plugin.serviceRegistry().getRegistered(InteractablesService.class).saveCurrentInteractables(conn, plot);
                 plugin.serviceRegistry().getRegistered(PlotLocationService.class).setPlotHome(conn, plot, plot.plotHome());
+                if (isAtCreation) {
+                    plugin.serviceRegistry().getRegistered(PlotLocationService.class).setPlotHomeResetLocation(conn, plot, plot.plotHome());
+                }
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Failed to save plot " + plot.id(), e);
             }

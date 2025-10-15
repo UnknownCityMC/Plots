@@ -49,7 +49,7 @@ public class PlotAdminSetRentIntervalCommand extends SubCommand {
                 return;
             }
             rentPlot.rentIntervalInMin(interval.toMinutes());
-            plotService.savePlot(plot);
+            plotService.savePlot(plot, false);
             SignManager.updateSings(plot, plugin.messenger());
             plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "setinterval", "success"), plot.tagResolvers(player, plugin.messenger()));
         }, () -> plugin.messenger().sendMessage(player, NodePath.path("command", "plot", "no-plot")));
