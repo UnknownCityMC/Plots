@@ -1,6 +1,7 @@
 package de.unknowncity.plots.command.user;
 
 import de.unknowncity.astralib.paper.api.command.PaperCommand;
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.gui.PlotMainGUI;
 import de.unknowncity.plots.plot.PlotUtil;
@@ -56,7 +57,7 @@ public class PlotCommand extends PaperCommand<PlotsPlugin> {
                 return;
             }
 
-            if (!plot.isOwner(sender.getUniqueId())) {
+            if (!plot.isOwner(sender.getUniqueId()) && !sender.hasPermission(Permissions.COMMAND_PLOT_ADMIN)) {
                 plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "only-owner"), plot.tagResolvers(sender, plugin.messenger()));
                 return;
             }

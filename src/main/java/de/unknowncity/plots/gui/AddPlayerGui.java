@@ -8,8 +8,10 @@ import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.plot.model.PlotMember;
 import de.unknowncity.plots.plot.access.type.PlotMemberRole;
 import de.unknowncity.plots.service.plot.AccessService;
+import de.unknowncity.plots.util.AstraArrays;
 import de.unknowncity.plots.util.SkullHelper;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -98,7 +100,11 @@ public class AddPlayerGui {
                 if (target instanceof Player targetPlayer) {
                     plugin.messenger().sendMessage(player, NodePath.path("event", "plot", "member", "added"), plot.tagResolvers(targetPlayer, messenger));
                 }
-                messenger.sendMessage(player, NodePath.path("command", "plot", "member", "add", "success"), Placeholder.parsed("name", target.getName()));
+                plugin.messenger().sendMessage(player, NodePath.path("command", "plot", "member", "add", "success"),
+                        AstraArrays.merge(plot.tagResolvers(player, plugin.messenger()), new TagResolver[]{
+                                Placeholder.unparsed("target", target.getName()),
+                                Placeholder.unparsed("role", member.role().name().toLowerCase())
+                        }));
                 MembersGUI.open(player, plot, plugin);
             } else {
                 if (isPresent) {
