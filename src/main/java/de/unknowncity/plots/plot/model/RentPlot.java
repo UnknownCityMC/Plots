@@ -16,19 +16,19 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class RentPlot extends Plot {
-    private LocalDateTime lastRentPayed;
+    private LocalDateTime lastRentPaid;
     private long rentIntervalInMin;
 
     public RentPlot(String plotId, PlotPlayer owner, String groupName, String regionId, double price, String worldName,
-                    PlotState state, LocalDateTime claimed, LocalDateTime lastRentPayed, long rentIntervalInMin
+                    PlotState state, LocalDateTime claimed, LocalDateTime lastRentPaid, long rentIntervalInMin
     ) {
         super(plotId, groupName, owner, regionId, price, worldName, state, claimed);
-        this.lastRentPayed = lastRentPayed;
+        this.lastRentPaid = lastRentPaid;
         this.rentIntervalInMin = rentIntervalInMin;
     }
 
-    public void lastRentPayed(LocalDateTime lastRentPayed) {
-        this.lastRentPayed = lastRentPayed;
+    public void lastRentPaid(LocalDateTime lastRentPayed) {
+        this.lastRentPaid = lastRentPayed;
     }
 
     public void rentIntervalInMin(long rentIntervalInMin) {
@@ -36,8 +36,8 @@ public class RentPlot extends Plot {
     }
 
     @Override
-    public LocalDateTime lastRentPayed() {
-        return lastRentPayed;
+    public LocalDateTime lastRentPaid() {
+        return lastRentPaid;
     }
 
     @Override
@@ -53,8 +53,8 @@ public class RentPlot extends Plot {
     @Override
     public TagResolver[] tagResolvers(Player player, PaperMessenger messenger) {
         return AstraArrays.merge(super.tagResolvers(player, messenger), new TagResolver[]{
-                Placeholder.component("rented-until", lastRentPayed == null  ? messenger.component(player, NodePath.path("plot", "info", "not-rented")) :
-                        Component.text(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").format(lastRentPayed.plusMinutes(rentIntervalInMin)))),
+                Placeholder.component("rented-until", lastRentPaid == null  ? messenger.component(player, NodePath.path("plot", "info", "not-rented")) :
+                        Component.text(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").format(lastRentPaid.plusMinutes(rentIntervalInMin)))),
                 Placeholder.unparsed("rent-interval", DurationFormatter.formatDuration(Duration.ofMinutes(rentIntervalInMin)))
         });
     }

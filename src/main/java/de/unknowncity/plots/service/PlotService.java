@@ -187,11 +187,11 @@ public class PlotService extends Service<PlotsPlugin> {
         plugin.serviceRegistry().getRegistered(BiomeService.class).resetBiome(plot);
         flagRegistry.getAllRegistered().forEach(plotFlag -> plot.setFlag(plotFlag, plotFlag.defaultValue()));
         if (plot instanceof RentPlot rentPlot) {
-            rentPlot.lastRentPayed(null);
+            rentPlot.lastRentPaid(null);
         }
 
         if (plot instanceof RentPlot rentPlot) {
-            rentPlot.lastRentPayed(null);
+            rentPlot.lastRentPaid(null);
         }
 
         plot.interactables(PlotInteractable.defaults());
@@ -205,6 +205,9 @@ public class PlotService extends Service<PlotsPlugin> {
     public void setPlotOwner(OfflinePlayer player, Plot plot) {
         plot.state(PlotState.SOLD);
         plot.owner(new PlotPlayer(plot.id(), player.getUniqueId(), player.getName()));
+        if (plot instanceof RentPlot rentPlot) {
+            rentPlot.lastRentPaid(LocalDateTime.now());
+        }
         CompletableFuture.runAsync(() -> plotDao.write(queryConfiguration, plot));
     }
 
@@ -329,7 +332,7 @@ public class PlotService extends Service<PlotsPlugin> {
         }
 
         if (plot instanceof RentPlot rentPlot) {
-            rentPlot.lastRentPayed(LocalDateTime.now());
+            rentPlot.lastRentPaid(LocalDateTime.now());
         }
 
         plugin.serviceRegistry().getRegistered(EconomyService.class).withdraw(player.getUniqueId(), plot.price());

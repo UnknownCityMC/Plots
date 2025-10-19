@@ -57,7 +57,7 @@ public abstract class Plot {
         this.claimed = claimed;
     }
 
-    public abstract LocalDateTime lastRentPayed();
+    public abstract LocalDateTime lastRentPaid();
 
     public abstract long rentIntervalInMin();
 

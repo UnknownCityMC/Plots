@@ -35,7 +35,7 @@ public class RentService extends Service<PlotsPlugin> {
             plotService.plotCache().asMap().values().stream()
                     .filter(plot -> plot.state() == PlotState.SOLD && plot instanceof RentPlot)
                     .map(plot -> (RentPlot) plot)
-                    .filter(plot -> plot.lastRentPayed().plusMinutes(plot.rentIntervalInMin()).isBefore(LocalDateTime.now()))
+                    .filter(plot -> plot.lastRentPaid().plusMinutes(plot.rentIntervalInMin()).isBefore(LocalDateTime.now()))
                     .forEach(plot -> {
                         var price = plot.price();
                         var owner = plot.owner();
@@ -59,7 +59,7 @@ public class RentService extends Service<PlotsPlugin> {
                         } else {
                             economyService.withdraw(owner.uuid(), price);
 
-                            plot.lastRentPayed(LocalDateTime.now());
+                            plot.lastRentPaid(LocalDateTime.now());
                             plotService.savePlot(plot, false);
                             if (player != null) {
                                 plugin.messenger().sendMessage(player, NodePath.path("task", "rent", "success"),

@@ -13,7 +13,7 @@ public class BuyPlot extends Plot {
     }
 
     @Override
-    public LocalDateTime lastRentPayed() {
+    public LocalDateTime lastRentPaid() {
         return null;
     }
 

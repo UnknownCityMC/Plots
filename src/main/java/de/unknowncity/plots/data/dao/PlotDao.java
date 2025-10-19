@@ -1,12 +1,10 @@
 package de.unknowncity.plots.data.dao;
 
-import de.chojo.sadu.queries.api.configuration.ConnectedQueryConfiguration;
 import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.chojo.sadu.queries.call.adapter.UUIDAdapter;
 import de.unknowncity.plots.plot.model.Plot;
 import org.intellij.lang.annotations.Language;
 
-import javax.management.Query;
 import java.util.List;
 
 import static de.chojo.sadu.queries.api.call.Call.call;
@@ -68,7 +66,7 @@ public class PlotDao {
                         .bind("paymentType", plot.paymentType())
                         .bind("price", plot.price())
                         .bind("rentInterval", plot.rentIntervalInMin())
-                        .bind("lastRentPaid", plot.lastRentPayed())
+                        .bind("lastRentPaid", plot.lastRentPaid())
                 )
                 .insert().changed();
     }
