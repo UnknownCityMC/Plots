@@ -316,6 +316,8 @@ public class PlotService extends Service<PlotsPlugin> {
             );
         });
 
+        plugin.serviceRegistry().getRegistered(BackupService.class).loadPresaleBackup(plot);
+
         SignManager.updateSings(plot, plugin.messenger());
     }
 
