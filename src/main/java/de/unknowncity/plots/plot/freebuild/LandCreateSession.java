@@ -84,28 +84,38 @@ public class LandCreateSession {
     public void complete() {
         var world = player.getWorld();
 
-        var id = generateId();
-        if (id == null) {
-            plugin.messenger().sendMessage(player, NodePath.path("command", "land", "claim", "error"));
+        String id = null;
+
+        for (int i = 0; i < 5; i++) {
+            var newId = generateId();
+            if (newId == null) {
+                continue;
+            }
+
+            if (plotService.existsPlot(newId)) {
+                continue;
+            }
+            id = newId;
+            break;
+        }
+
+        if (id == null || plotService.existsPlot(id)) {
+            plugin.messenger().sendMessage(player, NodePath.path("command", "land", "buy", "id-not-generated"));
             return;
         }
 
         if (pos1 == null) {
-            plugin.messenger().sendMessage(player, NodePath.path("command", "land", "claim", "not-selected"));
+            plugin.messenger().sendMessage(player, NodePath.path("command", "land", "buy", "not-selected"));
             return;
         }
 
         if (pos2 == null) {
-            plugin.messenger().sendMessage(player, NodePath.path("command", "land", "claim", "not-selected"));
+            plugin.messenger().sendMessage(player, NodePath.path("command", "land", "buy", "not-selected"));
             return;
         }
 
         var loc1 = BlockVector3.at(pos1.getBlockX(), -64, pos1.getBlockZ());
         var loc2 = BlockVector3.at(pos2.getBlockX(), 320, pos2.getBlockZ());
-
-        freeBuildEditOutline.updateOutline(plugin, pos1, pos2, false, false);
-        player.sendActionBar(Component.empty());
-        this.task.cancel();
 
         if (!economyService.hasEnoughFunds(player.getUniqueId(), price)) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "land", "expand", "not-enough-money"), Placeholder.parsed("price", String.valueOf(price)));
@@ -115,7 +125,7 @@ public class LandCreateSession {
         var regionExist = regionService.doesRegionExistBetweenLocations(world, loc1, loc2);
 
         if (regionExist) {
-            plugin.messenger().sendMessage(player, NodePath.path("command", "land", "claim", "already-exists"));
+            plugin.messenger().sendMessage(player, NodePath.path("command", "land", "buy", "already-exists"));
             return;
         }
 
@@ -124,11 +134,17 @@ public class LandCreateSession {
 
         if (plotOpt.isPresent()) {
             plugin.messenger().sendMessage(player, NodePath.path("command", "land", "claim", "disable"));
-            plugin.messenger().sendMessage(player, NodePath.path("command", "land", "claim", "success"));
+            plugin.messenger().sendMessage(player, NodePath.path("command", "land", "buy", "success"));
             plotService.claimPlot(player, plotOpt.get());
         } else {
-            plugin.messenger().sendMessage(player, NodePath.path("command", "land", "claim", "error"));
+            plugin.messenger().sendMessage(player, NodePath.path("command", "land", "buy", "error"));
         }
+    }
+
+    public void close() {
+        freeBuildEditOutline.updateOutline(plugin, pos1, pos2, false, false);
+        player.sendActionBar(Component.empty());
+        this.task.cancel();
     }
 
     private String generateId() {

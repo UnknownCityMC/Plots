@@ -28,6 +28,9 @@ public class LandEditSessionHandler {
     }
 
     public void closeEditSession(Player player) {
-        findEditSession(player).ifPresent(openSessions::remove);
+        findEditSession(player).ifPresent(landCreateSession -> {
+            landCreateSession.close();
+            openSessions.remove(landCreateSession);
+        });
     }
 }
