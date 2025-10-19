@@ -12,16 +12,21 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.biome.BiomeType;
 import de.unknowncity.astralib.common.service.Service;
 import de.unknowncity.plots.PlotsPlugin;
+import de.unknowncity.plots.data.dao.PlotResetDataDao;
 import de.unknowncity.plots.event.PlotInfoUpdateEvent;
 import de.unknowncity.plots.plot.model.Plot;
+import org.bukkit.Bukkit;
 
-import java.util.logging.Logger;
+import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
 
 public class BiomeService extends Service<PlotsPlugin> {
-    private final Logger logger;
+    private final PlotsPlugin plugin;
+    private final PlotResetDataDao resetDataDao;
 
-    public BiomeService(Logger logger) {
-        this.logger = logger;
+    public BiomeService(PlotsPlugin plugin, PlotResetDataDao resetDataDao) {
+        this.plugin = plugin;
+        this.resetDataDao = resetDataDao;
     }
 
     public void setBiome(Plot plot, BiomeType biome) {
@@ -39,9 +44,24 @@ public class BiomeService extends Service<PlotsPlugin> {
             var visitor = new RegionVisitor(region, replace);
             Operations.complete(visitor);
         } catch (WorldEditException e) {
-            logger.warning("Failed to change biome for plot " + plot.id());
+            plugin.getLogger().warning("Failed to change biome for plot " + plot.id());
         }
 
         new PlotInfoUpdateEvent(plot).callEvent();
+    }
+
+    public void resetBiome(Plot plot) {
+        CompletableFuture.supplyAsync(() -> resetDataDao.getResetBiome(plot.id())).whenComplete((biomeType, throwable) -> {
+            Bukkit.getScheduler().runTask(plugin, () -> setBiome(plot, BukkitAdapter.adapt(biomeType)));
+        });
+    }
+
+    public void saveResetBiome(Plot plot) {
+        var biome = plot.world().getBiome(plot.plotHome().getLocation(plot.world()));
+        CompletableFuture.runAsync(() -> resetDataDao.setResetBiome(plot.id(), biome))
+                .exceptionally(throwable -> {
+                    plugin.getLogger().log(Level.WARNING, "Failed to save reset data biome", throwable);
+                    return null;
+                });
     }
 }

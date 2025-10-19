@@ -63,6 +63,7 @@ public class PlotService extends Service<PlotsPlugin> {
     private final PlotHomeResetsDao homeResetDao;
     private final PlotFlagDao flagDao;
     private final PlotInteractablesDao interactablesDao;
+    private final PlotResetDataDao plotResetDataDao;
 
     private final SchematicManager schematicManager;
 
@@ -81,6 +82,7 @@ public class PlotService extends Service<PlotsPlugin> {
         this.homeResetDao = new PlotHomeResetsDao(queryConfiguration);
         this.flagDao = new PlotFlagDao(queryConfiguration, flagRegistry);
         this.interactablesDao = new PlotInteractablesDao(queryConfiguration);
+        this.plotResetDataDao = new PlotResetDataDao(queryConfiguration);
     }
 
     @Override
@@ -90,7 +92,7 @@ public class PlotService extends Service<PlotsPlugin> {
         schematicManager.makeDirectories();
         this.plugin.serviceRegistry().register(new BackupService(schematicManager, this));
         var accessService = new AccessService(queryConfiguration, memberDao, deniedDao, logger);
-        var biomeService = new BiomeService(logger);
+        var biomeService = new BiomeService(plugin, plotResetDataDao);
         var flagService = new FlagService(flagDao, flagRegistry, queryConfiguration);
         var interactablesService = new InteractablesService(interactablesDao, queryConfiguration);
         var locationService = new PlotLocationService(locationDao, homeResetDao, queryConfiguration);
@@ -171,6 +173,8 @@ public class PlotService extends Service<PlotsPlugin> {
             plot.plotHome(plotHome);
         }
 
+        plugin.serviceRegistry().getRegistered(BiomeService.class).saveResetBiome(plot);
+
         setDefaults(plot);
 
         savePlot(plot, true);
@@ -180,6 +184,7 @@ public class PlotService extends Service<PlotsPlugin> {
     private void setDefaults(Plot plot) {
         plot.state(PlotState.AVAILABLE);
         plot.owner(null);
+        plugin.serviceRegistry().getRegistered(BiomeService.class).resetBiome(plot);
         flagRegistry.getAllRegistered().forEach(plotFlag -> plot.setFlag(plotFlag, plotFlag.defaultValue()));
         if (plot instanceof RentPlot rentPlot) {
             rentPlot.lastRentPayed(null);
