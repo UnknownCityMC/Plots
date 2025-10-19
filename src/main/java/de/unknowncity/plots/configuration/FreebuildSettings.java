@@ -7,10 +7,12 @@ import java.util.ArrayList;
 public class FreebuildSettings {
 
     @JsonProperty
-    public double price = 3.0;
+    private final double price = 3.0;
 
     @JsonProperty
-    public ArrayList<String> noSchematic = new ArrayList<>();
+    private final ArrayList<String> noSchematic = new ArrayList<>();
+    @JsonProperty
+    private final String freeBuildGroup = "freebuild";
 
 
     public FreebuildSettings() {
@@ -23,5 +25,9 @@ public class FreebuildSettings {
 
     public ArrayList<String> noSchematic() {
         return noSchematic;
+    }
+
+    public String freeBuildGroup() {
+        return freeBuildGroup;
     }
 }

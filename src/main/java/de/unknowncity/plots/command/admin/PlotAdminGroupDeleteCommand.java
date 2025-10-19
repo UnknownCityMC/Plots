@@ -48,6 +48,12 @@ public class PlotAdminGroupDeleteCommand extends SubCommand {
         var player = (Player) commandContext.sender();
         var group = commandContext.<PlotGroup>get("group");
 
+        if (group.name().equals(plugin.configuration().fb().freeBuildGroup()) ||
+                group.name().equals(plugin.configuration().starterPlotGroup())) {
+            plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "group", "delete", "internal"));
+            return;
+        }
+
         plotService.deletePlotGroup(group.name());
 
         plugin.messenger().sendMessage(player, NodePath.path("command", "plotadmin", "group", "delete", "success"));

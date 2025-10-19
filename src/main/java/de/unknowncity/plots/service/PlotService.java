@@ -256,6 +256,7 @@ public class PlotService extends Service<PlotsPlugin> {
 
     public List<Plot> findPlotsByOwnerUUID(UUID uuid) {
         return plotCache.asMap().values().stream().filter(plot -> plot.isOwner(uuid))
+                .filter(plot -> plot.state().equals(PlotState.SOLD))
                 .sorted(Comparator.comparing(Plot::claimed))
                 .toList();
     }
@@ -263,6 +264,7 @@ public class PlotService extends Service<PlotsPlugin> {
     public List<Plot> findPlotsByMember(UUID memberOrOwner) {
         return plotCache.asMap().values().stream()
                 .filter(plot -> plot.isMember(memberOrOwner))
+                .filter(plot -> plot.state().equals(PlotState.SOLD))
                 .sorted(Comparator.comparing(Plot::claimed))
                 .toList();
     }
@@ -477,7 +479,20 @@ public class PlotService extends Service<PlotsPlugin> {
 
             var groups = groupsFuture.join();
             groups.forEach(plotGroup -> plotGroupCache.put(plotGroup.name(), plotGroup));
+
+            createDefaultData();
         });
+    }
+
+    private void createDefaultData() {
+        var freeBuildGroup = plugin.configuration().fb().freeBuildGroup();
+        if (!existsGroup(freeBuildGroup)) {
+            createPlotGroup(freeBuildGroup);
+        }
+        var starterGroup = plugin.configuration().starterPlotGroup();
+        if (!existsGroup(starterGroup)) {
+            createPlotGroup(starterGroup);
+        }
     }
 
     public PlotsPlugin plugin() {

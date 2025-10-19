@@ -5,7 +5,7 @@ import de.unknowncity.astralib.libs.com.fasterxml.jackson.annotation.JsonPropert
 public class EconomySettings {
 
     @JsonProperty
-    public String currency = "money";
+    private final String currency = "money";
 
     public EconomySettings() {
 
