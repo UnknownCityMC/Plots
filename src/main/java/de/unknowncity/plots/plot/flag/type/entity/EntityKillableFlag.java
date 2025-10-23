@@ -1,5 +1,6 @@
 package de.unknowncity.plots.plot.flag.type.entity;
 
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.plot.access.PlotAccessUtil;
 import de.unknowncity.plots.plot.access.type.PlotAccessModifier;
 import de.unknowncity.plots.plot.flag.PlotAccessModifierFlag;
@@ -20,6 +21,10 @@ public class EntityKillableFlag extends PlotAccessModifierFlag implements Listen
     @EventHandler
     public void onEntityDamage(EntityDamageByEntityEvent event) {
         if (!(event.getDamager() instanceof Player player)) {
+            return;
+        }
+
+        if (player.hasPermission(Permissions.BYPASS_INTERACT)) {
             return;
         }
 

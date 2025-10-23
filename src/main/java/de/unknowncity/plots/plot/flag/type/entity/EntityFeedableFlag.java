@@ -1,5 +1,6 @@
 package de.unknowncity.plots.plot.flag.type.entity;
 
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.plot.access.PlotAccessUtil;
 import de.unknowncity.plots.plot.access.type.PlotAccessModifier;
 import de.unknowncity.plots.plot.flag.PlotAccessModifierFlag;
@@ -31,6 +32,10 @@ public class EntityFeedableFlag extends PlotAccessModifierFlag implements Listen
     @EventHandler
     public void onEntityDamage(PlayerInteractAtEntityEvent event) {
         var player = event.getPlayer();
+
+        if (player.hasPermission(Permissions.BYPASS_INTERACT)) {
+            return;
+        }
 
         var itemType = player.getActiveItem().getType();
 
