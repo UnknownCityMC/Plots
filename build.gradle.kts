@@ -108,7 +108,7 @@ tasks {
     }
 
     runServer {
-        minecraftVersion("1.21.8")
+        minecraftVersion("1.21.10")
 
         downloadPlugins {
             modrinth("WorldGuard", "7.0.14")
