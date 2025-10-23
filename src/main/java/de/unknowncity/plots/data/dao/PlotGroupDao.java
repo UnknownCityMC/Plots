@@ -4,13 +4,16 @@ import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
 import de.unknowncity.plots.plot.group.PlotGroup;
 import org.intellij.lang.annotations.Language;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static de.chojo.sadu.queries.api.call.Call.call;
 
 public class PlotGroupDao {
 
     private final QueryConfiguration queryConfiguration;
+    private final Logger logger = Logger.getLogger(PlotGroupDao.class.getName());
 
     public PlotGroupDao(QueryConfiguration queryConfiguration) {
         this.queryConfiguration = queryConfiguration;
@@ -22,16 +25,21 @@ public class PlotGroupDao {
         return queryConfiguration.query(querySting)
                 .single()
                 .map(row -> {
-                    var displayItemBytes = row.getBytes("display_item");
-                    if (displayItemBytes != null) {
+                    try {
+                        var displayItemBytes = row.getBytes("display_item");
+                        if (displayItemBytes != null) {
+                            return new PlotGroup(
+                                    row.getString("name"),
+                                    displayItemBytes
+                            );
+                        }
                         return new PlotGroup(
-                                row.getString("name"),
-                                displayItemBytes
+                                row.getString("name")
                         );
+                    } catch (Exception e) {
+                        logger.warning("Could not read plot group from database: " + e.getMessage());
+                        return null;
                     }
-                    return new PlotGroup(
-                            row.getString("name")
-                    );
                 }).all();
     }
 

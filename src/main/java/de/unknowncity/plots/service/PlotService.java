@@ -426,59 +426,64 @@ public class PlotService extends Service<PlotsPlugin> {
                 logger.log(Level.SEVERE, "Failed to load plots from database.", throwable);
                 return;
             }
-            var plots = plotsFuture.join();
-            plotCache.putAll(plots.stream().collect(Collectors.toMap(Plot::id, Function.identity())));
-            var members = membersFuture.join();
-            members.forEach(plotMember -> {
-                var plot = plotCache.getIfPresent(plotMember.plotId());
-                if (plot != null) {
-                    plot.members().add(plotMember);
-                }
-            });
 
-            var deniedPlayers = deniedFuture.join();
-            deniedPlayers.forEach(plotPlayer -> {
-                var plot = plotCache.getIfPresent(plotPlayer.plotId());
-                if (plot != null) {
-                    plot.deniedPlayers().add(plotPlayer);
-                }
-            });
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                var plots = plotsFuture.join();
+                plotCache.putAll(plots.stream().collect(Collectors.toMap(Plot::id, Function.identity())));
+                var members = membersFuture.join();
+                members.forEach(plotMember -> {
+                    var plot = plotCache.getIfPresent(plotMember.plotId());
+                    if (plot != null) {
+                        plot.members().add(plotMember);
+                    }
+                });
 
-            var signs = signsFuture.join();
-            signs.forEach(plotSign -> {
-                var plot = plotCache.getIfPresent(plotSign.plotId());
-                if (plot != null) {
-                    plot.signs().add(plotSign);
-                }
-                plugin.serviceRegistry().getRegistered(SignService.class).plotSignCache().add(plotSign);
-            });
+                var deniedPlayers = deniedFuture.join();
+                deniedPlayers.forEach(plotPlayer -> {
+                    var plot = plotCache.getIfPresent(plotPlayer.plotId());
+                    if (plot != null) {
+                        plot.deniedPlayers().add(plotPlayer);
+                    }
+                });
 
-            var warps = warpsFuture.join();
-            warps.forEach(plotLocation -> {
-                var plot = plotCache.getIfPresent(plotLocation.plotId());
-                if (plot != null) {
-                    plot.plotHome(plotLocation);
-                }
-            });
+                var signs = signsFuture.join();
+                signs.forEach(plotSign -> {
+                    var plot = plotCache.getIfPresent(plotSign.plotId());
+                    if (plot != null) {
+                        plot.signs().add(plotSign);
+                    }
+                    plugin.serviceRegistry().getRegistered(SignService.class).plotSignCache().add(plotSign);
+                });
 
-            var flags = flagsFuture.join();
-            flags.forEach(plotFlagWrapper -> {
-                var plot = plotCache.getIfPresent(plotFlagWrapper.plotId());
-                if (plot != null) {
-                    plot.setFlag(plotFlagWrapper.flag(), plotFlagWrapper.flagValue());
-                }
-            });
+                var warps = warpsFuture.join();
+                warps.forEach(plotLocation -> {
+                    var plot = plotCache.getIfPresent(plotLocation.plotId());
+                    if (plot != null) {
+                        plot.plotHome(plotLocation);
+                    }
+                });
 
-            var interactables = interactablesFuture.join();
-            interactables.forEach(plotInteractable -> {
-                var plot = plotCache.getIfPresent(plotInteractable.plotId());
-                if (plot != null) {
-                    plot.interactables().add(plotInteractable);
-                }
-            });
+                var flags = flagsFuture.join();
+                flags.forEach(plotFlagWrapper -> {
+                    var plot = plotCache.getIfPresent(plotFlagWrapper.plotId());
+                    if (plot != null) {
+                        plot.setFlag(plotFlagWrapper.flag(), plotFlagWrapper.flagValue());
+                    }
+                });
 
-            var groups = groupsFuture.join();
-            groups.forEach(plotGroup -> plotGroupCache.put(plotGroup.name(), plotGroup));
+                var interactables = interactablesFuture.join();
+                interactables.forEach(plotInteractable -> {
+                    var plot = plotCache.getIfPresent(plotInteractable.plotId());
+                    if (plot != null) {
+                        plot.interactables().add(plotInteractable);
+                    }
+                });
+
+                var groups = groupsFuture.join();
+                logger.warning("Loaded " + groups.size() + " plot groups.");
+                groups.forEach((plotGroup -> logger.warning(plotGroup.toString())));
+                groups.forEach(plotGroup -> plotGroupCache.put(plotGroup.name(), plotGroup));
+            });
 
             createDefaultData();
         });

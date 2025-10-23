@@ -24,12 +24,15 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.*;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.spongepowered.configurate.NodePath;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.logging.Logger;
 
 public abstract class Plot {
+    private boolean broken = false;
     private final String plotId;
     private final String regionId;
     private final String worldName;
@@ -216,7 +219,12 @@ public abstract class Plot {
         } else {
             flags.put(flag, val);
             if (flag instanceof WorldGuardFlag<?> worldGuardFlag) {
-                protectedRegion().setFlag((Flag<V>) worldGuardFlag.worldGuardFlag(), (V) val);
+                try {
+                    protectedRegion().setFlag((Flag<V>) worldGuardFlag.worldGuardFlag(), (V) val);
+                } catch (Exception e) {
+                    broken = true;
+                    Logger.getLogger(JavaPlugin.class.getName()).severe("Plot " + plotId + " is broken (No region present)!");
+                }
             }
         }
     }
@@ -272,15 +280,15 @@ public abstract class Plot {
     }
 
     public int height() {
-        return protectedRegion().getMaximumPoint().y() - protectedRegion().getMinimumPoint().y() + 1;
+        return broken ? 0 : protectedRegion().getMaximumPoint().y() - protectedRegion().getMinimumPoint().y() + 1;
     }
 
     public int width() {
-        return protectedRegion().getMaximumPoint().z() - protectedRegion().getMinimumPoint().z() + 1;
+        return broken ? 0 : protectedRegion().getMaximumPoint().z() - protectedRegion().getMinimumPoint().z() + 1;
     }
 
     public int depth() {
-        return protectedRegion().getMaximumPoint().x() - protectedRegion().getMinimumPoint().x() + 1;
+        return broken ? 0 : protectedRegion().getMaximumPoint().x() - protectedRegion().getMinimumPoint().x() + 1;
     }
 
     @MappingProvider({"payment_type", "id", "owner_id", "group_name", "region_id", "price", "world", "state", "claimed", "last_rent_paid", "rent_interval"})
@@ -323,5 +331,9 @@ public abstract class Plot {
                 );
             }
         };
+    }
+
+    public boolean isBroken() {
+        return broken;
     }
 }

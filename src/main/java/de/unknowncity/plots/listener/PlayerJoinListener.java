@@ -1,6 +1,8 @@
 package de.unknowncity.plots.listener;
 
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.PlotsPlugin;
+import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.plot.AccessService;
 import org.bukkit.event.EventHandler;
@@ -23,10 +25,26 @@ public class PlayerJoinListener implements Listener {
         plugin.serviceRegistry().getRegistered(PlotService.class).findPlotAt(location).ifPresent(plot -> {
             var deniedPlayer = plot.findPlotBannedPlayer(player.getUniqueId());
 
-           if (deniedPlayer.isPresent()) {
-               plugin.serviceRegistry().getRegistered(AccessService.class).kickPlayer(plot, player);
-               plugin.messenger().sendMessage(player, NodePath.path("event", "plot", "kick", "join"));
-           }
+            if (deniedPlayer.isPresent()) {
+                plugin.serviceRegistry().getRegistered(AccessService.class).kickPlayer(plot, player);
+                plugin.messenger().sendMessage(player, NodePath.path("event", "plot", "kick", "join"));
+            }
         });
+
+        if (player.hasPermission(Permissions.NOTIFY_BROKEN_PLOTS)) {
+            plugin.serviceRegistry().getRegistered(PlotService.class
+                    ).plotCache()
+                    .asMap()
+                    .values()
+                    .stream()
+                    .filter(Plot::isBroken)
+                    .forEach(plot -> {
+                        plugin.messenger().sendMessage(
+                                player,
+                                NodePath.path("event", "plot", "notify", "broken"),
+                                plot.tagResolvers(player, plugin.messenger())
+                        );
+                    });
+        }
     }
 }
