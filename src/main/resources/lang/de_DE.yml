@@ -78,7 +78,7 @@ sign:
 command:
   confirm:
     notification: <prefix><#ff7373>Willst du das wirklich tun? <gray>Nutze
-      <yellow>/[command} confirm
+      <yellow>/<command> confirm
   land:
     claim:
       price-enough: "<gray>Preis: <#beff73><price>"

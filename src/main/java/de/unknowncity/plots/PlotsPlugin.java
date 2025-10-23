@@ -105,7 +105,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
                                 NodePath.path("command", "confirm", "no-pending"))
                         )
                         .confirmationRequiredNotifier((sender, context) -> {
-                            var command = context.command().rootComponent().name();
+                            var command = context.command().toString();
                             messenger.sendMessage(
                                     sender,
                                     NodePath.path("command", "confirm", "notification"),
