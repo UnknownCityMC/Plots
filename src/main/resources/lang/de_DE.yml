@@ -1,4 +1,3 @@
----
 prefix: "<white>[<aqua>Plots<white>] "
 plot:
   info:
@@ -90,6 +89,11 @@ command:
       not-enough-money: <prefix><#ff7373>Das ausgewählte Grundtsück ist zu teuer
       already-exists: <prefix><#ff7373>Hier ist bereits ein anderer Land-Claim
       not-selected: <prefix><#ff7373>Du hast keinen gültigen Bereich ausgewählt
+      not-freebuild-world: <prefix><#ff7373>Das geht nur in einer Freebuild Welt!
+    buy:
+      not-found: <prefix><#ff7373>Du hast keine Ländereien ausgewählt!
+      success: <prefix><#beff73>Du hast dieses Land für <yellow><price></yellow> gekauft!
+      id-not-generated: <prefix><#ff7373>Oops, das sollte nicht passieren. Dein Land-Claim konnte nicht erstellt werden!
   plot:
     info:
       buy:
@@ -154,7 +158,7 @@ command:
   plotadmin:
     reload: <prefix><gray>Einstellungen und Nachrichten neu geladen! <#beff73>✔
     no-plot: <prefix><#ff7373>An dieser Stelle befindet sich kein Plot
-    no-suitable-region: <prefix><#ff7373>An dieser Stelle befindet sich keine WorldGuard Region#
+    no-suitable-region: <prefix><#ff7373>An dieser Stelle befindet sich keine WorldGuard Region
     signs:
       updateAll: <prefix><gray>Alle Schilder wurden aktualisiert (Hoffentlich)
       deleteAll: <prefix><gray>Es wurden alle signs zu diesem Plot gelöscht!
@@ -222,6 +226,8 @@ command:
       error: <prefix><#ff7373>Es gab einen Fehler...
 event:
   plot:
+    notify:
+      broken: "<prefix><dark_red>Kaputtes Plot gefunden: <yellow><id> <gray>[<green><click:run_command:'/plotadmin teleport <id>'>TP<gray></click></green>]"
     deny:
       block-place: <prefix><#ff7373>Du darfst hier keine Blöcke setzen!
       block-break: <prefix><#ff7373>Du darfst hier nicht abbaun!
@@ -234,10 +240,10 @@ menu:
   next-button: <white>[ <yellow>» <white>]
   next-button-no-next: =====
   plotlist:
-    header: <gray>===============[<aqua>Plots<gray>===============
+    header: <gray>===============[<aqua>Plots<gray>]===============
     entry: "<yellow><index><gray>: <aqua><id> <white><click:run_command:plotadmin
       teleport <id>>[<#beff73>TP<white>]</click>"
-    footer: <gray><prev><gray>==========[<aqua>Plots<gray>==========<next>
+    footer: <gray><prev><gray>==========[<aqua>Plots<gray>]==========<next>
 gui:
   item:
     back:
@@ -274,6 +280,27 @@ gui:
   access-modifier-format:
     active: <!i><gray>▶ <#beff73><access-modifier>
     inactive: <!i><gray>▸ <dark_gray><access-modifier>
+  viewplots:
+    title: "%nexo_shift_-20%<white>%nexo_gui-bg-paged-6%%nexo_shift_-175%<!i><#1d71\
+      ad>Plot <gray>| <white>Deine Plots"
+    item:
+      plot-owned:
+        name: "<!i><green><id> <gray>(<yellow>Im Besitz<gray>)"
+        lore:
+          - <!i>
+          - <!i><gray>Bedienung
+          - <!i><gray>▸ <yellow>Verwalten
+            <gray>[<gold><key:key.keyboard.left.shift><gray>] <gray>+ <white>🖰
+            <gray>[<gold><key:key.mouse.left><gray>]
+          - <!i><gray>▸ <yellow>Teleportieren <gray>[<gold><key:key.mouse.left><gray>]
+          - <!i>
+      plot-member:
+        name: "<!i><green><id> <gray>(<yellow>Vetraut<gray>)"
+        lore:
+          - <!i>
+          - <!i><gray>Bedienung
+          - <!i><gray>▸ <yellow>Teleportieren <gray>[<gold><key:key.mouse.left><gray>]
+          - <!i>
   members:
     title: "%nexo_shift_-20%<white>%nexo_gui-bg-paged-6%%nexo_shift_-175%<!i><#1d71\
       ad>Plot <gray>| <white>Vertraute Spieler"
