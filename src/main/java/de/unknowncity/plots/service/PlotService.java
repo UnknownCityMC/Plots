@@ -2,6 +2,8 @@ package de.unknowncity.plots.service;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
@@ -368,7 +370,13 @@ public class PlotService extends Service<PlotsPlugin> {
             plugin.serviceRegistry().getRegistered(EconomyService.class).deposit(plot.owner().uuid(), plot.price() * 0.8);
         }
 
-        resetPlot(plot);
+        if (isFreeBuildPlot(plot)) {
+            var region = plot.protectedRegion();
+            WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(plot.world())).removeRegion(region.getId());
+            deletePlot(plot.id());
+        } else {
+            resetPlot(plot);
+        }
     }
 
     public void savePlot(Plot plot, boolean isAtCreation) {
@@ -501,6 +509,10 @@ public class PlotService extends Service<PlotsPlugin> {
         if (!existsGroup(starterGroup)) {
             createPlotGroup(starterGroup);
         }
+    }
+
+    public boolean isFreeBuildPlot(Plot plot) {
+        return plugin.configuration().fb().noSchematic().contains(plot.world().getName());
     }
 
     public PlotsPlugin plugin() {
