@@ -40,7 +40,7 @@ public abstract class Plot {
     private String groupName;
     private double price;
     private PlotState state;
-    private final LocalDateTime claimed;
+    private LocalDateTime claimed;
 
     private final List<PlotMember> members = new ArrayList<>();
     private final List<PlotPlayer> deniedPlayers = new ArrayList<>();
@@ -125,6 +125,10 @@ public abstract class Plot {
 
     public LocalDateTime claimed() {
         return claimed;
+    }
+
+    public void claimed(LocalDateTime claimed) {
+        this.claimed = claimed;
     }
 
     /**

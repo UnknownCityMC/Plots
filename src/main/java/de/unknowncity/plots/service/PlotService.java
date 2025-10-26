@@ -343,6 +343,7 @@ public class PlotService extends Service<PlotsPlugin> {
 
         plot.state(PlotState.SOLD);
         plot.owner(new PlotPlayer(plot.id(), player.getUniqueId(), player.getName()));
+        plot.claimed(LocalDateTime.now());
         plotDao.write(queryConfiguration, plot);
 
         plot.protectedRegion().getOwners().addPlayer(player.getUniqueId());

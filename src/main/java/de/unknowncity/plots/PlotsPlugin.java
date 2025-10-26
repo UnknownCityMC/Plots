@@ -67,6 +67,7 @@ public class PlotsPlugin extends PaperAstraPlugin {
         pluginManager.registerEvents(new PlotSignInteractListener(this), this);
         pluginManager.registerEvents(new PlayerJoinListener(this), this);
         pluginManager.registerEvents(new LandClaimDeactivateListener(this), this);
+        pluginManager.registerEvents(new EntityMoveListener(this), this);
 
         var sessionManager = WorldGuard.getInstance().getPlatform().getSessionManager();
         sessionManager.registerHandler(new PlotEntrySessionHandler.Factory(
