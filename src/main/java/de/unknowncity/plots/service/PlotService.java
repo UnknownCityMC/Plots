@@ -352,6 +352,8 @@ public class PlotService extends Service<PlotsPlugin> {
             schematicManager.createPreSaleSchematic(plot);
         }
 
+        schematicManager.replaceLeavesWithOnesThatDecay(plot);
+
         SignManager.updateSings(plot, plugin.messenger());
         return true;
     }

@@ -115,7 +115,7 @@ tasks {
             modrinth("CoinsEngine", "2.5.2")
             modrinth("NightCore", "2.8.3")
             url("https://download.luckperms.net/1605/bukkit/loader/LuckPerms-Bukkit-5.5.16.jar")
-            url("https://ci.athion.net/job/FastAsyncWorldEdit/1175/artifact/artifacts/FastAsyncWorldEdit-Paper-2.13.3-SNAPSHOT-1175.jar")
+            url("https://ci.athion.net/job/FastAsyncWorldEdit/1202/artifact/artifacts/FastAsyncWorldEdit-Paper-2.14.1-SNAPSHOT-1202.jar")
             url("https://ci.unknowncity.de/job/AstraLib/56/artifact/astralib-paper-plugin/build/libs/AstraLib-Paper-0.7.0-SNAPSHOT-%2356.jar")
         }
     }

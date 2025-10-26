@@ -1,5 +1,6 @@
 package de.unknowncity.plots.plot;
 
+import com.fastasyncworldedit.core.registry.state.PropertyKey;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
@@ -9,14 +10,23 @@ import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
+import com.sk89q.worldedit.function.mask.BlockMask;
+import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.session.ClipboardHolder;
+import com.sk89q.worldedit.world.block.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockState;
+import com.sk89q.worldedit.world.block.BlockType;
+import com.sk89q.worldedit.world.block.BlockTypes;
 import de.unknowncity.astralib.common.structure.KeyValue;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.model.Plot;
+import org.bukkit.Tag;
+import org.bukkit.block.data.type.Leaves;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -24,6 +34,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -141,6 +152,26 @@ public class SchematicManager {
         } catch (IOException e) {
             plugin.getLogger().log(Level.SEVERE, e.getMessage());
             return Optional.empty();
+        }
+    }
+
+    public void replaceLeavesWithOnesThatDecay(Plot plot) {
+        var world = plot.world();
+        var region = plot.protectedRegion();
+        var min = region.getMinimumPoint().toVector3();
+        var max = region.getMaximumPoint().toVector3();
+
+        for (int x = min.getBlockX(); x <= max.getBlockX(); x++) {
+            for (int y = min.getBlockY(); y <= max.getBlockY(); y++) {
+                for (int z = min.getBlockZ(); z <= max.getBlockZ(); z++) {
+                    var block = world.getBlockAt(x, y, z);
+                    var data = block.getBlockData();
+                    if (data instanceof Leaves leaves) {
+                        leaves.setPersistent(false);
+                        block.setBlockData(leaves, false);
+                    }
+                }
+            }
         }
     }
 

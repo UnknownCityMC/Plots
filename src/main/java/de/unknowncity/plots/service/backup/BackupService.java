@@ -96,4 +96,8 @@ public class BackupService extends Service<PlotsPlugin> {
     public void loadPresaleBackup(Plot plot) {
         schematicManager.pastePresaleSchematic(plot);
     }
+
+    public void replaceLeavesWithOnesThatDecay() {
+
+    }
 }
