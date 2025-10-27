@@ -9,7 +9,7 @@ sadu = "2.3.2"
 # Config
 configurate = "4.2.0"
 jackson = "2.19.2"
-adventure = "4.24.0"
+adventure = "4.25.0"
 papi = "2.11.6"
 
 coinsengine = "2.5.0"
