@@ -3,6 +3,9 @@ package de.unknowncity.plots.listener;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.service.PlotService;
+import io.papermc.paper.event.entity.EntityMoveEvent;
+import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.vehicle.VehicleMoveEvent;
@@ -18,9 +21,15 @@ public class EntityMoveListener implements Listener {
 
     @EventHandler
     public void onEntityMove(VehicleMoveEvent event) {
-        var from = event.getFrom();
-        var to = event.getTo();
+        handle(event.getVehicle(), event.getFrom(), event.getTo());
+    }
 
+    @EventHandler
+    public void onEntityMove(EntityMoveEvent event) {
+        handle(event.getEntity(), event.getFrom(), event.getTo());
+    }
+
+    public void handle(Entity entity, Location from, Location to) {
         if (from.getBlockX() == to.getBlockX() && from.getBlockZ() == to.getBlockZ()) return;
 
         var plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
@@ -33,7 +42,7 @@ public class EntityMoveListener implements Listener {
         }
 
         if (plotTo.isEmpty() || !plotFrom.get().id().equals(plotTo.get().id())) {
-            event.getVehicle().teleport(from);
+            entity.teleport(from);
         }
     }
 }
