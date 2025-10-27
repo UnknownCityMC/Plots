@@ -21,9 +21,9 @@ public class PlotHomeSetCommand extends SubCommand {
 
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
-        commandManager.command(builder.literal("home")
+        commandManager.command(builder.literal("edithome")
                 .literal("setlocation")
-                .permission("plots.command.plot.unclaim")
+                .permission("plots.command.plot.edithome")
                 .senderType(Player.class)
                 .handler(this::handleHomeSet)
                 .build());

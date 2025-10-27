@@ -425,8 +425,8 @@ gui:
           - ""
           - <!i><#ff7373>Comming Soon.
           - <!i><gray>Nutze bis dahin
-          - <!i>   <yellow>/plot home setlocation
-          - <!i>   <yellow>/plot home setvisibility <public | private>
+          - <!i>   <yellow>/plot edithome setlocation
+          - <!i>   <yellow>/plot edithome setvisibility <public | private>
       members:
         name: <!i><gold>Verwalte Mitglieder
         lore:
