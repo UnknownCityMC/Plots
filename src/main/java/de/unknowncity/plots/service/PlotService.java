@@ -384,7 +384,6 @@ public class PlotService extends Service<PlotsPlugin> {
 
         CompletableFuture.runAsync(() -> {
             try (var conn = queryConfiguration.withSingleTransaction()) {
-                //logger.info("Saving plot with ID: " + plot.id());
                 plotDao.write(conn, plot);
                 plugin.serviceRegistry().getRegistered(FlagService.class).saveCurrentFlags(conn, plot);
                 plugin.serviceRegistry().getRegistered(InteractablesService.class).saveCurrentInteractables(conn, plot);
@@ -402,7 +401,7 @@ public class PlotService extends Service<PlotsPlugin> {
             if (throwable != null) {
                 logger.log(Level.SEVERE, "Failed to save plot " + plot.id(), throwable);
             } else {
-                SignManager.updateSings(plot, plugin.messenger());
+                Bukkit.getScheduler().runTask(plugin, () -> SignManager.updateSings(plot, plugin.messenger()));
             }
         });
     }
