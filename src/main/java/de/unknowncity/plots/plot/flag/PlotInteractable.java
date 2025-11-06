@@ -58,6 +58,7 @@ public class PlotInteractable {
         VALID_TYPES.add(Material.CHIPPED_ANVIL);
         VALID_TYPES.add(Material.DAMAGED_ANVIL);
         VALID_TYPES.add(Material.CHEST);
+        VALID_TYPES.addAll(Tag.COPPER_CHESTS.getValues());
         VALID_TYPES.add(Material.TRAPPED_CHEST);
         VALID_TYPES.add(Material.ENDER_CHEST);
         VALID_TYPES.add(Material.BARREL);

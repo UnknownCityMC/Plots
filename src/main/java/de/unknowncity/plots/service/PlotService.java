@@ -13,6 +13,7 @@ import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.event.PlotClaimPlayerEvent;
 import de.unknowncity.plots.event.PlotSellPlayerEvent;
 import de.unknowncity.plots.data.dao.*;
+import de.unknowncity.plots.plot.flag.PlotFlag;
 import de.unknowncity.plots.plot.model.BuyPlot;
 import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.plot.model.RentPlot;
@@ -487,6 +488,20 @@ public class PlotService extends Service<PlotsPlugin> {
                     if (plot != null) {
                         plot.interactables().add(plotInteractable);
                     }
+                });
+
+                plots.forEach(plot -> {
+                    PlotInteractable.defaults().forEach(plotInteractable -> {
+                        if (plot.interactables().stream().noneMatch(interactable -> interactable.blockType().name().equals(plotInteractable.blockType().name()))) {
+                            plot.interactables().add(plotInteractable);
+                        }
+                    });
+
+                    flagRegistry.getAllRegistered().forEach(plotFlag -> {
+                        if (plot.getFlag(plotFlag) == null) {
+                            plot.setFlag(plotFlag, plotFlag.defaultValue());
+                        }
+                    });
                 });
 
                 var groups = groupsFuture.join();

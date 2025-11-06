@@ -37,15 +37,13 @@ public class PlotInteractListener implements Listener {
         }
 
         plotService.findPlotAt(event.getClickedBlock().getLocation()).ifPresent(plot -> {
-            plot.interactables().stream().filter(plotInteractable -> plotInteractable.blockType() == event.getClickedBlock().getType()).forEach(plotInteractable -> {
+            var interactables = plot.interactables().stream().filter(plotInteractable -> plotInteractable.blockType() == event.getClickedBlock().getType()).toList();
+            if (!interactables.isEmpty() && PlotAccessUtil.hasAccess(player, interactables.getFirst().accessModifier(), plot)) {
+                return;
+            }
 
-                if (PlotAccessUtil.hasAccess(player, plotInteractable.accessModifier(), plot)) {
-                    return;
-                }
-
-                event.setCancelled(true);
-                plugin.messenger().sendMessage(event.getPlayer(), NodePath.path("event", "plot", "deny", "interact"));
-            });
+            event.setCancelled(true);
+            plugin.messenger().sendMessage(event.getPlayer(), NodePath.path("event", "plot", "deny", "interact"));
         });
     }
 }
