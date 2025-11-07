@@ -61,6 +61,7 @@ public class PlotInteractable {
         VALID_TYPES.addAll(Tag.COPPER_CHESTS.getValues());
         VALID_TYPES.add(Material.TRAPPED_CHEST);
         VALID_TYPES.add(Material.ENDER_CHEST);
+        VALID_TYPES.addAll(Tag.SHULKER_BOXES.getValues());
         VALID_TYPES.add(Material.BARREL);
         VALID_TYPES.add(Material.CHISELED_BOOKSHELF);
         VALID_TYPES.add(Material.HOPPER);
