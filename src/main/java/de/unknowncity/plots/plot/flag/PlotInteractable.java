@@ -93,6 +93,11 @@ public class PlotInteractable {
         VALID_TYPES.add(Material.SOUL_CAMPFIRE);
         VALID_TYPES.add(Material.BIG_DRIPLEAF);
         VALID_TYPES.add(Material.RESPAWN_ANCHOR);
+        VALID_TYPES.add(Material.GLOW_ITEM_FRAME);
+        VALID_TYPES.add(Material.ITEM_FRAME);
+        VALID_TYPES.add(Material.ARMOR_STAND);
+        VALID_TYPES.addAll(Tag.BEDS.getValues());
+        VALID_TYPES.addAll(Tag.SIGNS.getValues());
         VALID_TYPES.addAll(Tag.BUTTONS.getValues());
         VALID_TYPES.addAll(Tag.PRESSURE_PLATES.getValues());
         VALID_TYPES.addAll(Tag.TRAPDOORS.getValues());

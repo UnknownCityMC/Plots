@@ -7,6 +7,7 @@ import de.unknowncity.plots.service.PlotService;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.spongepowered.configurate.NodePath;
 
@@ -38,7 +39,11 @@ public class PlotInteractListener implements Listener {
 
         plotService.findPlotAt(event.getClickedBlock().getLocation()).ifPresent(plot -> {
             var interactables = plot.interactables().stream().filter(plotInteractable -> plotInteractable.blockType() == event.getClickedBlock().getType()).toList();
-            if (interactables.isEmpty() || PlotAccessUtil.hasAccess(player, interactables.getFirst().accessModifier(), plot)) {
+            if (!interactables.isEmpty() && PlotAccessUtil.hasAccess(player, interactables.getFirst().accessModifier(), plot)) {
+                return;
+            }
+
+            if (interactables.isEmpty() && (plot.isMember(player.getUniqueId()) || plot.isOwner(player.getUniqueId()))) {
                 return;
             }
 
