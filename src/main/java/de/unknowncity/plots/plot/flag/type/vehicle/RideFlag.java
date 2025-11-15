@@ -15,7 +15,7 @@ import org.spongepowered.configurate.NodePath;
 public class RideFlag extends PlotAccessModifierFlag implements Listener {
 
     public RideFlag(PlotService plotService) {
-        super("ride", PlotAccessModifier.EVERYBODY, Material.SADDLE, plotService);
+        super("ride", PlotAccessModifier.TEMP_MEMBER, Material.SADDLE, plotService);
     }
 
     @EventHandler
