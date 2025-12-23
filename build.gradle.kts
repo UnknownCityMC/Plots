@@ -50,7 +50,7 @@ dependencies {
     compileOnly("com.fastasyncworldedit:FastAsyncWorldEdit-Core")
     compileOnly("com.fastasyncworldedit:FastAsyncWorldEdit-Bukkit")
 
-    testImplementation(platform("org.junit:junit-bom:5.13.4"))
+    testImplementation(platform("org.junit:junit-bom:6.0.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
@@ -60,7 +60,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.github.mwiede:jsch:2.27.3")
+        classpath("com.github.mwiede:jsch:2.27.7")
     }
 }
 

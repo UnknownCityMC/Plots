@@ -1,0 +1,1 @@
+UPDATE plot_flag SET value = 'TEMP_MEMBER' WHERE value = 'EVERYBODY' and flag_id = 'ride';
