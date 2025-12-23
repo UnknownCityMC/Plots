@@ -1,5 +1,6 @@
 package de.unknowncity.plots.plot.flag.type.player;
 
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.plot.access.PlotAccessUtil;
 import de.unknowncity.plots.plot.access.type.PlotAccessModifier;
 import de.unknowncity.plots.plot.flag.PlotAccessModifierFlag;
@@ -8,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.spongepowered.configurate.NodePath;
 
 public class BlockPlaceFlag extends PlotAccessModifierFlag implements Listener {
@@ -17,10 +19,10 @@ public class BlockPlaceFlag extends PlotAccessModifierFlag implements Listener {
     }
 
     @EventHandler
-    public void onBlockPlace(BlockBreakEvent event) {
+    public void onBlockPlace(BlockPlaceEvent event) {
         var player = event.getPlayer();
 
-        if (player.hasPermission("ucplots.interact.bypass")) {
+        if (player.hasPermission(Permissions.BYPASS_INTERACT)) {
             return;
         }
 

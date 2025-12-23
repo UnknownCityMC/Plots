@@ -1,36 +1,50 @@
 package de.unknowncity.plots.plot.location.signs;
 
-import de.unknowncity.plots.plot.Plot;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
+import de.unknowncity.plots.plot.model.Plot;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.Rotatable;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.entity.BlockDisplay;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Transformation;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 public class SignOutline {
-    private static final NamespacedKey SIGN_GLOW = new NamespacedKey("ucplots", "signglow");
+    private final Player player;
+    private final Plugin plugin;
+    private Map<PlotSign, List<Entity>> outlineEntities = new HashMap<>();
+    private static final NamespacedKey SIGN_GLOW = new NamespacedKey("ucplots", "");
 
-    public static void setOutline(Plot plot, PlotSign plotSign, boolean show) {
-        var location = new Location(plot.world(), plotSign.x(), plotSign.y(), plotSign.z());
+    public SignOutline(Player player, Plugin plugin) {
+        this.player = player;
+        this.plugin = plugin;
+    }
 
-        // Hide outline (remove display entity)
-        if (!show) {
-            location.getNearbyEntities(1, 1, 1).forEach(entity -> {
-                if (entity.getPersistentDataContainer().has(SIGN_GLOW)) {
-                    entity.remove();
-                }
-            });
-            return;
+    public void hideOutline() {
+        outlineEntities.forEach((plotSign, entities) -> entities.forEach(Entity::remove));
+        outlineEntities.clear();
+    }
+
+    public void hideOutline(PlotSign plotSign) {
+        for (PlotSign sign : outlineEntities.keySet().stream().filter(plotSign::equals).collect(Collectors.toSet())) {
+            outlineEntities.get(sign).forEach(Entity::remove);
+            outlineEntities.remove(sign);
         }
+    }
+
+    public void showOutline(Plot plot, PlotSign plotSign) {
+        outlineEntities.putIfAbsent(plotSign, new ArrayList<>());
+        var location = new org.bukkit.Location(plot.world(), plotSign.x(), plotSign.y(), plotSign.z());
 
         // Show outline (spawn new display entity)
         var block = location.getBlock();
@@ -46,6 +60,7 @@ public class SignOutline {
             ));
 
             applyCommonData(block, blockDisplay, location);
+            outlineEntities.get(plotSign).add(blockDisplay);
         });
 
         // Add an outline to the signpost if the sign has one
@@ -60,21 +75,24 @@ public class SignOutline {
                 ));
 
                 applyCommonData(block, blockDisplay, location);
+                outlineEntities.get(plotSign).add(blockDisplay);
             });
         }
+
+        outlineEntities.forEach((plotSigns, entities) -> entities.forEach(entity -> {player.showEntity(plugin, entity);}));
     }
 
-    private static void applyCommonData(Block block, BlockDisplay blockDisplay, Location location) {
+    private void applyCommonData(Block block, BlockDisplay blockDisplay, org.bukkit.Location location) {
         blockDisplay.setBlock(Material.RED_CONCRETE.createBlockData());
         blockDisplay.setRotation(yawRotation(block), location.getPitch());
-
+        blockDisplay.setVisibleByDefault(false);
         blockDisplay.setGlowing(true);
         blockDisplay.setGlowColorOverride(Color.RED);
         blockDisplay.getPersistentDataContainer().set(SIGN_GLOW, PersistentDataType.BOOLEAN, true);
         blockDisplay.setPersistent(false);
     }
 
-    private static float yawRotation(Block block) {
+    private float yawRotation(Block block) {
         var data = block.getBlockData();
 
         if (data instanceof Rotatable rotatable) {
@@ -90,7 +108,7 @@ public class SignOutline {
         return 0;
     }
 
-    private static float blockFaceToYaw(BlockFace face) {
+    private float blockFaceToYaw(BlockFace face) {
         return switch (face) {
             case SOUTH_SOUTH_WEST -> 22.5f;
             case SOUTH_WEST -> 45f;

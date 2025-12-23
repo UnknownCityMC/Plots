@@ -3,8 +3,7 @@ package de.unknowncity.plots.command.user;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.plot.PlotUtil;
-import de.unknowncity.plots.service.PlotService;
-import de.unknowncity.plots.service.RegionService;
+import de.unknowncity.plots.service.plot.AccessService;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -17,8 +16,7 @@ import org.spongepowered.configurate.NodePath;
 import static de.unknowncity.plots.command.argument.UcPlayerParser.ucPlayerParser;
 
 public class PlotRemoveMemberCommand extends SubCommand {
-    private final RegionService regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
-    private final PlotService plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
+    private final AccessService accessService = plugin.serviceRegistry().getRegistered(AccessService.class);
 
     public PlotRemoveMemberCommand(PlotsPlugin plugin, Command.Builder<CommandSender> builder) {
         super(plugin, builder);
@@ -38,17 +36,19 @@ public class PlotRemoveMemberCommand extends SubCommand {
         var sender = context.sender();
         var target = (OfflinePlayer) context.get("target");
 
-        var plotOptional = PlotUtil.checkPlotConditionsAndGetPlotIfPresent(sender, regionService, plotService, plugin);
+        PlotUtil.getPlotIfPresent(sender, plugin).ifPresentOrElse(plot -> {
+            if (!PlotUtil.checkPlotOwner(sender, plot, plugin)) {
+                return;
+            }
 
-        plotOptional.ifPresent(plot -> {
             if (plot.members().stream().noneMatch(plotMember -> plotMember.uuid().equals(target.getUniqueId()))) {
                 plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "no-member"), plot.tagResolvers(sender, plugin.messenger()));
                 return;
             }
 
-            plot.members().removeIf(plotMember -> plotMember.uuid().equals(target.getUniqueId()));
-            plotService.savePlot(plot);
+            accessService.removeMember(plot, target.getUniqueId());
+
             plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "remove", "success"), plot.tagResolvers(sender, plugin.messenger()));
-        });
+        }, () -> plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot")));
     }
 }

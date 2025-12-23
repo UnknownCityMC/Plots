@@ -1,6 +1,5 @@
 package de.unknowncity.plots.command.argument;
 
-import de.unknowncity.plots.plot.Plot;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -20,9 +19,6 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 public class UcPlayerParser<C> implements ArgumentParser<C, OfflinePlayer> {
-
-    public UcPlayerParser() {
-    }
 
     public static <C> ParserDescriptor<C, OfflinePlayer> ucPlayerParser() {
         return ParserDescriptor.of(new UcPlayerParser<>(), OfflinePlayer.class);
@@ -57,7 +53,7 @@ public class UcPlayerParser<C> implements ArgumentParser<C, OfflinePlayer> {
                     UcPlayerParser.class,
                     context,
                     Caption.of("argument.parse.failure.player"),
-                    CaptionVariable.of("shop", input)
+                    CaptionVariable.of("player", input)
             );
         }
     }

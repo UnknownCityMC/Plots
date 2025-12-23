@@ -1,8 +1,10 @@
 package de.unknowncity.plots.gui.items;
 
+import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
+import de.unknowncity.plots.configuration.GuiSettings;
 import de.unknowncity.plots.gui.GuiPlaceholders;
-import net.kyori.adventure.text.Component;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
@@ -10,28 +12,29 @@ import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.NodePath;
 import xyz.xenondevs.invui.Click;
 import xyz.xenondevs.invui.item.AbstractPagedGuiBoundItem;
-import xyz.xenondevs.invui.item.ItemBuilder;
 import xyz.xenondevs.invui.item.ItemProvider;
+import xyz.xenondevs.invui.item.ItemWrapper;
 
 public class NextPageItem extends AbstractPagedGuiBoundItem {
     private final ItemStack displayItem;
     private final PaperMessenger messenger;
+    private final GuiSettings guiSettings;
 
-    public NextPageItem(ItemStack displayItem, PaperMessenger messenger) {
+    public NextPageItem(ItemStack displayItem, PaperMessenger messenger, GuiSettings guiSettings) {
         this.displayItem = displayItem;
         this.messenger = messenger;
+        this.guiSettings = guiSettings;
     }
 
     @Override
     public @NotNull ItemProvider getItemProvider(@NotNull Player player) {
         boolean hasNextPage = getGui().getPage() < getGui().getPageCount() - 1;
-        var builder = new ItemBuilder(displayItem);
 
         var lore = messenger.componentList(
                 player,
                 NodePath.path("gui", "item", "next-page", "lore", hasNextPage ? "has-next" : "no-next"),
                 GuiPlaceholders.paged(getGui())
-        ).toArray(Component[]::new);
+        );
 
         var name = messenger.component(
                 player,
@@ -39,9 +42,12 @@ public class NextPageItem extends AbstractPagedGuiBoundItem {
                 GuiPlaceholders.paged(getGui())
         );
 
-        builder.setName(name).addLoreLines(lore);
+        var builder = ItemBuilder.of(displayItem)
+                .itemModel(NamespacedKey.fromString(guiSettings.buttonModelNext()))
+                .name(name)
+                .lore(lore);
 
-        return builder;
+        return new ItemWrapper(builder.item());
     }
 
     @Override

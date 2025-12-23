@@ -1,5 +1,6 @@
 package de.unknowncity.plots.command.admin;
 
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.service.PlotService;
@@ -26,15 +27,16 @@ public class PlotAdminDeleteCommand extends SubCommand {
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("delete")
-                .permission("plots.command.plotadmin")
-                .required("id", stringParser(), (sender, input) -> CompletableFuture.completedFuture(plotService.plotCache().keySet().stream().map(Suggestion::suggestion).toList()))
+                .permission(Permissions.COMMAND_PLOT_ADMIN)
+                .required("id", stringParser(), (sender, input) ->
+                        CompletableFuture.completedFuture(plotService.plotCache().asMap().keySet().stream().map(Suggestion::suggestion).toList()))
                 .apply(plugin.confirmationManager())
                 .handler(this::handleDelete)
                 .build()
         );
 
         commandManager.command(builder.literal("delete")
-                .permission("plots.command.plotadmin")
+                .permission(Permissions.COMMAND_PLOT_ADMIN)
                 .literal("confirm")
                 .handler(plugin.confirmationManager().createExecutionHandler())
                 .build()

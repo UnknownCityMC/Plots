@@ -1,6 +1,6 @@
 package de.unknowncity.plots.plot.access;
 
-import de.unknowncity.plots.plot.Plot;
+import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.plot.access.type.PlotAccessModifier;
 import org.bukkit.entity.Player;
 
@@ -15,12 +15,18 @@ public class PlotAccessUtil {
             return true;
         }
 
-        var plotMemberOpt = plot.findPlotMember(player.getUniqueId());
-
-        if (plot.owner().uuid().equals(player.getUniqueId())) {
+        if (plot.isOwner(player.getUniqueId())) {
             return true;
         }
 
-        return plotMemberOpt.filter(plotMember -> plotMember.role().ordinal() + 1 >= plotAccessModifier.ordinal()).isPresent();
+        var plotMemberOpt = plot.findPlotMember(player.getUniqueId());
+
+        if (plotMemberOpt.isEmpty()) {
+            return false;
+        }
+
+        var member = plotMemberOpt.get();
+
+        return member.role().ordinal() < plotAccessModifier.ordinal();
     }
 }

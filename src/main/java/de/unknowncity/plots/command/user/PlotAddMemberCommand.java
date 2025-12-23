@@ -3,10 +3,11 @@ package de.unknowncity.plots.command.user;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.plot.PlotUtil;
-import de.unknowncity.plots.plot.access.entity.PlotMember;
 import de.unknowncity.plots.plot.access.type.PlotMemberRole;
-import de.unknowncity.plots.service.PlotService;
-import de.unknowncity.plots.service.RegionService;
+import de.unknowncity.plots.service.plot.AccessService;
+import de.unknowncity.plots.util.AstraArrays;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -20,8 +21,7 @@ import static de.unknowncity.plots.command.argument.UcPlayerParser.ucPlayerParse
 import static org.incendo.cloud.parser.standard.EnumParser.enumParser;
 
 public class PlotAddMemberCommand extends SubCommand {
-    private final RegionService regionService = plugin.serviceRegistry().getRegistered(RegionService.class);
-    private final PlotService plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
+    private final AccessService accessService = plugin.serviceRegistry().getRegistered(AccessService.class);
 
     public PlotAddMemberCommand(PlotsPlugin plugin, Command.Builder<CommandSender> builder) {
         super(plugin, builder);
@@ -32,7 +32,7 @@ public class PlotAddMemberCommand extends SubCommand {
         commandManager.command(builder.literal("member").literal("add")
                 .permission("plots.command.plot.member.add")
                 .required("target", ucPlayerParser())
-                .required("role", enumParser(PlotMemberRole.class))
+                .optional("role", enumParser(PlotMemberRole.class))
                 .senderType(Player.class)
                 .handler(this::handleAdd)
                 .build());
@@ -41,19 +41,25 @@ public class PlotAddMemberCommand extends SubCommand {
     private void handleAdd(@NonNull CommandContext<Player> context) {
         var sender = context.sender();
         var target = (OfflinePlayer) context.get("target");
-        var role = (PlotMemberRole) context.get("role");
+        var role = context.getOrDefault("role", PlotMemberRole.MEMBER);
 
-        var plotOptional = PlotUtil.checkPlotConditionsAndGetPlotIfPresent(sender, regionService, plotService, plugin);
+        PlotUtil.getPlotIfPresent(sender, plugin).ifPresentOrElse(plot -> {
+            if (!PlotUtil.checkPlotOwner(sender, plot, plugin)) {
+                return;
+            }
 
-        plotOptional.ifPresent(plot -> {
-            if (plot.owner().uuid().equals(target.getUniqueId()) || plot.members().stream().anyMatch(plotMember -> plotMember.uuid().equals(target.getUniqueId()))) {
+            if (plot.isMember(target.getUniqueId()) || plot.isOwner(target.getUniqueId())) {
                 plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "already-member"), plot.tagResolvers(sender, plugin.messenger()));
                 return;
             }
 
-            plot.members().add(new PlotMember(target.getUniqueId(), target.getName(), role));
-            plotService.savePlot(plot);
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "success"), plot.tagResolvers(sender, plugin.messenger()));
-        });
+            accessService.addMember(plot, target, role);
+
+            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "member", "add", "success"),
+                    AstraArrays.merge(plot.tagResolvers(sender, plugin.messenger()), new TagResolver[]{
+                            Placeholder.unparsed("target", target.getName()),
+                            Placeholder.unparsed("role", role.name())
+            }));
+        }, () -> plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot")));
     }
 }

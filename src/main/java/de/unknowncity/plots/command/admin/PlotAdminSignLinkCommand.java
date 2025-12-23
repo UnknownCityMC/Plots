@@ -1,5 +1,6 @@
 package de.unknowncity.plots.command.admin;
 
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.plot.location.signs.SignManager;
@@ -16,13 +17,13 @@ public class PlotAdminSignLinkCommand extends SubCommand {
 
     public PlotAdminSignLinkCommand(PlotsPlugin plugin, Command.Builder<CommandSender> builder) {
         super(plugin, builder);
-        this.signManager = plugin.serviceRegistry().getRegistered(PlotService.class).signManager();
+        this.signManager = plugin.signManager();
     }
 
     @Override
     public void apply(CommandManager<CommandSender> commandManager) {
         commandManager.command(builder.literal("signLink")
-                .permission("plots.command.plotadmin")
+                .permission(Permissions.COMMAND_PLOT_ADMIN)
                 .senderType(Player.class)
                 .handler(this::signLink)
                 .build()
@@ -32,7 +33,6 @@ public class PlotAdminSignLinkCommand extends SubCommand {
 
     private void signLink(CommandContext<Player> commandContext) {
         var player = commandContext.sender();
-        var uuid = player.getUniqueId();
 
         var possibleEditSession = signManager.findOpenEditSession(player);
 

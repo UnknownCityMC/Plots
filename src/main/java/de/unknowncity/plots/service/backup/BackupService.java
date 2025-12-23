@@ -1,15 +1,19 @@
 package de.unknowncity.plots.service.backup;
 
 import de.unknowncity.astralib.common.service.Service;
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.plot.Plot;
+import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.plot.SchematicManager;
 import de.unknowncity.plots.service.PlotService;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
+import java.io.File;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,9 +30,9 @@ public class BackupService extends Service<PlotsPlugin> {
 
     public void backupAllPlots() {
         var viewers = Bukkit.getOnlinePlayers().stream().filter(player ->
-                player.hasPermission("plots.backup.view-progress")).toList();
+                player.hasPermission(Permissions.BACKUP_VIEW_PROGRESS)).toList();
         var finishedPlots = 0;
-        var plots = plotService.plotCache().values();
+        var plots = plotService.plotCache().asMap().values();
         var bossbar = BossBar.bossBar(getProgressNameCreate(finishedPlots, plots.size()), (float) finishedPlots / plots.size(), BossBar.Color.RED, BossBar.Overlay.PROGRESS );
         viewers.forEach(player -> player.showBossBar(bossbar));
 
@@ -53,9 +57,9 @@ public class BackupService extends Service<PlotsPlugin> {
     public CompletableFuture<Integer> loadAllBackups() {
         var future = new CompletableFuture<Integer>();
         var viewers = Bukkit.getOnlinePlayers().stream().filter(player ->
-                player.hasPermission("plots.backup.view-progress")).toList();
+                player.hasPermission(Permissions.BACKUP_VIEW_PROGRESS)).toList();
         AtomicInteger finishedPlots = new AtomicInteger();
-        var plots = plotService.plotCache().values();
+        var plots = plotService.plotCache().asMap().values();
         var bossbar = BossBar.bossBar(getProgressNameLoad(finishedPlots.get(), plots.size()), (float) finishedPlots.get() / plots.size(), BossBar.Color.RED, BossBar.Overlay.PROGRESS );
         viewers.forEach(player -> player.showBossBar(bossbar));
 
@@ -73,5 +77,27 @@ public class BackupService extends Service<PlotsPlugin> {
             viewers.forEach(player -> player.hideBossBar(bossbar));
         });
         return future;
+    }
+
+    public boolean backupBoundToPlayer(Plot plot, UUID owner) {
+        return schematicManager.createSchematicBackup(plot, owner);
+    }
+
+    public boolean hasBackup(Plot plot, UUID owner) {
+        var path = "/schematics/backups/" + owner.toString() + "_" + plot.id() + ".schem";
+        File file = new File(plotService.plugin().getDataPath() + path);
+        return file.exists();
+    }
+
+    public void loadBackupForPlayer(Plot plot, Player player) {
+        schematicManager.pasteOwnedBackupSchematic(plot, player.getUniqueId());
+    }
+
+    public void loadPresaleBackup(Plot plot) {
+        schematicManager.pastePresaleSchematic(plot);
+    }
+
+    public void replaceLeavesWithOnesThatDecay() {
+
     }
 }

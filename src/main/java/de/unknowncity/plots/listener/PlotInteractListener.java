@@ -1,11 +1,13 @@
 package de.unknowncity.plots.listener;
 
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.plot.access.PlotAccessUtil;
 import de.unknowncity.plots.service.PlotService;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.spongepowered.configurate.NodePath;
 
@@ -31,20 +33,22 @@ public class PlotInteractListener implements Listener {
             return;
         }
 
-        if (player.hasPermission("ucplots.interact.bypass")) {
+        if (player.hasPermission(Permissions.BYPASS_INTERACT)) {
             return;
         }
 
         plotService.findPlotAt(event.getClickedBlock().getLocation()).ifPresent(plot -> {
-            plot.interactables().stream().filter(plotInteractable -> plotInteractable.blockType() == event.getClickedBlock().getType()).forEach(plotInteractable -> {
+            var interactables = plot.interactables().stream().filter(plotInteractable -> plotInteractable.blockType() == event.getClickedBlock().getType()).toList();
+            if (!interactables.isEmpty() && PlotAccessUtil.hasAccess(player, interactables.getFirst().accessModifier(), plot)) {
+                return;
+            }
 
-                if (PlotAccessUtil.hasAccess(player, plotInteractable.accessModifier(), plot)) {
-                    return;
-                }
+            if (interactables.isEmpty() && (plot.isMember(player.getUniqueId()) || plot.isOwner(player.getUniqueId()))) {
+                return;
+            }
 
-                event.setCancelled(true);
-                plugin.messenger().sendMessage(event.getPlayer(), NodePath.path("event", "plot", "deny", "interact"));
-            });
+            event.setCancelled(true);
+            plugin.messenger().sendMessage(event.getPlayer(), NodePath.path("event", "plot", "deny", "interact"));
         });
     }
 }

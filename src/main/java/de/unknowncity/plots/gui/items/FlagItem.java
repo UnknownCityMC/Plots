@@ -2,7 +2,7 @@ package de.unknowncity.plots.gui.items;
 
 import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.plots.PlotsPlugin;
-import de.unknowncity.plots.plot.Plot;
+import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.plot.flag.PlotFlag;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;

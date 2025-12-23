@@ -4,12 +4,14 @@ import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.gui.items.PreparedItems;
-import de.unknowncity.plots.plot.Plot;
-import de.unknowncity.plots.plot.access.entity.PlotMember;
+import de.unknowncity.plots.plot.model.Plot;
+import de.unknowncity.plots.plot.model.PlotMember;
 import de.unknowncity.plots.plot.access.type.PlotMemberRole;
-import de.unknowncity.plots.service.PlotService;
+import de.unknowncity.plots.service.plot.AccessService;
+import de.unknowncity.plots.util.AstraArrays;
 import de.unknowncity.plots.util.SkullHelper;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -21,13 +23,12 @@ import xyz.xenondevs.invui.item.Item;
 import xyz.xenondevs.invui.window.AnvilWindow;
 
 public class AddPlayerGui {
-    public static enum AddPlayerGuiType {
+    public enum AddPlayerGuiType {
         MEMBER,
-        BANNED_PLAYER;
+        BANNED_PLAYER
     }
     public static void open(Player player, Plot plot, PlotsPlugin plugin, AddPlayerGuiType type) {
         var messenger = plugin.messenger();
-        var plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
 
         var title = messenger.component(player, NodePath.path("gui", type == AddPlayerGuiType.MEMBER ? "member-add" : "banned-players-add", "title"));
 
@@ -37,25 +38,21 @@ public class AddPlayerGui {
                 ).lore(
                         messenger.componentList(player, NodePath.path("gui", type == AddPlayerGuiType.MEMBER ? "member-add" : "banned-players-add", "item", "not-found", "lore"))
                 ).item())
-                .addClickHandler(click -> {
-                    player.playSound(player.getLocation(), "entity.villager.no", 1, 1);
-
-                }).build();
+                .addClickHandler(click -> player.playSound(player.getLocation(), "entity.villager.no", 1, 1)).build();
 
 
         var gui = Gui.of(
                 new Structure(
                         ". P B"
                 )
-                        .addIngredient('B', type == AddPlayerGuiType.MEMBER ? PreparedItems.back(player, "members", plugin, () -> MembersGUI.open(player, plot, plugin)) :
-                                PreparedItems.back(player, "banned-players", plugin, () -> BannedPlayersGUI.open(player, plot, plugin)))
+                        .addIngredient('B', type == AddPlayerGuiType.MEMBER ? PreparedItems.back(player, plugin, () -> MembersGUI.open(player, plot, plugin)) :
+                                PreparedItems.back(player, plugin, () -> DeniedPlayersGUI.open(player, plot, plugin)))
                         .addIngredient('P', playerNotFoundItem)
         );
 
 
         var window = AnvilWindow.builder().setUpperGui(gui).setTitle(title).build(player);
 
-        window.addCloseHandler((reason) -> plotService.savePlot(plot));
         window.addRenameHandler(input -> {
             if (input.isEmpty() || input.length() > 17) {
                 gui.setItem(1, playerNotFoundItem);
@@ -73,11 +70,13 @@ public class AddPlayerGui {
     }
 
     public static Item createItem(OfflinePlayer target, Plot plot, PaperMessenger messenger, Player player, PlotsPlugin plugin, AddPlayerGuiType type) {
-        var isPresent = target.getUniqueId().equals(plot.owner().uuid()) || type == AddPlayerGuiType.MEMBER ?
-                plot.findPlotMember(target.getUniqueId()).isPresent() :
-                plot.findPlotBannedPlayer(target.getUniqueId()).isPresent();
+        var accessService = plugin.serviceRegistry().getRegistered(AccessService.class);
 
-        var member = new PlotMember(target.getUniqueId(), target.getName(), PlotMemberRole.MEMBER);
+        var isPresent = plot.isOwner(target.getUniqueId()) || (type == AddPlayerGuiType.MEMBER ?
+                plot.findPlotMember(target.getUniqueId()).isPresent() :
+                plot.findPlotBannedPlayer(target.getUniqueId()).isPresent());
+
+        var member = new PlotMember(plot.id(), target.getUniqueId(), target.getName(), PlotMemberRole.MEMBER);
 
         return Item.builder().setItemProvider(
                 ItemBuilder.of(SkullHelper.getSkull(target.getUniqueId()))
@@ -96,12 +95,16 @@ public class AddPlayerGui {
                     player.playSound(player.getLocation(), "entity.villager.no", 1, 1);
                     return;
                 }
-                plot.members().add(member);
+                accessService.addMember(plot, target, PlotMemberRole.MEMBER);
                 player.playSound(player.getLocation(), "entity.experience_orb.pickup", 1, 1);
                 if (target instanceof Player targetPlayer) {
                     plugin.messenger().sendMessage(player, NodePath.path("event", "plot", "member", "added"), plot.tagResolvers(targetPlayer, messenger));
                 }
-                messenger.sendMessage(player, NodePath.path("command", "plot", "member", "success"), Placeholder.parsed("name", target.getName()));
+                plugin.messenger().sendMessage(player, NodePath.path("command", "plot", "member", "add", "success"),
+                        AstraArrays.merge(plot.tagResolvers(player, plugin.messenger()), new TagResolver[]{
+                                Placeholder.unparsed("target", target.getName()),
+                                Placeholder.unparsed("role", member.role().name().toLowerCase())
+                        }));
                 MembersGUI.open(player, plot, plugin);
             } else {
                 if (isPresent) {
@@ -109,13 +112,13 @@ public class AddPlayerGui {
                     player.playSound(player.getLocation(), "entity.villager.no", 1, 1);
                     return;
                 }
-                plot.denyPlayer(target);
+                accessService.denyPlayer(plot, target);
                 player.playSound(player.getLocation(), "entity.experience_orb.pickup", 1, 1);
                 if (target instanceof Player targetPlayer) {
                     plugin.messenger().sendMessage(player, NodePath.path("event", "plot", "kick", "target"), plot.tagResolvers(targetPlayer, messenger));
                 }
-                messenger.sendMessage(player, NodePath.path("command", "plot", "member", "success"), Placeholder.parsed("name", target.getName()));
-                BannedPlayersGUI.open(player, plot, plugin);
+                messenger.sendMessage(player, NodePath.path("command", "plot", "deny", "add", "success"), Placeholder.parsed("name", target.getName()));
+                DeniedPlayersGUI.open(player, plot, plugin);
             }
         }).build();
     }

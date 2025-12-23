@@ -3,7 +3,7 @@ package de.unknowncity.plots.command.user;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.command.SubCommand;
 import de.unknowncity.plots.plot.PlotUtil;
-import de.unknowncity.plots.plot.access.PlotState;
+import de.unknowncity.plots.plot.model.BuyPlot;
 import de.unknowncity.plots.service.PlotService;
 import de.unknowncity.plots.service.RegionService;
 import org.bukkit.command.CommandSender;
@@ -33,12 +33,17 @@ public class PlotInfoCommand extends SubCommand {
 
     private void handleInfo(@NonNull CommandContext<Player> context) {
         var sender = context.sender();
-        var plotOptional = PlotUtil.checkForAndGetPlotIfPresent(sender, regionService, plotService, plugin);
 
-        plotOptional.ifPresent(plot -> {
-            plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "info"),
-                    plot.tagResolvers(sender, plugin.messenger())
-            );
-        });
+        PlotUtil.getPlotIfPresent(sender, plugin).ifPresentOrElse(plot -> {
+            if (plot instanceof BuyPlot) {
+                plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "info", "buy"),
+                        plot.tagResolvers(sender, plugin.messenger())
+                );
+            } else {
+                plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "info", "rent"),
+                        plot.tagResolvers(sender, plugin.messenger())
+                );
+            }
+        }, () -> plugin.messenger().sendMessage(sender, NodePath.path("command", "plot", "no-plot")));
     }
 }

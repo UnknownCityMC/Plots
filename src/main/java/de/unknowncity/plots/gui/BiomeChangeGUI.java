@@ -3,10 +3,10 @@ package de.unknowncity.plots.gui;
 import de.unknowncity.astralib.paper.api.item.ItemBuilder;
 import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.gui.items.BiomeChangeItem;
+import de.unknowncity.plots.gui.items.NextPageItem;
 import de.unknowncity.plots.gui.items.PreparedItems;
-import de.unknowncity.plots.gui.util.PagedGUI;
-import de.unknowncity.plots.plot.Plot;
-import de.unknowncity.plots.service.PlotService;
+import de.unknowncity.plots.gui.items.PrevPageItem;
+import de.unknowncity.plots.plot.model.Plot;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import net.kyori.adventure.text.Component;
@@ -15,12 +15,16 @@ import org.bukkit.Material;
 import org.bukkit.Registry;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.NodePath;
+import xyz.xenondevs.invui.gui.Markers;
+import xyz.xenondevs.invui.gui.PagedGui;
+import xyz.xenondevs.invui.gui.Structure;
 import xyz.xenondevs.invui.item.Item;
-import xyz.xenondevs.invui.item.ItemProvider;
+import xyz.xenondevs.invui.window.Window;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -28,7 +32,7 @@ import static io.papermc.paper.registry.keys.BiomeKeys.*;
 
 public class BiomeChangeGUI {
 
-    final static Registry<Biome> biomeRegistry = RegistryAccess
+    final static Registry<@NotNull Biome> biomeRegistry = RegistryAccess
             .registryAccess()
             .getRegistry(RegistryKey.BIOME);
 
@@ -70,9 +74,24 @@ public class BiomeChangeGUI {
                 messenger.component(player, NodePath.path("gui", "biome", "item", "biome", "name"), Placeholder.component("biome", Component.translatable(biome.translationKey())))
         ).item()).getItemProvider(player), plot, biome, plugin)).collect(Collectors.toList());
 
-        var gui = PagedGUI.createAndOpenPagedGUI(messenger, title, PreparedItems.back(player, "biome", plugin, () -> PlotMainGUI.open(player, plot, plugin)), items, player);
-        gui.addCloseHandler((reason) -> plugin.serviceRegistry().getRegistered(PlotService.class).savePlot(plot));
-        gui.open();
+        var gui = PagedGui.ofItems(
+                new Structure(
+                        "# # # # # # # # #",
+                        "# . . . . . . . #",
+                        "# . . . . . . . #",
+                        "# . . . . . . . #",
+                        "# . . . . . . . #",
+                        "# # < # # # > # B"
+                )
+                        .addIngredient('B', PreparedItems.back(player, plugin, () -> PlotMainGUI.open(player, plot, plugin)))
+                        .addIngredient('<', new PrevPageItem(ItemStack.of(Material.PAPER), messenger, plugin.configuration().gui()))
+                        .addIngredient('>', new NextPageItem(ItemStack.of(Material.PAPER), messenger, plugin.configuration().gui()))
+                        .addIngredient('.', Markers.CONTENT_LIST_SLOT_HORIZONTAL),
+                items
+        );
+
+        var window = Window.builder().setUpperGui(gui).setTitle(title).build(player);
+        window.open();
     }
 
     public static Material getItemForBiome(Biome biome) {

@@ -3,6 +3,7 @@ package de.unknowncity.plots.listener;
 import com.destroystokyo.paper.MaterialTags;
 import de.unknowncity.astralib.paper.api.message.PaperMessenger;
 import de.unknowncity.plots.PlotsPlugin;
+import de.unknowncity.plots.plot.PlotUtil;
 import de.unknowncity.plots.plot.access.PlotState;
 import de.unknowncity.plots.plot.location.signs.SignManager;
 import de.unknowncity.plots.service.EconomyService;
@@ -18,12 +19,14 @@ public class PlotSignInteractListener implements Listener {
     private final SignManager signManager;
     private final PaperMessenger messenger;
     private final EconomyService economyService;
+    private final PlotsPlugin plugin;
 
     public PlotSignInteractListener(PlotsPlugin plugin) {
         this.plotService = plugin.serviceRegistry().getRegistered(PlotService.class);
-        this.signManager = plotService.signManager();
+        this.signManager = plugin.signManager();
         this.messenger = plugin.messenger();
         this.economyService = plugin.serviceRegistry().getRegistered(EconomyService.class);
+        this.plugin = plugin;
     }
 
     @EventHandler
@@ -60,6 +63,11 @@ public class PlotSignInteractListener implements Listener {
         }
 
         var plot = possiblePlot.get();
+        var groupName = plot.groupName();
+
+        if (!PlotUtil.checkPlotGroupLimit(player, groupName, plugin)) {
+            return;
+        }
 
         if (plot.state() != PlotState.AVAILABLE) {
             messenger.sendMessage(player, NodePath.path("command", "plot", "claim", "unavailable"), plot.tagResolvers(player, messenger));

@@ -1,11 +1,13 @@
 package de.unknowncity.plots.plot.flag.type.player;
 
+import de.unknowncity.plots.Permissions;
 import de.unknowncity.plots.plot.access.PlotAccessUtil;
 import de.unknowncity.plots.plot.access.type.PlotAccessModifier;
 import de.unknowncity.plots.plot.flag.PlotAccessModifierFlag;
 import de.unknowncity.plots.service.PlotService;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.spongepowered.configurate.NodePath;
@@ -16,12 +18,13 @@ public class ItemPickupFlag extends PlotAccessModifierFlag implements Listener {
         super("item-pickup", PlotAccessModifier.EVERYBODY, Material.ENDER_EYE, plotService);
     }
 
+    @EventHandler
     public void onItemDrop(EntityPickupItemEvent event) {
         if (!((event.getEntity() instanceof Player player))) {
             return;
         }
 
-        if (player.hasPermission("ucplots.interact.bypass")) {
+        if (player.hasPermission(Permissions.BYPASS_INTERACT)) {
             return;
         }
 
