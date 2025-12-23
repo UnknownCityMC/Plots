@@ -58,8 +58,10 @@ public class PlotInteractable {
         VALID_TYPES.add(Material.CHIPPED_ANVIL);
         VALID_TYPES.add(Material.DAMAGED_ANVIL);
         VALID_TYPES.add(Material.CHEST);
+        VALID_TYPES.addAll(Tag.COPPER_CHESTS.getValues());
         VALID_TYPES.add(Material.TRAPPED_CHEST);
         VALID_TYPES.add(Material.ENDER_CHEST);
+        VALID_TYPES.addAll(Tag.SHULKER_BOXES.getValues());
         VALID_TYPES.add(Material.BARREL);
         VALID_TYPES.add(Material.CHISELED_BOOKSHELF);
         VALID_TYPES.add(Material.HOPPER);
@@ -91,6 +93,11 @@ public class PlotInteractable {
         VALID_TYPES.add(Material.SOUL_CAMPFIRE);
         VALID_TYPES.add(Material.BIG_DRIPLEAF);
         VALID_TYPES.add(Material.RESPAWN_ANCHOR);
+        VALID_TYPES.add(Material.GLOW_ITEM_FRAME);
+        VALID_TYPES.add(Material.ITEM_FRAME);
+        VALID_TYPES.add(Material.ARMOR_STAND);
+        VALID_TYPES.addAll(Tag.BEDS.getValues());
+        VALID_TYPES.addAll(Tag.SIGNS.getValues());
         VALID_TYPES.addAll(Tag.BUTTONS.getValues());
         VALID_TYPES.addAll(Tag.PRESSURE_PLATES.getValues());
         VALID_TYPES.addAll(Tag.TRAPDOORS.getValues());
