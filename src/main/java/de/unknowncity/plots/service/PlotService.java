@@ -13,6 +13,7 @@ import de.unknowncity.plots.PlotsPlugin;
 import de.unknowncity.plots.event.PlotClaimPlayerEvent;
 import de.unknowncity.plots.event.PlotSellPlayerEvent;
 import de.unknowncity.plots.data.dao.*;
+import de.unknowncity.plots.plot.flag.PlotFlag;
 import de.unknowncity.plots.plot.model.BuyPlot;
 import de.unknowncity.plots.plot.model.Plot;
 import de.unknowncity.plots.plot.model.RentPlot;
@@ -384,7 +385,6 @@ public class PlotService extends Service<PlotsPlugin> {
 
         CompletableFuture.runAsync(() -> {
             try (var conn = queryConfiguration.withSingleTransaction()) {
-                //logger.info("Saving plot with ID: " + plot.id());
                 plotDao.write(conn, plot);
                 plugin.serviceRegistry().getRegistered(FlagService.class).saveCurrentFlags(conn, plot);
                 plugin.serviceRegistry().getRegistered(InteractablesService.class).saveCurrentInteractables(conn, plot);
@@ -402,7 +402,7 @@ public class PlotService extends Service<PlotsPlugin> {
             if (throwable != null) {
                 logger.log(Level.SEVERE, "Failed to save plot " + plot.id(), throwable);
             } else {
-                SignManager.updateSings(plot, plugin.messenger());
+                Bukkit.getScheduler().runTask(plugin, () -> SignManager.updateSings(plot, plugin.messenger()));
             }
         });
     }
@@ -488,6 +488,20 @@ public class PlotService extends Service<PlotsPlugin> {
                     if (plot != null) {
                         plot.interactables().add(plotInteractable);
                     }
+                });
+
+                plots.forEach(plot -> {
+                    PlotInteractable.defaults().forEach(plotInteractable -> {
+                        if (plot.interactables().stream().noneMatch(interactable -> interactable.blockType().name().equals(plotInteractable.blockType().name()))) {
+                            plot.interactables().add(plotInteractable);
+                        }
+                    });
+
+                    flagRegistry.getAllRegistered().forEach(plotFlag -> {
+                        if (plot.getFlag(plotFlag) == null) {
+                            plot.setFlag(plotFlag, plotFlag.defaultValue());
+                        }
+                    });
                 });
 
                 var groups = groupsFuture.join();
