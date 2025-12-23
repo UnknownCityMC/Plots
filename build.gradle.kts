@@ -60,7 +60,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.github.mwiede:jsch:2.27.3")
+        classpath("com.github.mwiede:jsch:2.27.7")
     }
 }
 
