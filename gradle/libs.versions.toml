@@ -15,7 +15,7 @@ papi = "2.11.7"
 glowing-entities = "1.4.7"
 
 coinsengine = "2.6.0"
-invui = "2.0.0-alpha.24"
+invui = "2.0.0-alpha.26"
 
 worldguard = "7.0.14"
 astralib = "0.7.0-SNAPSHOT"
